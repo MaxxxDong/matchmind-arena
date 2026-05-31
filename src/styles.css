@@ -514,9 +514,72 @@ h1 {
   gap: 14px;
 }
 
-.signal-composer p {
+.signal-composer p,
+.ai-explanation {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.model-box {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in oklch, var(--line), white 22%);
+  border-radius: var(--radius);
+  background: oklch(99% 0.008 94);
+}
+
+.model-note {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.42;
+}
+
+.model-box label {
+  display: grid;
+  gap: 5px;
+}
+
+.model-box label span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.model-box input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0 10px;
+  background: color-mix(in oklch, white, var(--panel) 38%);
+  color: var(--ink);
+  font: inherit;
+}
+
+.model-box input:focus {
+  outline: 3px solid color-mix(in oklch, var(--blue), white 45%);
+  border-color: color-mix(in oklch, var(--blue), var(--line) 20%);
+}
+
+.model-action {
+  width: 100%;
+}
+
+.error-text {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklch, var(--red), white 38%);
+  border-radius: var(--radius);
+  color: oklch(34% 0.14 24) !important;
+  background: color-mix(in oklch, var(--red), white 86%);
+}
+
+.ai-explanation {
+  padding: 10px 12px;
+  border-left: 3px solid var(--mint);
+  background: color-mix(in oklch, var(--mint), white 88%);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .hash-list {

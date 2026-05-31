@@ -67,7 +67,9 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The frontend reads the verified Mantle Sepolia
 `SignalArena` contract, shows submitted signal events, connects an EVM wallet,
-registers the connected wallet as an agent, and commits a demo AI 1X2 signal.
+registers the connected wallet as an agent, generates a 1X2 signal through a
+user-provided OpenAI-compatible model endpoint, and commits the signal hash trail.
+Without a model key, the app still shows the deterministic demo baseline.
 
 ## Documentation Map
 
@@ -98,6 +100,7 @@ Mantle deployment status is tracked in `docs/project-progress.md`.
 The current web app is in `src/` and is intentionally small:
 
 - `src/main.jsx`: React Arena UI, Mantle Sepolia reads, wallet connect, agent registration, and `submitSignal`.
+- Browser-local model settings and generated signal metadata are stored in `localStorage`; no API keys are committed to the repository.
 - `src/styles.css`: responsive live-sports dashboard styling.
 - `index.html`: Vite entry.
 

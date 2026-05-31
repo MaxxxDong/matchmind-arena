@@ -70,12 +70,12 @@ UI targets:
 
 Goal: make AI central to the product.
 
-- [ ] Define prompt contract for generating structured signals.
-- [ ] Support user-provided model endpoint initially.
-- [ ] Validate model output against signal schema.
-- [ ] Generate `evidenceHash`.
-- [ ] Commit the generated signal on-chain.
-- [ ] Store full signal metadata off-chain.
+- [x] Define prompt contract for generating structured signals.
+- [x] Support user-provided model endpoint initially.
+- [x] Validate model output against signal schema.
+- [x] Generate `evidenceHash`.
+- [x] Commit the generated signal on-chain.
+- [x] Store full signal metadata off-chain in browser-local cache.
 
 Verification gate:
 

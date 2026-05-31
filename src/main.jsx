@@ -99,6 +99,14 @@ const MATCHES = [
   },
 ];
 
+const MODEL_CONFIG_KEY = "matchmind:model-config";
+const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
+const DEFAULT_MODEL_CONFIG = {
+  baseUrl: "https://api.openai.com/v1",
+  apiKey: "",
+  model: "gpt-4o-mini",
+};
+
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
 const readArena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, publicProvider);
 
@@ -124,37 +132,118 @@ function stableJson(value) {
   return JSON.stringify(value);
 }
 
-function buildSignal(match) {
+function buildSignal(match, aiSignal) {
+  const homeBps = aiSignal?.homeBps ?? match.homeBps;
+  const drawBps = aiSignal?.drawBps ?? match.drawBps;
+  const awayBps = aiSignal?.awayBps ?? match.awayBps;
+  const confidenceBps = aiSignal?.confidenceBps ?? match.confidenceBps;
   const context = {
     matchId: match.id,
     title: match.title,
-    source: "MatchMind demo context pack",
+    source: "MatchMind browser context pack",
     notes: [match.bias, match.status, match.venue],
   };
   const metadata = {
     app: "MatchMind Arena",
-    model: "demo-sports-signal-agent",
-    explanation:
+    model: aiSignal?.model ?? "demo-sports-signal-agent",
+    explanation: aiSignal?.explanation ??
       "Demo signal generated from match context, replay evidence labels, and tactical momentum notes.",
     probabilities: {
-      home: match.homeBps,
-      draw: match.drawBps,
-      away: match.awayBps,
+      home: homeBps,
+      draw: drawBps,
+      away: awayBps,
     },
-    confidenceBps: match.confidenceBps,
+    confidenceBps,
+    generatedBy: aiSignal ? "user-configured-model" : "deterministic-demo",
+    generatedAt: aiSignal?.generatedAt ?? "demo",
   };
   return {
     matchId: ethers.id(match.id),
     contextHash: ethers.id(stableJson(context)),
     matchWindow: match.window,
-    homeBps: match.homeBps,
-    drawBps: match.drawBps,
-    awayBps: match.awayBps,
-    confidenceBps: match.confidenceBps,
-    evidenceHash: ethers.id(`evidence:${match.id}:browser-demo`),
+    homeBps,
+    drawBps,
+    awayBps,
+    confidenceBps,
+    evidenceHash: ethers.id(aiSignal ? stableJson(aiSignal.rawEvidence) : `evidence:${match.id}:browser-demo`),
     metadataHash: ethers.id(stableJson(metadata)),
     metadataUri: `https://matchmind-arena.local/signals/${encodeURIComponent(match.id)}`,
   };
+}
+
+function readModelConfig() {
+  try {
+    const raw = globalThis.localStorage?.getItem(MODEL_CONFIG_KEY);
+    return raw ? { ...DEFAULT_MODEL_CONFIG, ...JSON.parse(raw) } : DEFAULT_MODEL_CONFIG;
+  } catch {
+    return DEFAULT_MODEL_CONFIG;
+  }
+}
+
+function normalizeBaseUrl(url) {
+  return url.trim().replace(/\/+$/, "");
+}
+
+function chatCompletionsUrl(baseUrl) {
+  const normalized = normalizeBaseUrl(baseUrl);
+  return normalized.endsWith("/chat/completions") ? normalized : `${normalized}/chat/completions`;
+}
+
+function extractJson(text) {
+  const trimmed = text.trim();
+  if (trimmed.startsWith("{") && trimmed.endsWith("}")) return JSON.parse(trimmed);
+  const match = trimmed.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error("Model response did not include a JSON object.");
+  return JSON.parse(match[0]);
+}
+
+function normalizeSignalVector(candidate) {
+  const values = ["homeBps", "drawBps", "awayBps"].map((key) => Number(candidate[key]));
+  if (values.some((value) => !Number.isFinite(value) || value < 0)) {
+    throw new Error("Model probabilities must be non-negative numbers.");
+  }
+  const sum = values.reduce((total, value) => total + value, 0);
+  if (sum <= 0) throw new Error("Model probability vector cannot sum to zero.");
+  const scaled = values.map((value) => Math.round((value / sum) * 10000));
+  const delta = 10000 - scaled.reduce((total, value) => total + value, 0);
+  const maxIndex = scaled.indexOf(Math.max(...scaled));
+  scaled[maxIndex] += delta;
+  const confidenceBps = Math.max(0, Math.min(10000, Math.round(Number(candidate.confidenceBps ?? 5000))));
+  return {
+    homeBps: scaled[0],
+    drawBps: scaled[1],
+    awayBps: scaled[2],
+    confidenceBps,
+    explanation: String(candidate.explanation || "Model returned a structured sports signal."),
+  };
+}
+
+function buildSignalPrompt(match) {
+  return [
+    "You are an AI football signal agent in MatchMind Arena.",
+    "Return only one JSON object. No markdown.",
+    "Schema: {\"homeBps\": number, \"drawBps\": number, \"awayBps\": number, \"confidenceBps\": number, \"explanation\": string}.",
+    "homeBps + drawBps + awayBps should represent a 1X2 football probability vector in basis points and should sum to 10000.",
+    "confidenceBps is 0 to 10000.",
+    "Use the provided context; do not claim unavailable live facts.",
+    "",
+    `Match: ${match.title}`,
+    `Stage: ${match.stage}`,
+    `Kickoff: ${match.kickoff}`,
+    `Venue: ${match.venue}`,
+    `Context note: ${match.bias}`,
+    `Baseline: home ${match.homeBps}, draw ${match.drawBps}, away ${match.awayBps}, confidence ${match.confidenceBps}.`,
+  ].join("\n");
+}
+
+function storeLocalSignalMetadata(record) {
+  try {
+    const existing = JSON.parse(globalThis.localStorage?.getItem(SIGNAL_METADATA_KEY) || "[]");
+    const next = [record, ...(Array.isArray(existing) ? existing : [])].slice(0, 20);
+    globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify(next));
+  } catch {
+    globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify([record]));
+  }
 }
 
 function App() {
@@ -166,12 +255,24 @@ function App() {
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState("");
   const [txHash, setTxHash] = useState("");
+  const [modelConfig, setModelConfig] = useState(readModelConfig);
+  const [aiSignal, setAiSignal] = useState(null);
+  const [aiError, setAiError] = useState("");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
     [selectedId],
   );
-  const signal = useMemo(() => buildSignal(selectedMatch), [selectedMatch]);
+  const signal = useMemo(() => buildSignal(selectedMatch, aiSignal), [selectedMatch, aiSignal]);
+
+  useEffect(() => {
+    globalThis.localStorage?.setItem(MODEL_CONFIG_KEY, JSON.stringify(modelConfig));
+  }, [modelConfig]);
+
+  useEffect(() => {
+    setAiSignal(null);
+    setAiError("");
+  }, [selectedId]);
 
   const refreshArena = useCallback(async (address = wallet) => {
     const [next, logs] = await Promise.all([
@@ -292,6 +393,84 @@ function App() {
     }
   }
 
+  async function generateAiSignal() {
+    setBusy("ai");
+    setAiError("");
+    setStatus("");
+    try {
+      const baseUrl = normalizeBaseUrl(modelConfig.baseUrl);
+      if (!baseUrl) throw new Error("Base URL is required.");
+      const endpoint = chatCompletionsUrl(baseUrl);
+      if (!modelConfig.apiKey.trim()) throw new Error("API Key is required.");
+      if (!modelConfig.model.trim()) throw new Error("Model is required.");
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${modelConfig.apiKey.trim()}`,
+        },
+        body: JSON.stringify({
+          model: modelConfig.model.trim(),
+          temperature: 0.2,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You produce calibrated football 1X2 probability signals for an on-chain benchmark. Return valid JSON only.",
+            },
+            { role: "user", content: buildSignalPrompt(selectedMatch) },
+          ],
+        }),
+      });
+
+      const responseText = await response.text();
+      if (!response.ok) {
+        throw new Error(`Model request failed with HTTP ${response.status}: ${responseText.slice(0, 240)}`);
+      }
+      const payload = JSON.parse(responseText);
+      const content = payload.choices?.[0]?.message?.content;
+      if (typeof content !== "string" || !content.trim()) {
+        throw new Error("Model endpoint returned no assistant message.");
+      }
+      const parsed = extractJson(content);
+      const normalized = normalizeSignalVector(parsed);
+      const nextAiSignal = {
+        ...normalized,
+        model: modelConfig.model.trim(),
+        generatedAt: new Date().toISOString(),
+        rawEvidence: {
+          matchId: selectedMatch.id,
+          model: modelConfig.model.trim(),
+          prompt: buildSignalPrompt(selectedMatch),
+          response: parsed,
+          normalized,
+        },
+      };
+      setAiSignal(nextAiSignal);
+      storeLocalSignalMetadata({
+        matchId: selectedMatch.id,
+        title: selectedMatch.title,
+        generatedAt: nextAiSignal.generatedAt,
+        model: nextAiSignal.model,
+        signal: {
+          homeBps: nextAiSignal.homeBps,
+          drawBps: nextAiSignal.drawBps,
+          awayBps: nextAiSignal.awayBps,
+          confidenceBps: nextAiSignal.confidenceBps,
+        },
+        explanation: nextAiSignal.explanation,
+        rawEvidence: nextAiSignal.rawEvidence,
+      });
+      setStatus("AI signal generated and validated. Review it, then commit on-chain.");
+    } catch (error) {
+      setAiError(error.message);
+      setStatus("");
+    } finally {
+      setBusy("");
+    }
+  }
+
   const selectedEvents = events.filter((event) => event.matchId === signal.matchId);
   const agentReady = Boolean(agent?.registered);
 
@@ -379,14 +558,48 @@ function App() {
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
-              <small>{agentReady ? "agent ready" : "registration required"}</small>
+              <small>{aiSignal ? "model signal" : "demo baseline"}</small>
             </div>
             <p>{selectedMatch.bias}</p>
+            <div className="model-box">
+              <p className="model-note">Keys stay in this browser. Generated metadata is cached locally before the on-chain commit.</p>
+              <label>
+                <span>Base URL</span>
+                <input
+                  value={modelConfig.baseUrl}
+                  onChange={(event) => setModelConfig((current) => ({ ...current, baseUrl: event.target.value }))}
+                  placeholder="https://api.openai.com/v1"
+                />
+              </label>
+              <label>
+                <span>API Key</span>
+                <input
+                  value={modelConfig.apiKey}
+                  onChange={(event) => setModelConfig((current) => ({ ...current, apiKey: event.target.value }))}
+                  placeholder="User-provided key"
+                  type="password"
+                />
+              </label>
+              <label>
+                <span>Model</span>
+                <input
+                  value={modelConfig.model}
+                  onChange={(event) => setModelConfig((current) => ({ ...current, model: event.target.value }))}
+                  placeholder="gpt-4o-mini"
+                />
+              </label>
+              <button onClick={generateAiSignal} disabled={busy === "ai"} className="link-button model-action">
+                {busy === "ai" ? <Loader2 className="spin" size={17} /> : <Bot size={17} />}
+                Generate AI signal
+              </button>
+            </div>
+            {aiError ? <p className="error-text">{aiError}</p> : null}
             <dl className="hash-list">
               <div><dt>Context</dt><dd>{shortHash(signal.contextHash)}</dd></div>
               <div><dt>Evidence</dt><dd>{shortHash(signal.evidenceHash)}</dd></div>
               <div><dt>Confidence</dt><dd>{formatPct(signal.confidenceBps)}</dd></div>
             </dl>
+            {aiSignal ? <p className="ai-explanation">{aiSignal.explanation}</p> : null}
             <div className="button-row">
               <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
                 {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}

@@ -8,6 +8,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 1 local contract foundation: complete.
 - Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: minimal local demo complete.
+- Phase 3 browser AI signal flow: minimal local demo complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -123,11 +124,37 @@ Reflection:
 - The next iteration should move AI generation behind a user-configured model endpoint and persist full signal metadata outside the contract, while keeping only hashes and event proofs on-chain.
 - The first UI pass felt too generic and card-heavy. It was redesigned into a denser sports signal desk with a match field visual, compact Mantle status strip, signal composer, and proof timeline.
 
+## Phase 3 - Browser AI Signal Flow
+
+Completed locally.
+
+What was done:
+
+- Added user-provided OpenAI-compatible model settings in the signal composer.
+- Stores `baseUrl`, `model`, and user-provided API key in the user's browser local storage only.
+- Sends selected match context to `/chat/completions` and asks the model to return a strict JSON 1X2 probability vector.
+- Parses model output, validates non-negative numeric probabilities, normalizes the vector to exactly `10000` bps, and clamps confidence to `0..10000`.
+- Uses AI output to generate the signal `contextHash`, `evidenceHash`, and `metadataHash`.
+- Stores full generated signal metadata in browser-local cache before the user commits the hash trail on-chain.
+- Keeps the deterministic demo baseline as fallback when no model is configured.
+
+Verification:
+
+- `npm test`: 8 passing.
+- `npm run build`: passing.
+- `git diff --check`: passing.
+- Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
+- Headless Chrome screenshot confirmed the signal composer renders model settings, baseline hashes, and on-chain event state.
+
+Reflection:
+
+- This keeps the project pure frontend for the demo and avoids storing user keys server-side.
+- Browser-side calls may hit provider CORS restrictions. If a chosen provider blocks browser requests, the next robust version should add a tiny user-owned relay or serverless function that forwards OpenAI-compatible requests without persisting keys.
+
 ## Next Phase
 
-After the minimal local Arena frontend:
+After the browser AI signal flow:
 
 - Deploy the frontend to a public URL.
-- Add user-provided model endpoint support for real AI-generated signals.
-- Add off-chain metadata persistence for signal evidence.
+- Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.
