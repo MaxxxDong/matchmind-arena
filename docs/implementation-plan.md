@@ -33,9 +33,9 @@ Goal: satisfy the 20 Project Deployment Award as early as possible.
 - [x] Emit public resolution source hash and URI.
 - [x] Add unit tests.
 - [x] Configure Mantle testnet deployment.
-- [ ] Deploy to Mantle Testnet. Blocked until a funded deployer key is provided locally.
-- [ ] Verify contract on Mantle Explorer. Blocked until deployment is complete.
-- [ ] Save deployed address and explorer link in README.
+- [x] Deploy to Mantle Testnet.
+- [ ] Verify contract on Mantle Explorer. Blocked until explorer API verification is configured or a manual explorer verification path is confirmed.
+- [x] Save deployed address and transaction proof in README.
 - [ ] Build a minimal frontend button that calls the AI-powered `submitSignal` path. This starts after deployment because the frontend needs the deployed address.
 
 Verification gate:

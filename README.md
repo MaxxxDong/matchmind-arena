@@ -82,7 +82,14 @@ It supports:
 - Match resolution with public source hash and URI.
 - Event-based Mantle accountability trail.
 
-Mantle deployment status is tracked only in `docs/project-progress.md`.
+Mantle deployment status is tracked in `docs/project-progress.md`.
+
+Current Mantle Sepolia proof:
+
+- Contract: `0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4`
+- Deploy tx: `0xfc255bc191e0c1b6e95ec3f4bd191e809047e2ed30d9e71c5736389700e660ff`
+- Agent registration tx: `0x86d5bbf171db6cf5327bce47d0237230595126544fed38f09ff59240e4e8ae0e`
+- Demo signal tx: `0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c`
 
 ## License
 

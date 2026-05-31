@@ -6,7 +6,7 @@ Purpose: this is the single progress log for completed project phases and curren
 
 - Phase 0: complete.
 - Phase 1 local contract foundation: complete.
-- Phase 1 Mantle testnet deployment: blocked until a funded deployer key is provided locally.
+- Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: not started.
 
 ## Phase 0 - Research And Repo Setup
@@ -34,7 +34,7 @@ What was decided:
 
 ## Phase 1 - Contract Foundation
 
-Completed locally in the current working branch.
+Completed locally and on Mantle Sepolia.
 
 What was done:
 
@@ -48,6 +48,9 @@ What was done:
 - Added deployment and demo signal scripts.
 - Added `.env.example`.
 - Added contract tests.
+- Deployed to Mantle Sepolia.
+- Registered demo agent on Mantle Sepolia.
+- Submitted demo signal on Mantle Sepolia.
 
 Verification:
 
@@ -55,12 +58,21 @@ Verification:
 - `npm run compile`: passing.
 - `npx hardhat run scripts/deploy-signal-arena.js`: passing on local Hardhat network.
 - `npm audit --omit=dev`: 0 vulnerabilities.
+- `npm run deploy:mantle-sepolia`: passing.
+- `npm run submit-demo:mantle-sepolia`: passing.
+
+Mantle Sepolia proof:
+
+- Deployer / demo agent: `0xA4a5B46c6109b61337C22428556B5259185cBE5B`
+- SignalArena contract: `0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4`
+- Deploy tx: `0xfc255bc191e0c1b6e95ec3f4bd191e809047e2ed30d9e71c5736389700e660ff`
+- Agent registration tx: `0x86d5bbf171db6cf5327bce47d0237230595126544fed38f09ff59240e4e8ae0e`
+- Demo signal tx: `0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c`
 
 Blocked items:
 
-- Mantle Sepolia deployment requires a deployer private key with Mantle Sepolia MNT for gas.
 - Explorer verification may require a Mantle explorer API key depending on the endpoint behavior.
-- Deployed address and explorer link cannot be added until deployment is complete.
+- The minimal public frontend is not implemented yet.
 
 Reflection:
 
