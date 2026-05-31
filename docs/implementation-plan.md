@@ -34,10 +34,10 @@ Goal: satisfy the 20 Project Deployment Award as early as possible.
 - [x] Add unit tests.
 - [x] Configure Mantle testnet deployment.
 - [x] Deploy to Mantle Testnet.
-- [ ] Verify contract on Mantle Explorer.
+- [x] Verify contract on Mantle Explorer.
   - [x] Prepare Standard JSON input for manual upload.
   - [x] Configure Hardhat verification against Etherscan API V2.
-  - [ ] Complete explorer verification after an API key is available or manual MantleScan upload succeeds.
+  - [x] Complete manual MantleScan Standard JSON upload.
 - [x] Save deployed address and transaction proof in README.
 - [ ] Build a minimal frontend button that calls the AI-powered `submitSignal` path. This starts after deployment because the frontend needs the deployed address.
 

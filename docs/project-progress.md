@@ -72,18 +72,18 @@ Mantle Sepolia proof:
 
 Explorer verification status:
 
-- MantleScan still reports `Contract: Unverified`.
-- Prepared Standard JSON upload file: `verification/SignalArena.standard-input.json`.
+- MantleScan manual Standard JSON verification succeeded.
+- Standard JSON upload file: `verification/SignalArena.standard-input.json`.
 - Compiler: `v0.8.24+commit.e11b9ed9`.
 - EVM version: `paris`.
 - Optimizer: enabled, 200 runs.
 - Constructor arguments: none.
+- MantleScan returned: `Successfully generated matching Bytecode and ABI for Contract Address [0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4]`.
 - Hardhat verification now targets Etherscan API V2; it requires `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`.
 - Current CLI probe reaches Etherscan V2 and fails only with `Invalid API Key`, which confirms the old HTML/V1 endpoint issue is fixed.
 
 Blocked items:
 
-- Explorer verification requires either a working Etherscan API V2 key or a manual MantleScan Standard JSON upload after the Cloudflare challenge is completed.
 - The minimal public frontend is not implemented yet.
 
 Reflection:

@@ -93,14 +93,16 @@ Current Mantle Sepolia proof:
 
 Explorer verification:
 
+- Status: verified through MantleScan manual Standard JSON upload.
 - Standard JSON input: `verification/SignalArena.standard-input.json`
 - Compiler: `v0.8.24+commit.e11b9ed9`
 - EVM version: `paris`
 - Optimizer: enabled, 200 runs
 - Constructor arguments: none
 - Creation bytecode has been checked against the Mantle Sepolia deployment transaction.
+- MantleScan verification page returned: `Successfully generated matching Bytecode and ABI for Contract Address [0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4]`.
 
-For CLI verification, put an Etherscan API V2 key in `.env` as `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`, then run:
+For repeat CLI verification, put an Etherscan API V2 key in `.env` as `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`, then run:
 
 ```bash
 npx hardhat verify --network mantleSepolia 0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4
