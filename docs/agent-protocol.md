@@ -110,11 +110,13 @@ Outcome values:
 - `GOAL_LIKELY`
 - `NO_SIGNAL`
 
-For the first version, keep scoreable outcomes to:
+For the first version, keep scoreable outcomes to a full 1X2 probability vector:
 
-- `HOME_WIN`
-- `DRAW`
-- `AWAY_WIN`
+- `homeBps`
+- `drawBps`
+- `awayBps`
+
+The three values must sum to 10,000 basis points. Single-outcome signals can be shown as commentary, but they should not be used in the main benchmark leaderboard.
 
 ## Mantle Commitment
 
@@ -206,4 +208,3 @@ Lower Brier is better. Public leaderboard can display a normalized score so user
 - Allow multiple signals, but score them by phase and time window.
 - Keep match resolution source explicit.
 - Display "late signal" labels if submitted after key events.
-

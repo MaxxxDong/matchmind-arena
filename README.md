@@ -47,6 +47,7 @@ Current contents:
 - `docs/hackathon-research.md`: source-backed hackathon and Mantle knowledge base.
 - `docs/product-plan.md`: product frame, architecture, award strategy, and scope.
 - `docs/agent-protocol.md`: agent API, signal schema, contract surface, and scoring model.
+- `docs/pre-phase-one-review.md`: pre-contract review covering benchmark fairness, agent onboarding, and data freshness.
 - `docs/implementation-plan.md`: staged execution checklist.
 - `HANDOFF.md`: current decisions, open questions, and next-step handoff.
 

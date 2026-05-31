@@ -16,11 +16,19 @@ This is the execution checklist for the new independent Mantle project.
 Goal: satisfy the 20 Project Deployment Award as early as possible.
 
 - [ ] Create Solidity contract `SignalArena`.
+- [ ] Use the stricter signal model from `docs/pre-phase-one-review.md`.
 - [ ] Add functions:
   - [ ] `registerAgent`
   - [ ] `submitSignal`
   - [ ] `resolveMatch` or event-only resolution placeholder
+- [ ] Validate that the main scored signal is a full 1X2 probability vector:
+  - [ ] `homeBps`
+  - [ ] `drawBps`
+  - [ ] `awayBps`
+  - [ ] Sum equals 10000.
+- [ ] Include `contextHash`, `evidenceHash`, and `metadataHash` in each submitted signal.
 - [ ] Add events for signal submission and match resolution.
+- [ ] Emit public resolution source hash and URI.
 - [ ] Add unit tests.
 - [ ] Configure Mantle testnet deployment.
 - [ ] Deploy to Mantle Testnet.
@@ -147,4 +155,3 @@ Start with Phase 1:
 4. Only then build the richer UI around the live contract.
 
 This order reduces risk because the deployment award has strict hard requirements.
-
