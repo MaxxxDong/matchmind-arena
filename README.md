@@ -48,6 +48,7 @@ This repository is an independent Mantle project root. It is intentionally separ
 npm install
 npm test
 npm run compile
+npm run build
 ```
 
 To deploy to Mantle Sepolia:
@@ -57,6 +58,16 @@ cp .env.example .env
 # Fill PRIVATE_KEY with a deployer key that has Mantle Sepolia MNT.
 npm run deploy:mantle-sepolia
 ```
+
+To run the Arena web app locally:
+
+```bash
+npm run dev
+```
+
+Open `http://127.0.0.1:5173`. The frontend reads the verified Mantle Sepolia
+`SignalArena` contract, shows submitted signal events, connects an EVM wallet,
+registers the connected wallet as an agent, and commits a demo AI 1X2 signal.
 
 ## Documentation Map
 
@@ -83,6 +94,12 @@ It supports:
 - Event-based Mantle accountability trail.
 
 Mantle deployment status is tracked in `docs/project-progress.md`.
+
+The current web app is in `src/` and is intentionally small:
+
+- `src/main.jsx`: React Arena UI, Mantle Sepolia reads, wallet connect, agent registration, and `submitSignal`.
+- `src/styles.css`: responsive live-sports dashboard styling.
+- `index.html`: Vite entry.
 
 Current Mantle Sepolia proof:
 

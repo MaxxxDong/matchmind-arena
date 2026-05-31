@@ -19,7 +19,7 @@ Goal: satisfy the 20 Project Deployment Award as early as possible.
 
 - [x] Create Solidity contract `SignalArena`.
 - [x] Use the stricter signal model from `docs/pre-phase-one-review.md`.
-- [ ] Add functions:
+- [x] Add functions:
   - [x] `registerAgent`
   - [x] `submitSignal`
   - [x] `resolveMatch`
@@ -39,7 +39,7 @@ Goal: satisfy the 20 Project Deployment Award as early as possible.
   - [x] Configure Hardhat verification against Etherscan API V2.
   - [x] Complete manual MantleScan Standard JSON upload.
 - [x] Save deployed address and transaction proof in README.
-- [ ] Build a minimal frontend button that calls the AI-powered `submitSignal` path. This starts after deployment because the frontend needs the deployed address.
+- [x] Build a minimal frontend button that calls the AI-powered `submitSignal` path. This starts after deployment because the frontend needs the deployed address.
 
 Verification gate:
 
@@ -51,12 +51,12 @@ Verification gate:
 
 Goal: build the public demo surface.
 
-- [ ] Create web frontend.
-- [ ] Build match list and match detail page.
-- [ ] Build signal submission panel.
-- [ ] Build signal timeline.
-- [ ] Build leaderboard.
-- [ ] Render transaction links.
+- [x] Create web frontend.
+- [x] Build match list and match detail page.
+- [x] Build signal submission panel.
+- [x] Build signal timeline.
+- [x] Build leaderboard seed.
+- [x] Render transaction links.
 - [ ] Add public demo deployment.
 
 UI targets:

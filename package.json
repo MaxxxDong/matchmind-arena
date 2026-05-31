@@ -6,15 +6,25 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
     "deploy:mantle-sepolia": "hardhat run scripts/deploy-signal-arena.js --network mantleSepolia",
     "submit-demo:mantle-sepolia": "hardhat run scripts/submit-demo-signal.js --network mantleSepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.8",
     "@nomicfoundation/hardhat-verify": "^2.1.3",
+    "@vitejs/plugin-react": "^6.0.2",
     "chai": "^4.5.0",
     "dotenv": "^16.4.7",
     "ethers": "^6.15.0",
-    "hardhat": "^2.26.5"
+    "hardhat": "^2.26.5",
+    "vite": "^8.0.14"
+  },
+  "dependencies": {
+    "lucide-react": "^1.17.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   }
 }

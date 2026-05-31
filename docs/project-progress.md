@@ -7,7 +7,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 0: complete.
 - Phase 1 local contract foundation: complete.
 - Phase 1 Mantle testnet deployment: complete.
-- Phase 2 public frontend: not started.
+- Phase 2 public frontend: minimal local demo complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -84,7 +84,7 @@ Explorer verification status:
 
 Blocked items:
 
-- The minimal public frontend is not implemented yet.
+- Public frontend hosting is not deployed yet.
 
 Reflection:
 
@@ -93,11 +93,40 @@ Reflection:
 - The contract intentionally avoids on-chain leaderboard calculation. This keeps Phase 1 small and verifiable; scoring should remain off-chain until the model is stable.
 - The contract currently blocks all submissions after match resolution. This is correct for the main benchmark, but later demo tooling may need a separate historical demo flow instead of reusing resolved live matches.
 
+## Phase 2 - Minimal Arena Web App
+
+Completed locally.
+
+What was done:
+
+- Added a Vite / React web app.
+- Added a live sports dashboard UI for match selection, match detail, probability cards, timeline, and leaderboard seed.
+- Reads `SignalArena.nextSignalId`, connected agent status, and `SignalSubmitted` events from Mantle Sepolia.
+- Uses deployment block `39344371` as the event scan start to avoid slow full-chain log reads.
+- Connects an EVM wallet and switches/adds Mantle Sepolia.
+- Allows the connected wallet to call `registerAgent`.
+- Allows a registered wallet to commit a structured demo AI 1X2 signal through `submitSignal`.
+- Renders MantleScan links for contract and transaction proof.
+
+Verification:
+
+- `npm run compile`: passing.
+- `npm test`: 8 passing.
+- `npm run build`: passing.
+- `npm audit --omit=dev`: 0 vulnerabilities.
+- Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
+- Headless Chrome screenshot confirmed the page renders, reads `nextSignalId = 2`, loads 1 on-chain signal event, and shows the MantleScan transaction link path.
+
+Reflection:
+
+- The current signal generator is deterministic demo logic. This is correct for the first public surface because it proves the user flow and chain path without blocking on model providers.
+- The next iteration should move AI generation behind a user-configured model endpoint and persist full signal metadata outside the contract, while keeping only hashes and event proofs on-chain.
+
 ## Next Phase
 
-After Mantle deployment:
+After the minimal local Arena frontend:
 
-- Build a minimal public frontend that calls the deployed contract.
-- Display transaction proof and explorer link.
-- Add AI-generated signal flow.
-- Then expand into the full Arena UI and Chrome companion integration.
+- Deploy the frontend to a public URL.
+- Add user-provided model endpoint support for real AI-generated signals.
+- Add off-chain metadata persistence for signal evidence.
+- Then expand into the Chrome companion integration.
