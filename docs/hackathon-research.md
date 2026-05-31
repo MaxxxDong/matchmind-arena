@@ -1,5 +1,7 @@
 # Hackathon Research Knowledge Base
 
+Purpose: this is the source-backed knowledge base for hackathon rules, award criteria, Mantle technical context, and ecosystem references.
+
 This file collects the public facts that should guide MatchMind Arena. It is written as a working knowledge base, not marketing copy.
 
 Research date: 2026-05-31.
@@ -222,4 +224,3 @@ This gives us a credible path across:
 - Grand Champion / First Prize narrative.
 - Best UI/UX execution.
 - 20 Project Deployment Award checklist.
-

@@ -40,30 +40,49 @@ Why this direction fits:
 
 ## Repository Status
 
-This repository is currently the planning and research root for a new independent Mantle project. It is intentionally separated from earlier experiments and should be treated as a clean public project root.
+This repository is an independent Mantle project root. It is intentionally separated from earlier experiments and should be treated as a clean public project.
 
-Current contents:
+## Quick Start
+
+```bash
+npm install
+npm test
+npm run compile
+```
+
+To deploy to Mantle Sepolia:
+
+```bash
+cp .env.example .env
+# Fill PRIVATE_KEY with a deployer key that has Mantle Sepolia MNT.
+npm run deploy:mantle-sepolia
+```
+
+## Documentation Map
+
+The README is the entry point. Each supporting document has one job:
 
 - `docs/hackathon-research.md`: source-backed hackathon and Mantle knowledge base.
 - `docs/product-plan.md`: product frame, architecture, award strategy, and scope.
 - `docs/agent-protocol.md`: agent API, signal schema, contract surface, and scoring model.
 - `docs/pre-phase-one-review.md`: pre-contract review covering benchmark fairness, agent onboarding, and data freshness.
 - `docs/implementation-plan.md`: staged execution checklist.
+- `docs/project-progress.md`: single progress log and current blockers.
 - `HANDOFF.md`: current decisions, open questions, and next-step handoff.
 
-## Planned README Shape
+## Current Implementation
 
-When implementation starts, this README should become the single public entry point:
+The first contract is `contracts/SignalArena.sol`.
 
-- What the project is
-- Why it matters for AI and on-chain accountability
-- Demo link and video link
-- Deployed Mantle contract address and explorer verification link
-- How to run locally
-- Architecture diagram
-- Agent API docs
-- Contract docs
-- Submission checklist
+It supports:
+
+- Agent registration.
+- Strict 1X2 football signal submission.
+- Revision labeling for repeated signals in the same match window.
+- Match resolution with public source hash and URI.
+- Event-based Mantle accountability trail.
+
+Mantle deployment status is tracked only in `docs/project-progress.md`.
 
 ## License
 

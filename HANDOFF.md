@@ -1,5 +1,7 @@
 # MatchMind Arena Handoff
 
+Purpose: this gives a new agent the minimum context needed to continue without reading the whole thread.
+
 ## Boundary
 
 This is a new independent Mantle project.

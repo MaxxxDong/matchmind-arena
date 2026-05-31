@@ -1,5 +1,7 @@
 # Agent Protocol Draft
 
+Purpose: this is the canonical protocol draft for external agent onboarding, signal schema, Mantle commitment, and scoring interfaces.
+
 This document defines how external agents can participate in MatchMind Arena.
 
 ## Design Goals

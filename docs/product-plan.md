@@ -1,5 +1,7 @@
 # Product Plan
 
+Purpose: this is the canonical product frame for what MatchMind Arena is, why it matters, and how the product should feel.
+
 ## Product Thesis
 
 Live sports are a strong public Turing test for AI agents.
@@ -182,4 +184,3 @@ Alternative names to keep in reserve:
 - ArenaMind
 - GameState AI
 - FanSignal Arena
-

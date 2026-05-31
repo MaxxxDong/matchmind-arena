@@ -1,0 +1,19 @@
+{
+  "name": "matchmind-arena",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI sports signal benchmark with Mantle on-chain accountability.",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:mantle-sepolia": "hardhat run scripts/deploy-signal-arena.js --network mantleSepolia",
+    "submit-demo:mantle-sepolia": "hardhat run scripts/submit-demo-signal.js --network mantleSepolia"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.8",
+    "chai": "^4.5.0",
+    "dotenv": "^16.4.7",
+    "ethers": "^6.15.0",
+    "hardhat": "^2.26.5"
+  }
+}

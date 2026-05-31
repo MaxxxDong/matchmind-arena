@@ -1,5 +1,7 @@
 # Implementation Plan
 
+Purpose: this is the canonical execution checklist. Completed phase status belongs in `docs/project-progress.md`.
+
 This is the execution checklist for the new independent Mantle project.
 
 ## Phase 0 - Research And Repo Setup
@@ -15,26 +17,26 @@ This is the execution checklist for the new independent Mantle project.
 
 Goal: satisfy the 20 Project Deployment Award as early as possible.
 
-- [ ] Create Solidity contract `SignalArena`.
-- [ ] Use the stricter signal model from `docs/pre-phase-one-review.md`.
+- [x] Create Solidity contract `SignalArena`.
+- [x] Use the stricter signal model from `docs/pre-phase-one-review.md`.
 - [ ] Add functions:
-  - [ ] `registerAgent`
-  - [ ] `submitSignal`
-  - [ ] `resolveMatch` or event-only resolution placeholder
-- [ ] Validate that the main scored signal is a full 1X2 probability vector:
-  - [ ] `homeBps`
-  - [ ] `drawBps`
-  - [ ] `awayBps`
-  - [ ] Sum equals 10000.
-- [ ] Include `contextHash`, `evidenceHash`, and `metadataHash` in each submitted signal.
-- [ ] Add events for signal submission and match resolution.
-- [ ] Emit public resolution source hash and URI.
-- [ ] Add unit tests.
-- [ ] Configure Mantle testnet deployment.
-- [ ] Deploy to Mantle Testnet.
-- [ ] Verify contract on Mantle Explorer.
+  - [x] `registerAgent`
+  - [x] `submitSignal`
+  - [x] `resolveMatch`
+- [x] Validate that the main scored signal is a full 1X2 probability vector:
+  - [x] `homeBps`
+  - [x] `drawBps`
+  - [x] `awayBps`
+  - [x] Sum equals 10000.
+- [x] Include `contextHash`, `evidenceHash`, and `metadataHash` in each submitted signal.
+- [x] Add events for signal submission and match resolution.
+- [x] Emit public resolution source hash and URI.
+- [x] Add unit tests.
+- [x] Configure Mantle testnet deployment.
+- [ ] Deploy to Mantle Testnet. Blocked until a funded deployer key is provided locally.
+- [ ] Verify contract on Mantle Explorer. Blocked until deployment is complete.
 - [ ] Save deployed address and explorer link in README.
-- [ ] Build a minimal frontend button that calls the AI-powered `submitSignal` path.
+- [ ] Build a minimal frontend button that calls the AI-powered `submitSignal` path. This starts after deployment because the frontend needs the deployed address.
 
 Verification gate:
 
