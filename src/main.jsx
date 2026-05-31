@@ -3,17 +3,23 @@ import { createRoot } from "react-dom/client";
 import { ethers } from "ethers";
 import {
   Activity,
+  BadgeCheck,
   Bot,
+  BrainCircuit,
   CheckCircle2,
   CircleDollarSign,
+  Clock3,
   ExternalLink,
   Gauge,
+  Layers3,
   Loader2,
+  Network,
   RadioTower,
   ShieldCheck,
   Sparkles,
   Trophy,
   Wallet,
+  Zap,
 } from "lucide-react";
 import "./styles.css";
 
@@ -287,44 +293,42 @@ function App() {
   }
 
   const selectedEvents = events.filter((event) => event.matchId === signal.matchId);
+  const agentReady = Boolean(agent?.registered);
 
   return (
     <main className="app">
-      <section className="hero">
-        <div className="hero-copy">
-          <div className="eyebrow"><RadioTower size={16} /> Mantle Sepolia live contract</div>
-          <h1>MatchMind Arena</h1>
-          <p>
-            A public sports-signal arena where AI agents turn match context into 1X2 probability
-            vectors and commit the proof trail on Mantle.
-          </p>
-          <div className="hero-actions">
-            <button onClick={connectWallet} disabled={busy === "wallet"} className="primary">
-              {busy === "wallet" ? <Loader2 className="spin" size={18} /> : <Wallet size={18} />}
-              {wallet ? shortHash(wallet) : "Connect wallet"}
-            </button>
-            <a href={`${EXPLORER}/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noreferrer" className="ghost">
-              <ExternalLink size={18} /> Verified contract
-            </a>
-          </div>
-        </div>
-        <div className="contract-card">
-          <div className="contract-top">
-            <ShieldCheck size={28} />
-            <span>SignalArena</span>
-          </div>
-          <strong>{shortHash(CONTRACT_ADDRESS)}</strong>
-          <div className="contract-grid">
-            <span>Next signal</span><b>{nextSignalId ?? "-"}</b>
-            <span>Loaded events</span><b>{events.length}</b>
-            <span>Agent status</span><b>{agent?.registered ? "Registered" : "Not registered"}</b>
-          </div>
-        </div>
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="MatchMind Arena">
+          <span className="brand-mark"><BrainCircuit size={22} /></span>
+          <span>
+            <strong>MatchMind Arena</strong>
+            <small>AI signal desk for live football</small>
+          </span>
+        </a>
+        <nav className="top-actions" aria-label="Arena actions">
+          <a href={`${EXPLORER}/address/${CONTRACT_ADDRESS}`} target="_blank" rel="noreferrer" className="link-button">
+            <ShieldCheck size={17} /> Contract
+          </a>
+          <button onClick={connectWallet} disabled={busy === "wallet"} className="primary compact">
+            {busy === "wallet" ? <Loader2 className="spin" size={17} /> : <Wallet size={17} />}
+            {wallet ? shortHash(wallet) : "Connect wallet"}
+          </button>
+        </nav>
+      </header>
+
+      <section className="command-strip" aria-label="Mantle contract status">
+        <Metric icon={<RadioTower size={18} />} label="Network" value="Mantle Sepolia" />
+        <Metric icon={<BadgeCheck size={18} />} label="Verified contract" value={shortHash(CONTRACT_ADDRESS)} />
+        <Metric icon={<Activity size={18} />} label="Loaded signals" value={events.length} />
+        <Metric icon={<Network size={18} />} label="Next signal" value={nextSignalId ?? "-"} />
       </section>
 
-      <section className="workspace">
+      <section className="arena-grid">
         <aside className="match-rail" aria-label="Match list">
-          <div className="section-title"><Trophy size={18} /> Match board</div>
+          <div className="section-title">
+            <span><Trophy size={18} /> Match board</span>
+            <small>{MATCHES.length} cards</small>
+          </div>
           {MATCHES.map((match) => (
             <button
               key={match.id}
@@ -338,42 +342,62 @@ function App() {
           ))}
         </aside>
 
-        <section className="signal-panel">
-          <div className="panel-head">
+        <section className="match-stage">
+          <div className="stage-header">
             <div>
               <span className="kicker">{selectedMatch.stage}</span>
-              <h2>{selectedMatch.title}</h2>
-              <p>{selectedMatch.kickoff} · {selectedMatch.venue}</p>
+              <h1>{selectedMatch.title}</h1>
+              <p><Clock3 size={16} /> {selectedMatch.kickoff} <span /> {selectedMatch.venue}</p>
             </div>
-            <div className="status-pill">{selectedMatch.status}</div>
+            <div className="status-pill"><Zap size={15} /> {selectedMatch.status}</div>
+          </div>
+
+          <div className="field-view" aria-label="Match signal field visual">
+            <div className="field-lines" />
+            <div className="team-node home">
+              <span>{selectedMatch.home}</span>
+              <strong>{formatPct(selectedMatch.homeBps)}</strong>
+            </div>
+            <div className="team-node draw">
+              <span>Draw pressure</span>
+              <strong>{formatPct(selectedMatch.drawBps)}</strong>
+            </div>
+            <div className="team-node away">
+              <span>{selectedMatch.away}</span>
+              <strong>{formatPct(selectedMatch.awayBps)}</strong>
+            </div>
           </div>
 
           <div className="prob-grid">
-            <Probability label={selectedMatch.home} value={selectedMatch.homeBps} />
-            <Probability label="Draw" value={selectedMatch.drawBps} />
-            <Probability label={selectedMatch.away} value={selectedMatch.awayBps} />
+            <Probability label={selectedMatch.home} value={selectedMatch.homeBps} tone="home" />
+            <Probability label="Draw" value={selectedMatch.drawBps} tone="draw" />
+            <Probability label={selectedMatch.away} value={selectedMatch.awayBps} tone="away" />
           </div>
+        </section>
 
-          <div className="insight-card">
-            <div><Sparkles size={18} /> Demo AI signal</div>
+        <aside className="proof-desk">
+          <section className="signal-composer">
+            <div className="section-title">
+              <span><Sparkles size={18} /> Signal composer</span>
+              <small>{agentReady ? "agent ready" : "registration required"}</small>
+            </div>
             <p>{selectedMatch.bias}</p>
-            <dl>
-              <dt>Context hash</dt><dd>{shortHash(signal.contextHash)}</dd>
-              <dt>Evidence hash</dt><dd>{shortHash(signal.evidenceHash)}</dd>
-              <dt>Confidence</dt><dd>{formatPct(signal.confidenceBps)}</dd>
+            <dl className="hash-list">
+              <div><dt>Context</dt><dd>{shortHash(signal.contextHash)}</dd></div>
+              <div><dt>Evidence</dt><dd>{shortHash(signal.evidenceHash)}</dd></div>
+              <div><dt>Confidence</dt><dd>{formatPct(signal.confidenceBps)}</dd></div>
             </dl>
-          </div>
-
-          <div className="button-row">
-            <button onClick={registerAgent} disabled={busy === "register" || agent?.registered} className="secondary">
-              {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
-              {agent?.registered ? "Agent ready" : "Register agent"}
-            </button>
-            <button onClick={submitSignal} disabled={busy === "signal"} className="primary">
-              {busy === "signal" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
-              Commit AI signal
-            </button>
-          </div>
+            <div className="button-row">
+              <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
+                {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
+                {agentReady ? "Agent ready" : "Register agent"}
+              </button>
+              <button onClick={submitSignal} disabled={busy === "signal"} className="primary">
+                {busy === "signal" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
+                Commit signal
+              </button>
+            </div>
+          </section>
 
           {(status || txHash) && (
             <div className="notice">
@@ -385,11 +409,12 @@ function App() {
               )}
             </div>
           )}
-        </section>
 
-        <aside className="right-stack">
-          <section className="mini-panel">
-            <div className="section-title"><Activity size={18} /> Signal timeline</div>
+          <section className="mini-panel timeline-panel">
+            <div className="section-title">
+              <span><Layers3 size={18} /> Signal timeline</span>
+              <small>{selectedEvents.length} match</small>
+            </div>
             {selectedEvents.length === 0 ? (
               <p className="empty">No on-chain signal for this selected card yet.</p>
             ) : (
@@ -404,7 +429,10 @@ function App() {
           </section>
 
           <section className="mini-panel">
-            <div className="section-title"><Gauge size={18} /> Leaderboard seed</div>
+            <div className="section-title">
+              <span><Gauge size={18} /> Leaderboard seed</span>
+              <small>live proof</small>
+            </div>
             <div className="leader-row">
               <span><Bot size={16} /> Browser demo agent</span>
               <b>{events.length} signal{events.length === 1 ? "" : "s"}</b>
@@ -420,9 +448,19 @@ function App() {
   );
 }
 
-function Probability({ label, value }) {
+function Metric({ icon, label, value }) {
   return (
-    <div className="prob-card">
+    <div className="metric">
+      {icon}
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function Probability({ label, value, tone }) {
+  return (
+    <div className={`prob-card ${tone}`}>
       <span>{label}</span>
       <strong>{formatPct(value)}</strong>
       <div className="meter"><i style={{ width: `${Number(value) / 100}%` }} /></div>
