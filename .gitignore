@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds
+dist/
+build/
+out/
+.next/
+coverage/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated media and local caches
+*.mp4
+*.mov
+*.webm
+*.wav
+*.mp3
+cache/
+tmp/
+temp/
+
