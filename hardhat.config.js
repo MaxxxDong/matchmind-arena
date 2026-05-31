@@ -1,7 +1,10 @@
 require("@nomicfoundation/hardhat-ethers");
+require("@nomicfoundation/hardhat-verify");
 require("dotenv").config();
 
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const EXPLORER_API_KEY =
+  process.env.MANTLE_EXPLORER_API_KEY || process.env.ETHERSCAN_API_KEY || "empty";
 
 const accounts = PRIVATE_KEY ? [PRIVATE_KEY] : [];
 
@@ -29,25 +32,22 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: {
-      mantleSepolia: process.env.MANTLE_EXPLORER_API_KEY || "empty",
-      mantleMainnet: process.env.MANTLE_EXPLORER_API_KEY || "empty",
-    },
+    apiKey: EXPLORER_API_KEY,
     customChains: [
       {
         network: "mantleSepolia",
         chainId: 5003,
         urls: {
-          apiURL: "https://explorer.sepolia.mantle.xyz/api",
-          browserURL: "https://explorer.sepolia.mantle.xyz",
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://sepolia.mantlescan.xyz",
         },
       },
       {
         network: "mantleMainnet",
         chainId: 5000,
         urls: {
-          apiURL: "https://explorer.mantle.xyz/api",
-          browserURL: "https://explorer.mantle.xyz",
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://mantlescan.xyz",
         },
       },
     ],

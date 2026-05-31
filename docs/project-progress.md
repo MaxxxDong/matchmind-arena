@@ -60,6 +60,7 @@ Verification:
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - `npm run deploy:mantle-sepolia`: passing.
 - `npm run submit-demo:mantle-sepolia`: passing.
+- Deployment creation bytecode matches local Hardhat compile output.
 
 Mantle Sepolia proof:
 
@@ -69,9 +70,20 @@ Mantle Sepolia proof:
 - Agent registration tx: `0x86d5bbf171db6cf5327bce47d0237230595126544fed38f09ff59240e4e8ae0e`
 - Demo signal tx: `0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c`
 
+Explorer verification status:
+
+- MantleScan still reports `Contract: Unverified`.
+- Prepared Standard JSON upload file: `verification/SignalArena.standard-input.json`.
+- Compiler: `v0.8.24+commit.e11b9ed9`.
+- EVM version: `paris`.
+- Optimizer: enabled, 200 runs.
+- Constructor arguments: none.
+- Hardhat verification now targets Etherscan API V2; it requires `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`.
+- Current CLI probe reaches Etherscan V2 and fails only with `Invalid API Key`, which confirms the old HTML/V1 endpoint issue is fixed.
+
 Blocked items:
 
-- Explorer verification may require a Mantle explorer API key depending on the endpoint behavior.
+- Explorer verification requires either a working Etherscan API V2 key or a manual MantleScan Standard JSON upload after the Cloudflare challenge is completed.
 - The minimal public frontend is not implemented yet.
 
 Reflection:

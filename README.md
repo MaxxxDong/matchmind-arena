@@ -91,6 +91,21 @@ Current Mantle Sepolia proof:
 - Agent registration tx: `0x86d5bbf171db6cf5327bce47d0237230595126544fed38f09ff59240e4e8ae0e`
 - Demo signal tx: `0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c`
 
+Explorer verification:
+
+- Standard JSON input: `verification/SignalArena.standard-input.json`
+- Compiler: `v0.8.24+commit.e11b9ed9`
+- EVM version: `paris`
+- Optimizer: enabled, 200 runs
+- Constructor arguments: none
+- Creation bytecode has been checked against the Mantle Sepolia deployment transaction.
+
+For CLI verification, put an Etherscan API V2 key in `.env` as `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`, then run:
+
+```bash
+npx hardhat verify --network mantleSepolia 0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4
+```
+
 ## License
 
 License is not finalized yet. Choose before publishing the public repository.
