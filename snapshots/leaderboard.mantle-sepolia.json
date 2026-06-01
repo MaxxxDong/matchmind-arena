@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-01T02:54:34.390Z",
+  "generatedAt": "2026-06-01T02:56:26.395Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
   "deployBlock": 39344371,
-  "latestBlock": 39368899,
+  "latestBlock": 39368955,
   "eventCount": 1,
   "resolvedSignalCount": 1,
   "resolutionSource": {
     "path": "snapshots/resolutions.mantle-sepolia.json",
-    "generatedAt": "2026-06-01T02:54:33.143Z",
+    "generatedAt": "2026-06-01T02:56:24.680Z",
     "resolver": "matchmind-public-result-resolver"
   },
   "matches": [
@@ -24,7 +24,7 @@
         "resultScope": "regular-time-1x2",
         "sourceId": "espnArgentinaFrance2022",
         "source": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
-        "resolvedAt": "2026-06-01T02:54:31.671Z",
+        "resolvedAt": "2026-06-01T02:56:23.751Z",
         "resolverStatus": "verified-from-public-source",
         "sourceProvider": "ESPN",
         "sourceTitle": "Argentina 3-3 France (Dec 18, 2022) Final Score",
@@ -64,6 +64,15 @@
         "eligible": true,
         "reason": "demo-replay-window"
       },
+      "actualResult": "draw",
+      "predictedResult": "home",
+      "predictedBps": 4800,
+      "probabilities": {
+        "homeBps": 4800,
+        "drawBps": 2700,
+        "awayBps": 2500,
+        "confidenceBps": 6800
+      },
       "scored": true,
       "score": {
         "brier": 0.8257999999999999,
@@ -72,6 +81,39 @@
       }
     }
   ],
+  "calibrationSummary": {
+    "scoredSignals": 1,
+    "predictionHitRate": 0,
+    "averageQuality": 39,
+    "averageBrier": 0.8257999999999999,
+    "averageLogLoss": 1.3093333199837622,
+    "confidenceBins": [
+      {
+        "label": "0-50%",
+        "count": 1,
+        "averagePredictedBps": 4800,
+        "hitRate": 0
+      },
+      {
+        "label": "50-70%",
+        "count": 0,
+        "averagePredictedBps": null,
+        "hitRate": null
+      },
+      {
+        "label": "70-85%",
+        "count": 0,
+        "averagePredictedBps": null,
+        "hitRate": null
+      },
+      {
+        "label": "85-100%",
+        "count": 0,
+        "averagePredictedBps": null,
+        "hitRate": null
+      }
+    ]
+  },
   "leaderboard": [
     {
       "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",

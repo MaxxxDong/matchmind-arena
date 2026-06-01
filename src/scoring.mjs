@@ -31,6 +31,15 @@ export function scoreSignal(event, resolution) {
   return { brier, logLoss, quality };
 }
 
+function predictedOutcome(event) {
+  const entries = [
+    ["home", event.homeBps],
+    ["draw", event.drawBps],
+    ["away", event.awayBps],
+  ];
+  return entries.sort((a, b) => b[1] - a[1])[0];
+}
+
 export function evaluateSignalEligibility(event, match) {
   if (!match) {
     return { eligible: false, reason: "unknown-match" };
@@ -61,6 +70,7 @@ export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_
     const resolution = match ? resolutions[match.id] : null;
     const eligibility = evaluateSignalEligibility(event, match);
     const score = eligibility.eligible ? scoreSignal(event, resolution) : null;
+    const [predictedResult, predictedBps] = predictedOutcome(event);
     return {
       signalId: event.signalId,
       agent: event.agent,
@@ -68,10 +78,67 @@ export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_
       matchKey: match?.id ?? null,
       submittedAt: event.submittedAt ?? null,
       eligibility,
+      actualResult: resolution?.result ?? null,
+      predictedResult,
+      predictedBps,
+      probabilities: {
+        homeBps: event.homeBps,
+        drawBps: event.drawBps,
+        awayBps: event.awayBps,
+        confidenceBps: event.confidenceBps,
+      },
       scored: Boolean(score),
       score,
     };
   });
+}
+
+export function buildCalibrationSummary(scoringAudit) {
+  const scored = scoringAudit.filter((entry) => entry.scored && entry.score);
+  const empty = {
+    scoredSignals: 0,
+    predictionHitRate: null,
+    averageQuality: null,
+    averageBrier: null,
+    averageLogLoss: null,
+    confidenceBins: [],
+  };
+  if (scored.length === 0) return empty;
+
+  const totals = scored.reduce((current, entry) => ({
+    hits: current.hits + (entry.predictedResult === entry.actualResult ? 1 : 0),
+    quality: current.quality + entry.score.quality,
+    brier: current.brier + entry.score.brier,
+    logLoss: current.logLoss + entry.score.logLoss,
+  }), { hits: 0, quality: 0, brier: 0, logLoss: 0 });
+
+  const bins = [
+    { label: "0-50%", min: 0, max: 5000 },
+    { label: "50-70%", min: 5000, max: 7000 },
+    { label: "70-85%", min: 7000, max: 8500 },
+    { label: "85-100%", min: 8500, max: 10001 },
+  ].map((bin) => {
+    const entries = scored.filter((entry) => entry.predictedBps >= bin.min && entry.predictedBps < bin.max);
+    const hits = entries.filter((entry) => entry.predictedResult === entry.actualResult).length;
+    const averagePredictedBps = entries.length
+      ? Math.round(entries.reduce((total, entry) => total + entry.predictedBps, 0) / entries.length)
+      : null;
+    return {
+      label: bin.label,
+      count: entries.length,
+      averagePredictedBps,
+      hitRate: entries.length ? hits / entries.length : null,
+    };
+  });
+
+  return {
+    scoredSignals: scored.length,
+    predictionHitRate: totals.hits / scored.length,
+    averageQuality: Math.round(totals.quality / scored.length),
+    averageBrier: totals.brier / scored.length,
+    averageLogLoss: totals.logLoss / scored.length,
+    confidenceBins: bins,
+  };
 }
 
 export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {

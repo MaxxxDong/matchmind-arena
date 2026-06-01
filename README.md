@@ -137,7 +137,7 @@ The current web app is in `src/` and is intentionally small:
 - `src/data/matches.mjs`: demo match cards shared by the UI and snapshot exporter.
 - `src/data/resolutions.mjs`: local resolved-result fixtures for demo scoring.
 - `src/resultSources.mjs`: public result-source evidence and deterministic source hashes.
-- `src/scoring.mjs`: shared Brier score, log loss, eligibility audit, and leaderboard logic.
+- `src/scoring.mjs`: shared Brier score, log loss, eligibility audit, calibration summary, and leaderboard logic.
 - `src/signals.mjs`: shared stable JSON hashing, signal vector validation, and commitment construction.
 - Browser-local model settings and generated signal metadata are stored in `localStorage`; no API keys are committed to the repository.
 - `src/styles.css`: responsive live-sports dashboard styling.

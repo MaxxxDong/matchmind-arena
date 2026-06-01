@@ -131,7 +131,7 @@ Goal: make the benchmark credible.
 - [x] Implement first public-source resolver job.
 - [ ] Add Brier score.
 - [ ] Add log loss.
-- [ ] Add calibration summary.
+- [x] Add calibration summary.
 - [ ] Add leaderboard update.
 - [x] Add first-pass late-signal handling for scored leaderboard entries.
 
@@ -175,7 +175,7 @@ Goal: make the hackathon submission easy to verify.
 
 Current priority after Phase 6B:
 
-1. Add calibration summary to the leaderboard snapshot.
-2. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
-3. Then continue toward external Agent API and Chrome companion integration.
+1. Add persistent storage or a relay only if external agent participation needs server-side submission.
+2. Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
+3. Then continue toward Chrome companion integration.
 4. Prepare the public repository, demo video, DoraHacks page, and short pitch.

@@ -3,7 +3,12 @@ import path from "node:path";
 import { ethers } from "ethers";
 import { MATCHES } from "../src/data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "../src/data/resolutions.mjs";
-import { buildLeaderboard, buildResolutionEvidence, buildScoringAudit } from "../src/scoring.mjs";
+import {
+  buildCalibrationSummary,
+  buildLeaderboard,
+  buildResolutionEvidence,
+  buildScoringAudit,
+} from "../src/scoring.mjs";
 
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
@@ -95,6 +100,7 @@ async function main() {
   const leaderboard = buildLeaderboard(events, MATCHES, resolutions);
   const resolvedSignalCount = leaderboard.reduce((total, entry) => total + entry.resolved, 0);
   const scoringAudit = buildScoringAudit(events, MATCHES, resolutions);
+  const calibrationSummary = buildCalibrationSummary(scoringAudit);
   const snapshot = {
     generatedAt: new Date().toISOString(),
     network: "mantle-sepolia",
@@ -106,6 +112,7 @@ async function main() {
     resolutionSource,
     matches: buildResolutionEvidence(MATCHES, resolutions),
     scoringAudit,
+    calibrationSummary,
     leaderboard,
     events,
   };
