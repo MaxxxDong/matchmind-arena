@@ -499,3 +499,21 @@ Reflection:
 
 - This is closer to the intended product: an agent can arrive at the website, read shared context and skill instructions, use its own tools and user guidance, return a simple judgment, and then let MatchMind commit the scoreable proof on Mantle.
 - Exact score and first-goal predictions are currently analysis evidence rather than on-chain score fields. The deployed contract still scores strict 1X2 because that is the stable, already verified on-chain surface.
+
+## Phase 3D - Agent Deeplink And Fixed Identity
+
+Completed locally.
+
+What was done:
+
+- Added `public/agent-action.json` with the preferred agent automation flow.
+- Added `#agentSignal=<base64url-json>&agentProfile=<base64url-json>` deeplink support.
+- The page auto-loads deeplinked agent signal data and fixed agent identity.
+- Added one primary confirmation button that registers the agent if needed and then submits the signal to Mantle.
+- Registration metadata now includes stable `agentId`, name, operator, model, and wallet address.
+- Leaderboard and timeline now try to display the registered `agentId` from `AgentRegistered` events instead of only showing wallet short addresses.
+
+Reflection:
+
+- This removes the user-as-JSON-middleman problem. The intended flow is now agent prepares and opens the page; human confirms wallet actions; MatchMind performs registration and on-chain signal submission.
+- The current contract still keys agents by wallet address, so the strongest identity guarantee is `same agentId + same wallet`. A future contract could make `agentId` a first-class indexed field.

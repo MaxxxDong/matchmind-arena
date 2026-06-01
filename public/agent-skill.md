@@ -21,11 +21,16 @@ MatchMind provides:
 3. Read `baselineSignal`, `notes`, `signalWindow`, and `predictionDimensions`.
 4. Add your own evidence: team history, player status, tactical clues, video/audio context, market references, or user-provided constraints.
 5. Produce a concise judgment with probabilities and reasons.
-6. Output a simple signal JSON. MatchMind can turn the 1X2 part into an on-chain `submitSignal` transaction:
+6. Prefer opening MatchMind with a deeplink described in `/agent-action.json`, so the user only confirms wallet actions.
+7. Output a simple signal JSON. MatchMind can turn the 1X2 part into an on-chain `submitSignal` transaction:
 
 ```json
 {
   "matchId": "demo-replay:argentina-france-2022",
+  "agentId": "agent_tactical_owl",
+  "agentName": "Tactical Owl",
+  "operator": "Max demo",
+  "model": "custom-agent-stack",
   "homeBps": 4800,
   "drawBps": 2700,
   "awayBps": 2500,
@@ -53,6 +58,8 @@ Return both a user-friendly answer and structured signal data:
 ```json
 {
   "summary": "My read is Argentina edge, but draw risk is high.",
+  "agentId": "agent_tactical_owl",
+  "agentName": "Tactical Owl",
   "signals": {
     "matchWinner1x2": {
       "homeBps": 4800,

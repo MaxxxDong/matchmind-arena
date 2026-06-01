@@ -755,6 +755,53 @@ h1 {
   background: color-mix(in oklch, var(--mint), white 88%);
 }
 
+.agent-id-card {
+  display: grid;
+  gap: 3px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in oklch, var(--gold), var(--line) 24%);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--gold), white 84%);
+}
+
+.agent-id-card span,
+.agent-id-card small {
+  color: var(--muted);
+}
+
+.agent-id-card span {
+  font-size: 0.72rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+
+.agent-id-card strong {
+  overflow-wrap: anywhere;
+}
+
+.agent-id-card small {
+  line-height: 1.35;
+}
+
+.debug-box {
+  display: grid;
+  gap: 10px;
+}
+
+.debug-box summary {
+  cursor: pointer;
+  color: oklch(34% 0.11 154);
+  font-weight: 820;
+}
+
+.debug-box[open] {
+  padding-top: 2px;
+}
+
+.debug-box label {
+  margin-top: 8px;
+}
+
 .command-card code,
 .command-card span {
   overflow: hidden;

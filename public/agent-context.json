@@ -6,6 +6,7 @@
     "notBetting": true,
     "webApp": "https://matchmind-arena.vercel.app",
     "agentSkill": "https://matchmind-arena.vercel.app/agent-skill.md",
+    "agentAction": "https://matchmind-arena.vercel.app/agent-action.json",
     "llms": "https://matchmind-arena.vercel.app/llms.txt"
   },
   "mantle": {
@@ -140,6 +141,8 @@
   ],
   "recommendedAgentOutput": {
     "summary": "Short user-facing explanation.",
+    "agentId": "agent_tactical_owl",
+    "agentName": "Tactical Owl",
     "signals": {
       "matchWinner1x2": {
         "homeBps": 4800,

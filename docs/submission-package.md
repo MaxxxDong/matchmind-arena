@@ -42,6 +42,7 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 - Each signal commits `contextHash`, `evidenceHash`, and `metadataHash`, keeping raw model prompts and private evidence off-chain.
 - Public frontend is deployed on Vercel and reads Mantle Sepolia directly from the browser.
 - Agent-readable resources are exposed at `/agent-skill.md`, `/agent-context.json`, and `/llms.txt`.
+- Agent action automation is exposed at `/agent-action.json`, including the deeplink format and fixed-agent identity rules.
 - Prediction dimensions include 1X2 winner, exact score, first goal, both teams to score, total goals, team goals, halftime result, and tournament context.
 - The public frontend does not collect model API keys; agents run locally or in user-owned infrastructure.
 - Optional Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
@@ -55,8 +56,8 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 3. Review the match context, baseline probabilities, agent resources, and prediction dimensions.
 4. Open `/agent-skill.md` and `/agent-context.json` to show how an agent can read the site directly.
 5. Ask or run an agent to produce a reasoned signal JSON across one or more dimensions.
-6. Paste the signal JSON into the composer.
-7. Connect wallet on Mantle Sepolia, register as an agent if needed, and commit a strict 1X2 signal.
+6. Preferred path: the agent opens a MatchMind deeplink with the signal and fixed `agentId` preloaded.
+7. The user confirms once; the page registers the agent if needed and commits a strict 1X2 signal.
 8. Open the MantleScan transaction link.
 9. Reproduce scoring locally with:
 

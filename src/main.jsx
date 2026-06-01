@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ethers } from "ethers";
 import {
@@ -53,6 +53,7 @@ const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
 const AGENT_API_BASE = "http://127.0.0.1:8787";
 const AGENT_SKILL_URL = "/agent-skill.md";
 const AGENT_CONTEXT_URL = "/agent-context.json";
+const AGENT_ACTION_URL = "/agent-action.json";
 const LLMS_URL = "/llms.txt";
 const PREDICTION_DIMENSIONS = [
   ["1X2 winner", "home / draw / away"],
@@ -64,7 +65,16 @@ const PREDICTION_DIMENSIONS = [
   ["Halftime", "home / draw / away"],
   ["Tournament", "group / champion context"],
 ];
+const DEFAULT_AGENT_PROFILE = {
+  agentId: "agent_site_reader_demo",
+  name: "Site Reading Agent",
+  operator: "user-controlled",
+  model: "agent-provided",
+};
 const SIMPLE_AGENT_EXAMPLE = `{
+  "matchId": "demo-replay:argentina-france-2022",
+  "agentId": "agent_site_reader_demo",
+  "agentName": "Site Reading Agent",
   "homeBps": 4800,
   "drawBps": 2700,
   "awayBps": 2500,
@@ -95,6 +105,76 @@ function formatPct(bps) {
   return `${(Number(bps) / 100).toFixed(1)}%`;
 }
 
+function sanitizeAgentId(value) {
+  return String(value || DEFAULT_AGENT_PROFILE.agentId)
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64) || DEFAULT_AGENT_PROFILE.agentId;
+}
+
+function stableStringify(value) {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableStringify).join(",")}]`;
+  }
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function decodeBase64UrlJson(value) {
+  const normalized = String(value).replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+function getLaunchParams() {
+  const hash = globalThis.location?.hash?.startsWith("#")
+    ? globalThis.location.hash.slice(1)
+    : "";
+  const hashParams = new URLSearchParams(hash);
+  const searchParams = new URLSearchParams(globalThis.location?.search || "");
+  return {
+    agentSignal: searchParams.get("agentSignal") || hashParams.get("agentSignal"),
+    agentProfile: searchParams.get("agentProfile") || hashParams.get("agentProfile"),
+  };
+}
+
+function normalizeAgentProfile(candidate = {}) {
+  const agentId = sanitizeAgentId(candidate.agentId || candidate.id);
+  return {
+    agentId,
+    name: String(candidate.agentName || candidate.name || agentId),
+    operator: String(candidate.operator || "user-controlled"),
+    model: String(candidate.model || "agent-provided"),
+    homepage: candidate.homepage ? String(candidate.homepage) : "",
+  };
+}
+
+function buildAgentRegistration(profile, walletAddress) {
+  const record = {
+    app: "MatchMind Arena",
+    type: "agent-registration",
+    agentId: profile.agentId,
+    name: profile.name,
+    operator: profile.operator,
+    model: profile.model,
+    homepage: profile.homepage || null,
+    walletAddress: walletAddress?.toLowerCase?.() || null,
+  };
+  return {
+    metadataHash: ethers.id(stableStringify(record)),
+    metadataUri: `https://matchmind-arena.vercel.app/agents/${encodeURIComponent(profile.agentId)}`,
+    record,
+  };
+}
+
 async function querySignalEvents() {
   const latest = await publicProvider.getBlockNumber();
   const filter = readArena.filters.SignalSubmitted();
@@ -113,6 +193,28 @@ async function querySignalEvents() {
       ? new Date(timestamps.get(log.blockNumber) * 1000).toISOString()
       : null,
   }));
+}
+
+async function queryAgentEvents() {
+  const latest = await publicProvider.getBlockNumber();
+  const filter = readArena.filters.AgentRegistered();
+  const logs = [];
+  for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latest; fromBlock += LOG_CHUNK_SIZE + 1) {
+    const toBlock = Math.min(fromBlock + LOG_CHUNK_SIZE, latest);
+    logs.push(...await readArena.queryFilter(filter, fromBlock, toBlock));
+  }
+  const registry = new Map();
+  for (const log of logs) {
+    const address = String(log.args.agent).toLowerCase();
+    const metadataUri = String(log.args.metadataUri || "");
+    const match = metadataUri.match(/\/agents\/([^/?#]+)/);
+    registry.set(address, {
+      metadataHash: log.args.metadataHash,
+      metadataUri,
+      agentId: match ? decodeURIComponent(match[1]) : shortHash(log.args.agent),
+    });
+  }
+  return registry;
 }
 
 function buildSignal(match, aiSignal) {
@@ -217,6 +319,12 @@ function normalizeSimpleAgentSignal(candidate, match) {
   });
 }
 
+function matchFromSignal(candidate, fallbackMatch) {
+  const matchId = candidate?.matchId || candidate?.selectedMatch || candidate?.match?.id;
+  if (!matchId) return fallbackMatch;
+  return MATCHES.find((match) => match.id === matchId) || fallbackMatch;
+}
+
 function parseAgentSignalPayload(text, match) {
   if (!text.trim()) {
     throw new Error("Paste a simple agent signal JSON or a commit-ready payload.");
@@ -227,23 +335,30 @@ function parseAgentSignalPayload(text, match) {
       mode: "commitment",
       parsed,
       commitment: normalizeCommitment(parsed),
+      match,
+      profile: normalizeAgentProfile(parsed.agentProfile || parsed),
       summary: "Loaded commit-ready payload.",
     };
   }
+  const signalMatch = matchFromSignal(parsed, match);
   return {
     mode: "simple-signal",
     parsed,
-    commitment: normalizeSimpleAgentSignal(parsed, match),
+    commitment: normalizeSimpleAgentSignal(parsed, signalMatch),
+    match: signalMatch,
+    profile: normalizeAgentProfile(parsed.agentProfile || parsed),
     summary: parsed.reasoningSummary ?? parsed.summary ?? "Loaded simple agent signal.",
   };
 }
 
 function App() {
   const [selectedId, setSelectedId] = useState(MATCHES[0].id);
+  const launchLoadedRef = useRef(false);
   const [wallet, setWallet] = useState("");
   const [agent, setAgent] = useState(null);
   const [nextSignalId, setNextSignalId] = useState(null);
   const [events, setEvents] = useState([]);
+  const [agentRegistry, setAgentRegistry] = useState(new Map());
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState("");
   const [txHash, setTxHash] = useState("");
@@ -251,6 +366,7 @@ function App() {
   const [agentCommitment, setAgentCommitment] = useState(null);
   const [agentSignalError, setAgentSignalError] = useState("");
   const [agentSignalMode, setAgentSignalMode] = useState("");
+  const [agentProfile, setAgentProfile] = useState(DEFAULT_AGENT_PROFILE);
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
@@ -258,18 +374,43 @@ function App() {
   );
   const signal = useMemo(() => agentCommitment ?? buildSignal(selectedMatch), [selectedMatch, agentCommitment]);
 
-  useEffect(() => {
+  const selectMatch = useCallback((matchId) => {
+    setSelectedId(matchId);
     setAgentCommitment(null);
     setAgentSignalError("");
     setAgentSignalMode("");
-  }, [selectedId]);
+  }, []);
+
+  useEffect(() => {
+    if (launchLoadedRef.current) return;
+    launchLoadedRef.current = true;
+    try {
+      const launch = getLaunchParams();
+      if (!launch.agentSignal) return;
+      const signalPayload = decodeBase64UrlJson(launch.agentSignal);
+      const profilePayload = launch.agentProfile ? decodeBase64UrlJson(launch.agentProfile) : signalPayload.agentProfile;
+      const profile = normalizeAgentProfile(profilePayload || signalPayload);
+      const text = JSON.stringify({ ...signalPayload, agentProfile: profile }, null, 2);
+      const parsedSignal = parseAgentSignalPayload(text, MATCHES[0]);
+      setAgentSignalText(text);
+      setSelectedId(parsedSignal.match.id);
+      setAgentCommitment(parsedSignal.commitment);
+      setAgentSignalMode("agent deeplink");
+      setAgentProfile(profile);
+      setStatus(`Loaded ${profile.name} (${profile.agentId}) from agent deeplink. Confirm once to register if needed and commit on Mantle.`);
+    } catch (error) {
+      setAgentSignalError(`Agent deeplink could not be loaded: ${error.message}`);
+    }
+  }, []);
 
   const refreshArena = useCallback(async (address = wallet) => {
-    const [next, logs] = await Promise.all([
+    const [next, logs, registry] = await Promise.all([
       readArena.nextSignalId(),
       querySignalEvents(),
+      queryAgentEvents(),
     ]);
     setNextSignalId(Number(next));
+    setAgentRegistry(registry);
     setEvents(
       logs
         .slice()
@@ -345,16 +486,16 @@ function App() {
     try {
       const { address, arena } = await getSignerContract();
       setWallet(address);
-      const metadataHash = ethers.id(`agent:${address.toLowerCase()}:matchmind-demo`);
+      const registration = buildAgentRegistration(agentProfile, address);
       const tx = await arena.registerAgent(
-        metadataHash,
-        "https://matchmind-arena.local/agents/browser-demo",
+        registration.metadataHash,
+        registration.metadataUri,
       );
       setTxHash(tx.hash);
       setStatus("Waiting for Mantle confirmation...");
       await tx.wait();
       await refreshArena(address);
-      setStatus("Agent registered. You can commit a signal now.");
+      setStatus(`${agentProfile.name} registered. You can commit a signal now.`);
     } catch (error) {
       setStatus(error.shortMessage || error.message);
     } finally {
@@ -385,6 +526,33 @@ function App() {
     }
   }
 
+  async function confirmAgentSignal() {
+    setBusy("confirm");
+    setStatus("Preparing agent registration and signal commit...");
+    try {
+      const { address, arena } = await getSignerContract();
+      setWallet(address);
+      const record = await readArena.getAgent(address);
+      if (!record.registered) {
+        const registration = buildAgentRegistration(agentProfile, address);
+        setStatus(`Registering ${agentProfile.name} (${agentProfile.agentId})...`);
+        const registerTx = await arena.registerAgent(registration.metadataHash, registration.metadataUri);
+        setTxHash(registerTx.hash);
+        await registerTx.wait();
+      }
+      setStatus("Submitting agent signal to Mantle...");
+      const signalTx = await arena.submitSignal(signal);
+      setTxHash(signalTx.hash);
+      await signalTx.wait();
+      await refreshArena(address);
+      setStatus(`${agentProfile.name} signal committed on Mantle.`);
+    } catch (error) {
+      setStatus(error.shortMessage || error.message);
+    } finally {
+      setBusy("");
+    }
+  }
+
   function loadAgentSignal() {
     setAgentSignalError("");
     setStatus("");
@@ -392,16 +560,16 @@ function App() {
       const signalPayload = parseAgentSignalPayload(agentSignalText, selectedMatch);
       const { parsed, commitment } = signalPayload;
       const matched = MATCHES.find((match) => ethers.id(match.id).toLowerCase() === commitment.matchId.toLowerCase());
-      if (matched && matched.id !== selectedId) {
-        throw new Error(`This payload belongs to ${matched.title}. Select that match card first, then load it again.`);
-      }
+      if (matched && matched.id !== selectedId) setSelectedId(matched.id);
       setAgentCommitment(commitment);
       setAgentSignalMode(signalPayload.mode);
+      setAgentProfile(signalPayload.profile);
       storeLocalSignalMetadata({
         matchId: matched?.id ?? selectedMatch.id,
         title: matched?.title ?? selectedMatch.title,
         generatedAt: new Date().toISOString(),
-        model: parsed.model ?? "site-reading-agent",
+        model: signalPayload.profile.model,
+        agentId: signalPayload.profile.agentId,
         signal: {
           homeBps: commitment.homeBps,
           drawBps: commitment.drawBps,
@@ -422,6 +590,10 @@ function App() {
   const agentReady = Boolean(agent?.registered);
   const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
   const leaderboard = buildLeaderboard(events);
+  const agentLabel = useCallback((address) => {
+    const profile = agentRegistry.get(String(address).toLowerCase());
+    return profile?.agentId || shortHash(address);
+  }, [agentRegistry]);
 
   return (
     <main className="app">
@@ -492,6 +664,9 @@ function App() {
           <a href={AGENT_CONTEXT_URL} target="_blank" rel="noreferrer" className="link-button">
             <Layers3 size={17} /> Context JSON
           </a>
+          <a href={AGENT_ACTION_URL} target="_blank" rel="noreferrer" className="link-button">
+            <Zap size={17} /> Action JSON
+          </a>
           <a href={LLMS_URL} target="_blank" rel="noreferrer" className="link-button">
             <BrainCircuit size={17} /> llms.txt
           </a>
@@ -513,7 +688,7 @@ function App() {
             <button
               key={match.id}
               className={`match-card ${match.id === selectedId ? "active" : ""}`}
-              onClick={() => setSelectedId(match.id)}
+              onClick={() => selectMatch(match.id)}
             >
               <span>{match.stage}</span>
               <strong>{match.title}</strong>
@@ -564,28 +739,36 @@ function App() {
             <p>{selectedMatch.bias}</p>
             <div className="agent-box">
               <p className="model-note">
-                Simple path: ask any AI agent to read this page or the skill/context links, then paste
-                its signal JSON here. MatchMind turns the 1X2 part into a Mantle commit.
+                Simple path: an agent reads the page or action manifest, prepares a signal, and opens
+                MatchMind with a deeplink. You only confirm the wallet action.
               </p>
-              <div className="command-card">
-                <span>Agent instruction</span>
-                <code>Read /agent-skill.md and /agent-context.json</code>
-                <code>Return homeBps + drawBps + awayBps = 10000</code>
-                <span>Optional helper: {AGENT_API_BASE}/api/matches</span>
+              <div className="agent-id-card">
+                <span>Agent ID</span>
+                <strong>{agentProfile.agentId}</strong>
+                <small>{agentProfile.name} · {agentProfile.model}</small>
               </div>
-              <label>
-                <span>Agent signal JSON</span>
-                <textarea
-                  value={agentSignalText}
-                  onChange={(event) => setAgentSignalText(event.target.value)}
-                  placeholder={SIMPLE_AGENT_EXAMPLE}
-                  rows={10}
-                />
-              </label>
-              <button onClick={loadAgentSignal} className="link-button model-action">
-                <Bot size={17} />
-                Load agent signal for Mantle commit
-              </button>
+              <div className="command-card">
+                <span>Agent action</span>
+                <code>Read /agent-action.json</code>
+                <code>Open #agentSignal=&lt;base64url-json&gt;</code>
+                <span>Fallback helper: {AGENT_API_BASE}/api/matches</span>
+              </div>
+              <details className="debug-box">
+                <summary>Advanced: paste or inspect signal JSON</summary>
+                <label>
+                  <span>Agent signal JSON</span>
+                  <textarea
+                    value={agentSignalText}
+                    onChange={(event) => setAgentSignalText(event.target.value)}
+                    placeholder={SIMPLE_AGENT_EXAMPLE}
+                    rows={10}
+                  />
+                </label>
+                <button onClick={loadAgentSignal} className="link-button model-action">
+                  <Bot size={17} />
+                  Load signal for Mantle commit
+                </button>
+              </details>
             </div>
             {agentSignalError ? <p className="error-text">{agentSignalError}</p> : null}
             <dl className="hash-list">
@@ -605,11 +788,15 @@ function App() {
               </p>
             )}
             <div className="button-row">
+              <button onClick={confirmAgentSignal} disabled={busy === "confirm"} className="primary">
+                {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
+                Confirm agent signal on Mantle
+              </button>
               <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
                 {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
                 {agentReady ? "Agent ready" : "Register agent"}
               </button>
-              <button onClick={submitSignal} disabled={busy === "signal"} className="primary">
+              <button onClick={submitSignal} disabled={busy === "signal"} className="secondary">
                 {busy === "signal" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
                 Commit signal
               </button>
@@ -639,7 +826,7 @@ function App() {
                 <a className="timeline-item" href={`${EXPLORER}/tx/${event.txHash}`} target="_blank" rel="noreferrer" key={`${event.txHash}-${event.signalId}`}>
                   <span>#{event.signalId} · block {event.blockNumber}</span>
                   <strong>{formatPct(event.homeBps)} / {formatPct(event.drawBps)} / {formatPct(event.awayBps)}</strong>
-                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {shortHash(event.agent)} · {event.submittedAt ?? "time pending"}</small>
+                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {agentLabel(event.agent)} · {event.submittedAt ?? "time pending"}</small>
                 </a>
               ))
             )}
@@ -666,7 +853,7 @@ function App() {
                 <div className="leader-card" key={entry.agent}>
                   <div className="leader-rank">#{index + 1}</div>
                   <div>
-                    <strong>{shortHash(entry.agent)}</strong>
+                    <strong>{agentLabel(entry.agent)}</strong>
                     <span>{entry.resolved} resolved signal{entry.resolved === 1 ? "" : "s"}</span>
                   </div>
                   <b>{entry.quality}</b>
