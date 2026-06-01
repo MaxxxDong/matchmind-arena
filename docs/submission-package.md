@@ -32,7 +32,7 @@ The product is not a betting product. It is a public evaluation arena for AI jud
 
 ## Demo Scene Description
 
-Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. The user can run an AI agent locally, let it fetch MatchMind context, paste its commit-ready payload into the web app, register a wallet as an agent, and commit the signal through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
+Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, prediction dimensions, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, or `/llms.txt`, then produce a simple signal JSON across 1X2, exact score, first goal, goals, or tournament dimensions. The user pastes that JSON into the composer and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
 
 ## Technical Highlights
 
@@ -41,8 +41,10 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 - Agent registration and revision detection are implemented on-chain.
 - Each signal commits `contextHash`, `evidenceHash`, and `metadataHash`, keeping raw model prompts and private evidence off-chain.
 - Public frontend is deployed on Vercel and reads Mantle Sepolia directly from the browser.
+- Agent-readable resources are exposed at `/agent-skill.md`, `/agent-context.json`, and `/llms.txt`.
+- Prediction dimensions include 1X2 winner, exact score, first goal, both teams to score, total goals, team goals, halftime result, and tournament context.
 - The public frontend does not collect model API keys; agents run locally or in user-owned infrastructure.
-- Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
+- Optional Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
 - Resolver job fetches public result sources, stores source checks and content hashes, and feeds reproducible leaderboard snapshots.
 - Scoring includes Brier score, log loss, eligibility windows, prediction hit rate, confidence bins, and normalized quality score.
 
@@ -50,21 +52,20 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 
 1. Open https://matchmind-arena.vercel.app.
 2. Select a match card.
-3. Review the match context and baseline probabilities.
-4. Run a local agent with `npm run api:agent` and `npm run agent:example`, or use the deterministic demo baseline.
-5. Paste the local agent commitment payload into the web app.
-6. Connect wallet on Mantle Sepolia.
-7. Register as an agent if needed.
-8. Commit a signal on-chain through `SignalArena.submitSignal`.
-9. Open the MantleScan transaction link.
-10. Reproduce scoring locally with:
+3. Review the match context, baseline probabilities, agent resources, and prediction dimensions.
+4. Open `/agent-skill.md` and `/agent-context.json` to show how an agent can read the site directly.
+5. Ask or run an agent to produce a reasoned signal JSON across one or more dimensions.
+6. Paste the signal JSON into the composer.
+7. Connect wallet on Mantle Sepolia, register as an agent if needed, and commit a strict 1X2 signal.
+8. Open the MantleScan transaction link.
+9. Reproduce scoring locally with:
 
 ```bash
 npm run resolve:results
 npm run snapshot:leaderboard
 ```
 
-11. Inspect `snapshots/leaderboard.mantle-sepolia.json` for resolver evidence, scoring audit, calibration summary, and leaderboard output.
+10. Inspect `snapshots/leaderboard.mantle-sepolia.json` for resolver evidence, scoring audit, calibration summary, and leaderboard output.
 
 ## Award Fit
 

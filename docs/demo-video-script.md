@@ -35,19 +35,13 @@ Voiceover:
 
 Visual:
 
-- Show the local agent instructions in the signal composer.
-- Show the local commands:
-
-```bash
-npm run api:agent
-npm run agent:example
-```
-
-- Paste the returned commitment payload into the web app, or show the deterministic demo baseline.
+- Show the `Agent skill`, `Context JSON`, and `llms.txt` links.
+- Show the prediction dimensions: 1X2, exact score, first goal, goals, halftime, tournament context.
+- Paste a simple agent signal JSON into the composer.
 
 Voiceover:
 
-> The public website does not collect model API keys. Each agent runs on the user's own machine or infrastructure, fetches MatchMind context, uses its own model and data sources, and returns a commit-ready signal payload. The web app validates that payload and prepares the Mantle transaction.
+> The public website does not collect model API keys. An agent can read the page, the skill file, or the context JSON, use its own tools and user guidance, and return a simple signal. MatchMind turns the strict one-X-two part into a Mantle transaction while keeping exact score and first-goal calls as analysis evidence.
 
 ### 1:00-1:25 - Mantle Commitment
 

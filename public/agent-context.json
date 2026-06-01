@@ -1,0 +1,163 @@
+{
+  "schemaVersion": "2026-06-01.agent-context.v1",
+  "project": {
+    "name": "MatchMind Arena",
+    "description": "AI sports signal benchmark on Mantle. Agents read match context, form independent judgments, and may commit structured signals on-chain.",
+    "notBetting": true,
+    "webApp": "https://matchmind-arena.vercel.app",
+    "agentSkill": "https://matchmind-arena.vercel.app/agent-skill.md",
+    "llms": "https://matchmind-arena.vercel.app/llms.txt"
+  },
+  "mantle": {
+    "network": "Mantle Sepolia",
+    "contractName": "SignalArena",
+    "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
+    "explorer": "https://sepolia.mantlescan.xyz/address/0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
+    "primaryFunction": "submitSignal",
+    "scoreableOnchainSignal": {
+      "homeBps": "integer 0-10000",
+      "drawBps": "integer 0-10000",
+      "awayBps": "integer 0-10000",
+      "sumRule": "homeBps + drawBps + awayBps must equal 10000",
+      "confidenceBps": "integer 0-10000"
+    }
+  },
+  "predictionDimensions": [
+    {
+      "id": "match_winner_1x2",
+      "label": "90-minute winner",
+      "type": "scoreable_onchain",
+      "options": ["home", "draw", "away"],
+      "format": "basis_points_sum_10000"
+    },
+    {
+      "id": "exact_score",
+      "label": "Exact score",
+      "type": "analysis",
+      "examples": ["0-0", "1-0", "1-1", "2-1", "2-2"],
+      "format": "ranked_scores_with_probability_bps"
+    },
+    {
+      "id": "first_goal",
+      "label": "First goal",
+      "type": "analysis",
+      "options": ["home", "no_goal", "away"],
+      "format": "basis_points_sum_10000"
+    },
+    {
+      "id": "both_teams_to_score",
+      "label": "Both teams to score",
+      "type": "analysis",
+      "options": ["yes", "no"],
+      "format": "basis_points_sum_10000"
+    },
+    {
+      "id": "total_goals",
+      "label": "Total goals bands",
+      "type": "analysis",
+      "options": ["under_1_5", "under_2_5", "over_2_5", "over_3_5"],
+      "format": "separate_probability_bps"
+    },
+    {
+      "id": "team_goals",
+      "label": "Team goals",
+      "type": "analysis",
+      "format": "per_team_goal_count_distribution"
+    },
+    {
+      "id": "halftime_result",
+      "label": "Halftime result",
+      "type": "analysis",
+      "options": ["home", "draw", "away"],
+      "format": "basis_points_sum_10000"
+    },
+    {
+      "id": "tournament_context",
+      "label": "Group winner / champion / qualification context",
+      "type": "analysis",
+      "format": "ranked_team_probabilities"
+    }
+  ],
+  "matches": [
+    {
+      "id": "demo-replay:argentina-france-2022",
+      "title": "Argentina vs France",
+      "stage": "Demo replay",
+      "kickoff": "Replay window",
+      "venue": "Lusail signal pack",
+      "home": "Argentina",
+      "away": "France",
+      "scoringMode": "demo-replay",
+      "signalWindow": "Historical replay signals are accepted only for explicitly labeled demo scoring.",
+      "baselineSignal": {
+        "homeBps": 4800,
+        "drawBps": 2700,
+        "awayBps": 2500,
+        "confidenceBps": 6800
+      },
+      "notes": ["Volatile late-game momentum", "World Cup final replay", "Useful for demo scoring and visual explanation tests"],
+      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "both_teams_to_score", "total_goals"]
+    },
+    {
+      "id": "qualifier:spain-turkey-highlights",
+      "title": "Spain vs Turkey",
+      "stage": "Signal rehearsal",
+      "kickoff": "Sample clip",
+      "venue": "Video evidence pack",
+      "home": "Spain",
+      "away": "Turkey",
+      "scoringMode": "demo-replay",
+      "signalWindow": "Historical replay signals are accepted only for explicitly labeled demo scoring.",
+      "baselineSignal": {
+        "homeBps": 6200,
+        "drawBps": 2100,
+        "awayBps": 1700,
+        "confidenceBps": 6400
+      },
+      "notes": ["Possession and transition pressure", "Highlight packet for video-context agents"],
+      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "team_goals"]
+    },
+    {
+      "id": "worldcup-2026:mexico-south-africa",
+      "title": "Mexico vs South Africa",
+      "stage": "Pre-match sample",
+      "kickoff": "2026-06-11 19:00 UTC",
+      "venue": "Mexico City",
+      "home": "Mexico",
+      "away": "South Africa",
+      "scoringMode": "live",
+      "signalClosesAt": "2026-06-11T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6650,
+        "drawBps": 2250,
+        "awayBps": 1100,
+        "confidenceBps": 6100
+      },
+      "notes": ["Home edge plus market signal", "2026 group-stage watch card"],
+      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "group_winner", "tournament_context"]
+    }
+  ],
+  "recommendedAgentOutput": {
+    "summary": "Short user-facing explanation.",
+    "signals": {
+      "matchWinner1x2": {
+        "homeBps": 4800,
+        "drawBps": 2700,
+        "awayBps": 2500
+      },
+      "exactScore": [
+        { "score": "1-1", "bps": 1150 },
+        { "score": "1-0", "bps": 980 }
+      ],
+      "firstGoal": {
+        "homeBps": 5100,
+        "noGoalBps": 700,
+        "awayBps": 4200
+      }
+    },
+    "confidenceBps": 6800,
+    "sourceMix": ["match-context", "agent-search", "user-context"],
+    "caveats": ["Not betting advice"]
+  }
+}

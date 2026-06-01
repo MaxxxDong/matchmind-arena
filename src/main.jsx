@@ -51,6 +51,36 @@ const ARENA_ABI = [
 
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
 const AGENT_API_BASE = "http://127.0.0.1:8787";
+const AGENT_SKILL_URL = "/agent-skill.md";
+const AGENT_CONTEXT_URL = "/agent-context.json";
+const LLMS_URL = "/llms.txt";
+const PREDICTION_DIMENSIONS = [
+  ["1X2 winner", "home / draw / away"],
+  ["Exact score", "1-1, 1-0, 2-1"],
+  ["First goal", "home / no goal / away"],
+  ["Both score", "yes / no"],
+  ["Total goals", "under / over bands"],
+  ["Team goals", "per-team distribution"],
+  ["Halftime", "home / draw / away"],
+  ["Tournament", "group / champion context"],
+];
+const SIMPLE_AGENT_EXAMPLE = `{
+  "homeBps": 4800,
+  "drawBps": 2700,
+  "awayBps": 2500,
+  "confidenceBps": 6800,
+  "reasoningSummary": "Argentina have the stronger late-game chance quality, but France's transition threat keeps draw risk high.",
+  "exactScore": [
+    { "score": "1-1", "bps": 1150 },
+    { "score": "2-1", "bps": 920 }
+  ],
+  "firstGoal": {
+    "homeBps": 5100,
+    "noGoalBps": 700,
+    "awayBps": 4200
+  },
+  "sourceMix": ["match-context", "agent-reasoning", "user-context"]
+}`;
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
 const readArena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, publicProvider);
@@ -126,7 +156,7 @@ function normalizeCommitment(candidate) {
   ];
   const missing = required.filter((key) => source?.[key] === undefined || source?.[key] === null);
   if (missing.length) {
-    throw new Error(`Local agent payload is missing: ${missing.join(", ")}.`);
+    throw new Error(`Commit-ready payload is missing: ${missing.join(", ")}.`);
   }
   const next = {
     matchId: String(source.matchId),
@@ -141,15 +171,71 @@ function normalizeCommitment(candidate) {
     metadataUri: String(source.metadataUri),
   };
   if (![next.matchId, next.contextHash, next.evidenceHash, next.metadataHash].every((value) => /^0x[0-9a-fA-F]{64}$/.test(value))) {
-    throw new Error("Local agent payload hashes must be bytes32 hex values.");
+    throw new Error("Commit-ready payload hashes must be bytes32 hex values.");
   }
   if (next.homeBps + next.drawBps + next.awayBps !== 10000) {
-    throw new Error("Local agent payload must sum to 10,000 bps.");
+    throw new Error("Commit-ready payload must sum to 10,000 bps.");
   }
   if ([next.matchWindow, next.homeBps, next.drawBps, next.awayBps, next.confidenceBps].some((value) => !Number.isInteger(value) || value < 0 || value > 10000)) {
-    throw new Error("Local agent payload numeric fields must be integers from 0 to 10,000.");
+    throw new Error("Commit-ready payload numeric fields must be integers from 0 to 10,000.");
   }
   return next;
+}
+
+function normalizeSimpleAgentSignal(candidate, match) {
+  const source = candidate?.signals?.matchWinner1x2 ?? candidate?.matchWinner1x2 ?? candidate;
+  const homeBps = Number(source.homeBps);
+  const drawBps = Number(source.drawBps);
+  const awayBps = Number(source.awayBps);
+  const confidenceBps = Number(candidate.confidenceBps ?? source.confidenceBps ?? 5000);
+  if ([homeBps, drawBps, awayBps, confidenceBps].some((value) => !Number.isInteger(value) || value < 0 || value > 10000)) {
+    throw new Error("Agent signal must include integer homeBps, drawBps, awayBps, and confidenceBps from 0 to 10,000.");
+  }
+  if (homeBps + drawBps + awayBps !== 10000) {
+    throw new Error("Agent signal must sum to 10,000 bps.");
+  }
+  return buildSignalCommitment(match, {
+    homeBps,
+    drawBps,
+    awayBps,
+    confidenceBps,
+    model: candidate.model ?? "site-reading-agent",
+    explanation: candidate.reasoningSummary ?? candidate.summary ?? candidate.explanation ?? "Agent submitted a structured MatchMind signal.",
+    generatedBy: candidate.agentId ?? "site-reading-agent",
+    generatedAt: candidate.clientTimestamp ?? new Date().toISOString(),
+    rawEvidence: {
+      matchId: match.id,
+      summary: candidate.summary ?? null,
+      reasoningSummary: candidate.reasoningSummary ?? candidate.explanation ?? "",
+      exactScore: candidate.exactScore ?? candidate.signals?.exactScore ?? [],
+      firstGoal: candidate.firstGoal ?? candidate.signals?.firstGoal ?? null,
+      sourceMix: candidate.sourceMix ?? candidate.evidence ?? ["matchmind-site-context"],
+      caveats: candidate.caveats ?? [],
+    },
+    metadataUri: candidate.metadataUri,
+    contextSource: "MatchMind public site and agent-readable context",
+  });
+}
+
+function parseAgentSignalPayload(text, match) {
+  if (!text.trim()) {
+    throw new Error("Paste a simple agent signal JSON or a commit-ready payload.");
+  }
+  const parsed = JSON.parse(text);
+  if (parsed?.commitment || parsed?.contextHash || parsed?.metadataHash) {
+    return {
+      mode: "commitment",
+      parsed,
+      commitment: normalizeCommitment(parsed),
+      summary: "Loaded commit-ready payload.",
+    };
+  }
+  return {
+    mode: "simple-signal",
+    parsed,
+    commitment: normalizeSimpleAgentSignal(parsed, match),
+    summary: parsed.reasoningSummary ?? parsed.summary ?? "Loaded simple agent signal.",
+  };
 }
 
 function App() {
@@ -161,9 +247,10 @@ function App() {
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState("");
   const [txHash, setTxHash] = useState("");
-  const [agentPayloadText, setAgentPayloadText] = useState("");
+  const [agentSignalText, setAgentSignalText] = useState(SIMPLE_AGENT_EXAMPLE);
   const [agentCommitment, setAgentCommitment] = useState(null);
-  const [agentPayloadError, setAgentPayloadError] = useState("");
+  const [agentSignalError, setAgentSignalError] = useState("");
+  const [agentSignalMode, setAgentSignalMode] = useState("");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
@@ -173,7 +260,8 @@ function App() {
 
   useEffect(() => {
     setAgentCommitment(null);
-    setAgentPayloadError("");
+    setAgentSignalError("");
+    setAgentSignalMode("");
   }, [selectedId]);
 
   const refreshArena = useCallback(async (address = wallet) => {
@@ -297,37 +385,35 @@ function App() {
     }
   }
 
-  function loadLocalAgentPayload() {
-    setAgentPayloadError("");
+  function loadAgentSignal() {
+    setAgentSignalError("");
     setStatus("");
     try {
-      if (!agentPayloadText.trim()) {
-        throw new Error("Paste the JSON returned by npm run agent:example or POST /api/signals.");
-      }
-      const parsed = JSON.parse(agentPayloadText);
-      const commitment = normalizeCommitment(parsed);
+      const signalPayload = parseAgentSignalPayload(agentSignalText, selectedMatch);
+      const { parsed, commitment } = signalPayload;
       const matched = MATCHES.find((match) => ethers.id(match.id).toLowerCase() === commitment.matchId.toLowerCase());
       if (matched && matched.id !== selectedId) {
         throw new Error(`This payload belongs to ${matched.title}. Select that match card first, then load it again.`);
       }
       setAgentCommitment(commitment);
+      setAgentSignalMode(signalPayload.mode);
       storeLocalSignalMetadata({
         matchId: matched?.id ?? selectedMatch.id,
         title: matched?.title ?? selectedMatch.title,
         generatedAt: new Date().toISOString(),
-        model: "local-agent",
+        model: parsed.model ?? "site-reading-agent",
         signal: {
           homeBps: commitment.homeBps,
           drawBps: commitment.drawBps,
           awayBps: commitment.awayBps,
           confidenceBps: commitment.confidenceBps,
         },
-        explanation: "Loaded from local MatchMind Agent API.",
+        explanation: signalPayload.summary,
         rawEvidence: parsed,
       });
-      setStatus("Local agent signal loaded. Review it, then commit on-chain with your wallet.");
+      setStatus("Agent signal loaded. Review it, then commit the 1X2 proof on-chain with your wallet.");
     } catch (error) {
-      setAgentPayloadError(error.message);
+      setAgentSignalError(error.message);
       setStatus("");
     }
   }
@@ -389,6 +475,34 @@ function App() {
         </dl>
       </section>
 
+      <section className="agent-entry" aria-label="Agent-readable entry">
+        <div>
+          <span className="kicker">Agent entry</span>
+          <h2>Agents can read this site directly.</h2>
+          <p>
+            The page exposes a skill document, machine-readable context, and market-like
+            prediction dimensions. An agent should use these shared facts plus its own
+            search, video, memory, and user preferences to form a judgment.
+          </p>
+        </div>
+        <div className="agent-links">
+          <a href={AGENT_SKILL_URL} target="_blank" rel="noreferrer" className="link-button">
+            <Bot size={17} /> Agent skill
+          </a>
+          <a href={AGENT_CONTEXT_URL} target="_blank" rel="noreferrer" className="link-button">
+            <Layers3 size={17} /> Context JSON
+          </a>
+          <a href={LLMS_URL} target="_blank" rel="noreferrer" className="link-button">
+            <BrainCircuit size={17} /> llms.txt
+          </a>
+        </div>
+        <div className="dimension-grid" aria-label="Prediction dimensions">
+          {PREDICTION_DIMENSIONS.map(([label, description]) => (
+            <Dimension key={label} label={label} description={description} />
+          ))}
+        </div>
+      </section>
+
       <section className="arena-grid">
         <aside className="match-rail" aria-label="Match list">
           <div className="section-title">
@@ -445,34 +559,35 @@ function App() {
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
-              <small>{agentCommitment ? "local agent" : "demo baseline"}</small>
+              <small>{agentCommitment ? agentSignalMode : "demo baseline"}</small>
             </div>
             <p>{selectedMatch.bias}</p>
             <div className="agent-box">
               <p className="model-note">
-                MatchMind does not collect model keys in the public web app. Run your agent locally,
-                let it read the context API, then paste its commit-ready payload here.
+                Simple path: ask any AI agent to read this page or the skill/context links, then paste
+                its signal JSON here. MatchMind turns the 1X2 part into a Mantle commit.
               </p>
               <div className="command-card">
-                <code>npm run api:agent</code>
-                <code>npm run agent:example</code>
-                <span>{AGENT_API_BASE}/api/matches</span>
+                <span>Agent instruction</span>
+                <code>Read /agent-skill.md and /agent-context.json</code>
+                <code>Return homeBps + drawBps + awayBps = 10000</code>
+                <span>Optional helper: {AGENT_API_BASE}/api/matches</span>
               </div>
               <label>
-                <span>Local agent payload</span>
+                <span>Agent signal JSON</span>
                 <textarea
-                  value={agentPayloadText}
-                  onChange={(event) => setAgentPayloadText(event.target.value)}
-                  placeholder="{ &quot;commitment&quot;: { &quot;matchId&quot;: &quot;0x...&quot;, &quot;homeBps&quot;: 4800, ... } }"
-                  rows={6}
+                  value={agentSignalText}
+                  onChange={(event) => setAgentSignalText(event.target.value)}
+                  placeholder={SIMPLE_AGENT_EXAMPLE}
+                  rows={10}
                 />
               </label>
-              <button onClick={loadLocalAgentPayload} className="link-button model-action">
+              <button onClick={loadAgentSignal} className="link-button model-action">
                 <Bot size={17} />
-                Load local agent signal
+                Load agent signal for Mantle commit
               </button>
             </div>
-            {agentPayloadError ? <p className="error-text">{agentPayloadError}</p> : null}
+            {agentSignalError ? <p className="error-text">{agentSignalError}</p> : null}
             <dl className="hash-list">
               <div><dt>Context</dt><dd>{shortHash(signal.contextHash)}</dd></div>
               <div><dt>Evidence</dt><dd>{shortHash(signal.evidenceHash)}</dd></div>
@@ -480,13 +595,13 @@ function App() {
             </dl>
             {agentCommitment ? (
               <p className="ai-explanation">
-                Local agent payload loaded. The agent ran outside this website; this page only validates
-                the structured commitment and asks your wallet to submit it to Mantle.
+                Agent signal loaded. MatchMind will commit the strict 1X2 vector on Mantle; exact score,
+                first goal, and other dimensions stay as analysis evidence for the agent's reasoning.
               </p>
             ) : (
               <p className="ai-explanation">
-                Demo baseline is available for review. For a differentiated agent, run the local API and
-                paste a payload generated on your own machine.
+                The website exposes the match context and supported dimensions for agents. The example
+                JSON is intentionally simple so any AI agent can produce it quickly.
               </p>
             )}
             <div className="button-row">
@@ -582,6 +697,15 @@ function Step({ icon, label, value }) {
       {icon}
       <span>{label}</span>
       <strong>{value}</strong>
+    </div>
+  );
+}
+
+function Dimension({ label, description }) {
+  return (
+    <div className="dimension">
+      <strong>{label}</strong>
+      <span>{description}</span>
     </div>
   );
 }

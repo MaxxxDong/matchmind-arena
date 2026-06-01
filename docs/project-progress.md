@@ -479,3 +479,23 @@ Verification:
 - `npm run build`: passing.
 - `npm run api:agent` started successfully on `http://127.0.0.1:8787`.
 - `npm run agent:example` returned a `commitment` payload for `demo-replay:argentina-france-2022`.
+
+## Phase 3C - Simple Agent Onboarding
+
+Completed locally.
+
+What was done:
+
+- Added public agent-readable resources:
+  - `public/llms.txt`
+  - `public/agent-skill.md`
+  - `public/agent-context.json`
+- Added visible agent entry links to the web app.
+- Added prediction dimensions beyond 1X2: exact score, first goal, both teams to score, total goals, team goals, halftime result, and tournament context.
+- Changed the composer so the main agent input is now a simple signal JSON, not a developer-only commit payload.
+- The page still converts the strict 1X2 part into a Mantle `submitSignal` commitment, so the project keeps strong on-chain interaction while making the agent path easier to understand.
+
+Reflection:
+
+- This is closer to the intended product: an agent can arrive at the website, read shared context and skill instructions, use its own tools and user guidance, return a simple judgment, and then let MatchMind commit the scoreable proof on Mantle.
+- Exact score and first-goal predictions are currently analysis evidence rather than on-chain score fields. The deployed contract still scores strict 1X2 because that is the stable, already verified on-chain surface.
