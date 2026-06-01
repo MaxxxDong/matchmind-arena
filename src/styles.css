@@ -550,6 +550,24 @@ h1 {
   box-shadow: inset 0 0 0 1px oklch(100% 0 0 / 0.24);
 }
 
+.signal-source-pill {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  max-width: calc(100% - 28px);
+  padding: 7px 10px;
+  border: 1px solid color-mix(in oklch, var(--mint), white 18%);
+  border-radius: 999px;
+  color: oklch(94% 0.04 156);
+  background: color-mix(in oklch, var(--night), var(--pitch) 26%);
+  font-size: 0.78rem;
+  font-weight: 820;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .field-lines {
   position: absolute;
   inset: 24px;
@@ -624,6 +642,58 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+}
+
+.prediction-panel {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.prediction-card {
+  display: grid;
+  gap: 7px;
+  padding: 12px;
+  border: 1px solid color-mix(in oklch, var(--line), white 18%);
+  border-radius: var(--radius);
+  background: oklch(99% 0.01 94);
+}
+
+.prediction-card div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.prediction-card span,
+.prediction-card small,
+.prediction-card p {
+  color: var(--muted);
+}
+
+.prediction-card span {
+  text-align: right;
+  font-size: 0.78rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.prediction-card p {
+  margin: 0;
+  line-height: 1.42;
+}
+
+.prediction-card a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: oklch(34% 0.12 154);
+  font-size: 0.82rem;
+  font-weight: 820;
 }
 
 .prob-card {
@@ -892,6 +962,10 @@ h1 {
   padding: 13px 15px;
   color: var(--ink);
   background: color-mix(in oklch, var(--gold), white 82%);
+}
+
+.muted-notice {
+  background: color-mix(in oklch, var(--blue), white 88%);
 }
 
 .notice span {

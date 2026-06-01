@@ -26,6 +26,7 @@ import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
+import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
@@ -50,7 +51,7 @@ const ARENA_ABI = [
 ];
 
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
-const AGENT_API_BASE = "http://127.0.0.1:8787";
+const LOG_LOOKBACK_BLOCKS = 8000;
 const AGENT_SKILL_URL = "/agent-skill.md";
 const AGENT_CONTEXT_URL = "/agent-context.json";
 const AGENT_ACTION_URL = "/agent-action.json";
@@ -94,7 +95,6 @@ const SIMPLE_AGENT_EXAMPLE = `{
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
 const readArena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, publicProvider);
-const LOG_CHUNK_SIZE = 9000;
 
 function shortHash(value) {
   if (!value) return "-";
@@ -175,34 +175,75 @@ function buildAgentRegistration(profile, walletAddress) {
   };
 }
 
+function snapshotSignalEvents() {
+  return (LEADERBOARD_SNAPSHOT.events || []).map((event) => ({
+    ...event,
+    fromSnapshot: true,
+  }));
+}
+
+function mergeEvents(current, incoming) {
+  const byKey = new Map();
+  for (const event of [...current, ...incoming]) {
+    const key = `${event.txHash || "no-tx"}:${event.signalId}`;
+    byKey.set(key, event);
+  }
+  return [...byKey.values()].sort((a, b) => Number(b.blockNumber || 0) - Number(a.blockNumber || 0));
+}
+
+function eventFromParsedLog(parsed, receiptLog, blockTimestamp = null) {
+  return {
+    signalId: Number(parsed.args.signalId),
+    agent: parsed.args.agent,
+    matchId: parsed.args.matchId,
+    matchWindow: Number(parsed.args.matchWindow),
+    homeBps: Number(parsed.args.homeBps),
+    drawBps: Number(parsed.args.drawBps),
+    awayBps: Number(parsed.args.awayBps),
+    confidenceBps: Number(parsed.args.confidenceBps),
+    contextHash: parsed.args.contextHash,
+    evidenceHash: parsed.args.evidenceHash,
+    metadataHash: parsed.args.metadataHash,
+    metadataUri: parsed.args.metadataUri,
+    isRevision: parsed.args.isRevision,
+    txHash: receiptLog.transactionHash,
+    blockNumber: receiptLog.blockNumber,
+    blockTimestamp,
+    submittedAt: blockTimestamp ? new Date(blockTimestamp * 1000).toISOString() : new Date().toISOString(),
+  };
+}
+
+function signalEventsFromReceipt(receipt) {
+  return receipt.logs.flatMap((log) => {
+    try {
+      const parsed = readArena.interface.parseLog(log);
+      return parsed?.name === "SignalSubmitted" ? [eventFromParsedLog(parsed, log)] : [];
+    } catch {
+      return [];
+    }
+  });
+}
+
 async function querySignalEvents() {
   const latest = await publicProvider.getBlockNumber();
   const filter = readArena.filters.SignalSubmitted();
-  const logs = [];
-  for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latest; fromBlock += LOG_CHUNK_SIZE + 1) {
-    const toBlock = Math.min(fromBlock + LOG_CHUNK_SIZE, latest);
-    logs.push(...await readArena.queryFilter(filter, fromBlock, toBlock));
-  }
+  const fromBlock = Math.max(DEPLOY_BLOCK, latest - LOG_LOOKBACK_BLOCKS);
+  const logs = await readArena.queryFilter(filter, fromBlock, latest);
   const blockNumbers = [...new Set(logs.map((log) => log.blockNumber))];
   const blocks = await Promise.all(blockNumbers.map(async (blockNumber) => publicProvider.getBlock(blockNumber)));
   const timestamps = new Map(blocks.filter(Boolean).map((block) => [block.number, Number(block.timestamp)]));
-  return logs.map((log) => ({
+  return logs.map((log) => eventFromParsedLog(
+    readArena.interface.parseLog(log),
     log,
-    blockTimestamp: timestamps.get(log.blockNumber) ?? null,
-    submittedAt: timestamps.has(log.blockNumber)
-      ? new Date(timestamps.get(log.blockNumber) * 1000).toISOString()
-      : null,
-  }));
+    timestamps.get(log.blockNumber) ?? null,
+  ));
 }
 
 async function queryAgentEvents() {
   const latest = await publicProvider.getBlockNumber();
   const filter = readArena.filters.AgentRegistered();
-  const logs = [];
-  for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latest; fromBlock += LOG_CHUNK_SIZE + 1) {
-    const toBlock = Math.min(fromBlock + LOG_CHUNK_SIZE, latest);
-    logs.push(...await readArena.queryFilter(filter, fromBlock, toBlock));
-  }
+  const fromBlock = Math.max(DEPLOY_BLOCK, latest - LOG_LOOKBACK_BLOCKS);
+  const logs = await readArena.queryFilter(filter, fromBlock, latest);
   const registry = new Map();
   for (const log of logs) {
     const address = String(log.args.agent).toLowerCase();
@@ -232,14 +273,88 @@ function buildSignal(match, aiSignal) {
   });
 }
 
-function storeLocalSignalMetadata(record) {
+function readLocalSignalMetadata() {
   try {
-    const existing = JSON.parse(globalThis.localStorage?.getItem(SIGNAL_METADATA_KEY) || "[]");
-    const next = [record, ...(Array.isArray(existing) ? existing : [])].slice(0, 20);
-    globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify(next));
+    const parsed = JSON.parse(globalThis.localStorage?.getItem(SIGNAL_METADATA_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify([record]));
+    return [];
   }
+}
+
+function parseJsonOrEmpty(value) {
+  try {
+    return JSON.parse(value || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function upsertLocalSignalRecord(record) {
+  const existing = readLocalSignalMetadata();
+  const keyOf = (item) => `${item.agentId}:${item.matchId}:${item.generatedAt || ""}:${item.txHash || ""}`;
+  const next = [record, ...existing.filter((item) => keyOf(item) !== keyOf(record))].slice(0, 30);
+  globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify(next));
+  return next;
+}
+
+function localSignalRecord(signalPayload, match, profile, extra = {}) {
+  const raw = signalPayload.parsed || {};
+  return {
+    matchId: match.id,
+    title: match.title,
+    generatedAt: raw.clientTimestamp || new Date().toISOString(),
+    model: profile.model,
+    agentId: profile.agentId,
+    agentName: profile.name,
+    status: extra.status || "loaded",
+    txHash: extra.txHash || "",
+    signal: {
+      homeBps: signalPayload.commitment.homeBps,
+      drawBps: signalPayload.commitment.drawBps,
+      awayBps: signalPayload.commitment.awayBps,
+      confidenceBps: signalPayload.commitment.confidenceBps,
+    },
+    explanation: signalPayload.summary,
+    rawEvidence: raw,
+  };
+}
+
+function friendlyError(error) {
+  const message = String(error?.shortMessage || error?.message || error);
+  if (message.toLowerCase().includes("rate limit")) {
+    return "Mantle RPC is rate-limiting live event reads. Showing cached snapshot and any just-submitted wallet receipts; try Refresh later.";
+  }
+  if (message.includes("could not coalesce error")) {
+    return "Mantle RPC returned a low-level provider error. The app will keep cached data visible and retry on refresh.";
+  }
+  return message;
+}
+
+function vectorWinner(signal, match) {
+  const options = [
+    [match.home, signal.homeBps],
+    ["Draw", signal.drawBps],
+    [match.away, signal.awayBps],
+  ];
+  return options.sort((a, b) => b[1] - a[1])[0];
+}
+
+function exactScoreText(rawEvidence) {
+  const scores = rawEvidence?.exactScore || rawEvidence?.signals?.exactScore || [];
+  if (!Array.isArray(scores) || scores.length === 0) return "Score: not published";
+  return `Score: ${scores.slice(0, 2).map((item) => `${item.score}${item.bps ? ` (${formatPct(item.bps)})` : ""}`).join(", ")}`;
+}
+
+function firstGoalText(rawEvidence, match) {
+  const firstGoal = rawEvidence?.firstGoal || rawEvidence?.signals?.firstGoal;
+  if (!firstGoal) return "First goal: not published";
+  const [label, bps] = vectorWinner({
+    homeBps: Number(firstGoal.homeBps || 0),
+    drawBps: Number(firstGoal.noGoalBps || 0),
+    awayBps: Number(firstGoal.awayBps || 0),
+  }, { home: match.home, away: match.away });
+  return `First goal: ${label === "Draw" ? "No goal" : label} ${formatPct(bps)}`;
 }
 
 function normalizeCommitment(candidate) {
@@ -357,8 +472,10 @@ function App() {
   const [wallet, setWallet] = useState("");
   const [agent, setAgent] = useState(null);
   const [nextSignalId, setNextSignalId] = useState(null);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(() => snapshotSignalEvents());
   const [agentRegistry, setAgentRegistry] = useState(new Map());
+  const [localSignals, setLocalSignals] = useState(() => readLocalSignalMetadata());
+  const [readWarning, setReadWarning] = useState("");
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState("");
   const [txHash, setTxHash] = useState("");
@@ -397,49 +514,50 @@ function App() {
       setAgentCommitment(parsedSignal.commitment);
       setAgentSignalMode("agent deeplink");
       setAgentProfile(profile);
-      setStatus(`Loaded ${profile.name} (${profile.agentId}) from agent deeplink. Confirm once to register if needed and commit on Mantle.`);
+      setLocalSignals(upsertLocalSignalRecord(localSignalRecord(parsedSignal, parsedSignal.match, profile, { status: "loaded" })));
+      setStatus(`Loaded ${profile.name} (${profile.agentId}) from agent deeplink. Next: click the green confirmation button, then approve wallet prompts.`);
     } catch (error) {
       setAgentSignalError(`Agent deeplink could not be loaded: ${error.message}`);
     }
   }, []);
 
   const refreshArena = useCallback(async (address = wallet) => {
-    const [next, logs, registry] = await Promise.all([
+    const [nextResult, logsResult, registryResult] = await Promise.allSettled([
       readArena.nextSignalId(),
       querySignalEvents(),
       queryAgentEvents(),
     ]);
-    setNextSignalId(Number(next));
-    setAgentRegistry(registry);
-    setEvents(
-      logs
-        .slice()
-        .reverse()
-        .map(({ log, blockTimestamp, submittedAt }) => ({
-          signalId: Number(log.args.signalId),
-          agent: log.args.agent,
-          matchId: log.args.matchId,
-          homeBps: Number(log.args.homeBps),
-          drawBps: Number(log.args.drawBps),
-          awayBps: Number(log.args.awayBps),
-          confidenceBps: Number(log.args.confidenceBps),
-          isRevision: log.args.isRevision,
-          txHash: log.transactionHash,
-          blockNumber: log.blockNumber,
-          blockTimestamp,
-          submittedAt,
-        })),
-    );
+    const warnings = [];
+    if (nextResult.status === "fulfilled") {
+      setNextSignalId(Number(nextResult.value));
+    } else {
+      warnings.push(friendlyError(nextResult.reason));
+    }
+    if (logsResult.status === "fulfilled") {
+      setEvents((current) => mergeEvents(current, logsResult.value));
+    } else {
+      warnings.push(friendlyError(logsResult.reason));
+    }
+    if (registryResult.status === "fulfilled") {
+      setAgentRegistry(registryResult.value);
+    } else {
+      warnings.push(friendlyError(registryResult.reason));
+    }
+    setReadWarning([...new Set(warnings)].join(" "));
 
     if (address) {
-      const record = await readArena.getAgent(address);
-      setAgent(record);
+      try {
+        const record = await readArena.getAgent(address);
+        setAgent(record);
+      } catch (error) {
+        setReadWarning((current) => [current, friendlyError(error)].filter(Boolean).join(" "));
+      }
     }
   }, [wallet]);
 
   useEffect(() => {
     refreshArena().catch((error) => {
-      setStatus(`Arena read failed: ${error.message}`);
+      setReadWarning(friendlyError(error));
     });
   }, [refreshArena]);
 
@@ -505,7 +623,7 @@ function App() {
 
   async function submitSignal() {
     setBusy("signal");
-    setStatus("Sending structured AI signal to Mantle...");
+    setStatus("Approve the signal transaction in your wallet to commit this prediction on Mantle.");
     try {
       const { address, arena } = await getSignerContract();
       setWallet(address);
@@ -515,12 +633,14 @@ function App() {
       }
       const tx = await arena.submitSignal(signal);
       setTxHash(tx.hash);
-      setStatus("Signal submitted. Waiting for block confirmation...");
-      await tx.wait();
+      setStatus("Signal transaction sent. Waiting for Mantle confirmation...");
+      const receipt = await tx.wait();
+      const receiptEvents = signalEventsFromReceipt(receipt);
+      setEvents((current) => mergeEvents(current, receiptEvents));
       await refreshArena(address);
       setStatus("Signal committed on Mantle Sepolia.");
     } catch (error) {
-      setStatus(error.shortMessage || error.message);
+      setStatus(friendlyError(error));
     } finally {
       setBusy("");
     }
@@ -528,26 +648,46 @@ function App() {
 
   async function confirmAgentSignal() {
     setBusy("confirm");
-    setStatus("Preparing agent registration and signal commit...");
+    setStatus("Preparing wallet flow. You may need to approve two prompts: agent registration first, then signal commit.");
     try {
       const { address, arena } = await getSignerContract();
       setWallet(address);
       const record = await readArena.getAgent(address);
       if (!record.registered) {
         const registration = buildAgentRegistration(agentProfile, address);
-        setStatus(`Registering ${agentProfile.name} (${agentProfile.agentId})...`);
+        setStatus(`Step 1/2: approve agent registration for ${agentProfile.name} (${agentProfile.agentId}) in your wallet.`);
         const registerTx = await arena.registerAgent(registration.metadataHash, registration.metadataUri);
         setTxHash(registerTx.hash);
         await registerTx.wait();
+        setAgentRegistry((current) => new Map(current).set(address.toLowerCase(), {
+          metadataHash: registration.metadataHash,
+          metadataUri: registration.metadataUri,
+          agentId: agentProfile.agentId,
+        }));
+        setAgent({
+          registered: true,
+          metadataHash: registration.metadataHash,
+          metadataUri: registration.metadataUri,
+          registeredAt: 0,
+        });
       }
-      setStatus("Submitting agent signal to Mantle...");
+      setStatus(record.registered
+        ? "Approve the signal transaction in your wallet to commit this prediction on Mantle."
+        : "Step 2/2: registration confirmed. Now approve the signal transaction in your wallet.");
       const signalTx = await arena.submitSignal(signal);
       setTxHash(signalTx.hash);
-      await signalTx.wait();
+      const receipt = await signalTx.wait();
+      const receiptEvents = signalEventsFromReceipt(receipt);
+      setEvents((current) => mergeEvents(current, receiptEvents));
+      setLocalSignals(upsertLocalSignalRecord(localSignalRecord({
+        parsed: parseJsonOrEmpty(agentSignalText),
+        commitment: signal,
+        summary: agentCommitment ? "Committed agent-loaded signal." : "Committed baseline signal.",
+      }, selectedMatch, agentProfile, { status: "submitted", txHash: signalTx.hash })));
       await refreshArena(address);
       setStatus(`${agentProfile.name} signal committed on Mantle.`);
     } catch (error) {
-      setStatus(error.shortMessage || error.message);
+      setStatus(friendlyError(error));
     } finally {
       setBusy("");
     }
@@ -564,36 +704,62 @@ function App() {
       setAgentCommitment(commitment);
       setAgentSignalMode(signalPayload.mode);
       setAgentProfile(signalPayload.profile);
-      storeLocalSignalMetadata({
-        matchId: matched?.id ?? selectedMatch.id,
-        title: matched?.title ?? selectedMatch.title,
-        generatedAt: new Date().toISOString(),
-        model: signalPayload.profile.model,
-        agentId: signalPayload.profile.agentId,
-        signal: {
-          homeBps: commitment.homeBps,
-          drawBps: commitment.drawBps,
-          awayBps: commitment.awayBps,
-          confidenceBps: commitment.confidenceBps,
-        },
-        explanation: signalPayload.summary,
-        rawEvidence: parsed,
-      });
-      setStatus("Agent signal loaded. Review it, then commit the 1X2 proof on-chain with your wallet.");
+      setLocalSignals(upsertLocalSignalRecord(localSignalRecord(
+        signalPayload,
+        matched ?? selectedMatch,
+        signalPayload.profile,
+        { status: "loaded" },
+      )));
+      setStatus("Agent signal loaded. Next: click the green confirmation button, then approve wallet prompts.");
     } catch (error) {
       setAgentSignalError(error.message);
       setStatus("");
     }
   }
 
-  const selectedEvents = events.filter((event) => event.matchId === signal.matchId);
-  const agentReady = Boolean(agent?.registered);
-  const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
-  const leaderboard = buildLeaderboard(events);
   const agentLabel = useCallback((address) => {
     const profile = agentRegistry.get(String(address).toLowerCase());
     return profile?.agentId || shortHash(address);
   }, [agentRegistry]);
+  const selectedMatchHash = ethers.id(selectedMatch.id).toLowerCase();
+  const selectedEvents = events.filter((event) => String(event.matchId).toLowerCase() === selectedMatchHash);
+  const latestSelectedEvent = selectedEvents[0] || null;
+  const activeSignal = agentCommitment || latestSelectedEvent || selectedMatch;
+  const activeSignalLabel = agentCommitment
+    ? `${agentProfile.agentId} loaded signal`
+    : latestSelectedEvent
+      ? `${agentLabel(latestSelectedEvent.agent)} latest on-chain signal`
+      : "Baseline market reference";
+  const selectedLocalSignals = localSignals.filter((record) => record.matchId === selectedMatch.id);
+  const predictionRows = [
+    ...selectedLocalSignals.map((record) => ({
+      key: `local:${record.agentId}:${record.generatedAt}:${record.txHash || "draft"}`,
+      source: record.status === "submitted" ? "Submitted from this browser" : "Loaded in this browser",
+      agent: record.agentId,
+      signal: record.signal,
+      rawEvidence: record.rawEvidence,
+      txHash: record.txHash,
+    })),
+    ...selectedEvents.map((event) => ({
+      key: `chain:${event.txHash}:${event.signalId}`,
+      source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
+      agent: agentLabel(event.agent),
+      signal: event,
+      rawEvidence: null,
+      txHash: event.txHash,
+    })),
+  ].filter((row, index, list) => (
+    index === list.findIndex((candidate) => (
+      candidate.agent === row.agent
+      && Number(candidate.signal.homeBps) === Number(row.signal.homeBps)
+      && Number(candidate.signal.drawBps) === Number(row.signal.drawBps)
+      && Number(candidate.signal.awayBps) === Number(row.signal.awayBps)
+      && (candidate.txHash || "") === (row.txHash || "")
+    ))
+  ));
+  const agentReady = Boolean(agent?.registered);
+  const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
+  const leaderboard = buildLeaderboard(events);
 
   return (
     <main className="app">
@@ -709,25 +875,58 @@ function App() {
 
           <div className="field-view" aria-label="Match signal field visual">
             <div className="field-lines" />
+            <div className="signal-source-pill">{activeSignalLabel}</div>
             <div className="team-node home">
               <span>{selectedMatch.home}</span>
-              <strong>{formatPct(selectedMatch.homeBps)}</strong>
+              <strong>{formatPct(activeSignal.homeBps)}</strong>
             </div>
             <div className="team-node draw">
               <span>Draw pressure</span>
-              <strong>{formatPct(selectedMatch.drawBps)}</strong>
+              <strong>{formatPct(activeSignal.drawBps)}</strong>
             </div>
             <div className="team-node away">
               <span>{selectedMatch.away}</span>
-              <strong>{formatPct(selectedMatch.awayBps)}</strong>
+              <strong>{formatPct(activeSignal.awayBps)}</strong>
             </div>
           </div>
 
           <div className="prob-grid">
-            <Probability label={selectedMatch.home} value={selectedMatch.homeBps} tone="home" />
-            <Probability label="Draw" value={selectedMatch.drawBps} tone="draw" />
-            <Probability label={selectedMatch.away} value={selectedMatch.awayBps} tone="away" />
+            <Probability label={selectedMatch.home} value={activeSignal.homeBps} tone="home" />
+            <Probability label="Draw" value={activeSignal.drawBps} tone="draw" />
+            <Probability label={selectedMatch.away} value={activeSignal.awayBps} tone="away" />
           </div>
+
+          <section className="prediction-panel" aria-label="Agent predictions for selected match">
+            <div className="section-title">
+              <span><Bot size={18} /> Agent predictions</span>
+              <small>{predictionRows.length} visible</small>
+            </div>
+            {predictionRows.length === 0 ? (
+              <p className="empty">No agent prediction is loaded for this match yet. Ask an agent to open the action deeplink, then confirm the wallet transaction.</p>
+            ) : (
+              predictionRows.map((row) => {
+                const [winner, winnerBps] = vectorWinner(row.signal, selectedMatch);
+                return (
+                  <div className="prediction-card" key={row.key}>
+                    <div>
+                      <strong>{row.agent}</strong>
+                      <span>{row.source}</span>
+                    </div>
+                    <b>{winner} {formatPct(winnerBps)}</b>
+                    <p>
+                      1X2: {selectedMatch.home} {formatPct(row.signal.homeBps)} · Draw {formatPct(row.signal.drawBps)} · {selectedMatch.away} {formatPct(row.signal.awayBps)}
+                    </p>
+                    <small>{exactScoreText(row.rawEvidence)} · {firstGoalText(row.rawEvidence, selectedMatch)}</small>
+                    {row.txHash ? (
+                      <a href={`${EXPLORER}/tx/${row.txHash}`} target="_blank" rel="noreferrer">
+                        Open tx <ExternalLink size={12} />
+                      </a>
+                    ) : null}
+                  </div>
+                );
+              })
+            )}
+          </section>
         </section>
 
         <aside className="proof-desk">
@@ -751,7 +950,7 @@ function App() {
                 <span>Agent action</span>
                 <code>Read /agent-action.json</code>
                 <code>Open #agentSignal=&lt;base64url-json&gt;</code>
-                <span>Fallback helper: {AGENT_API_BASE}/api/matches</span>
+                <span>Then use the green button below; approve wallet prompts to write on Mantle.</span>
               </div>
               <details className="debug-box">
                 <summary>Advanced: paste or inspect signal JSON</summary>
@@ -790,7 +989,7 @@ function App() {
             <div className="button-row">
               <button onClick={confirmAgentSignal} disabled={busy === "confirm"} className="primary">
                 {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
-                Confirm agent signal on Mantle
+                Confirm in wallet and submit to Mantle
               </button>
               <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
                 {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
@@ -813,6 +1012,13 @@ function App() {
               )}
             </div>
           )}
+
+          {readWarning ? (
+            <div className="notice muted-notice">
+              <span>{readWarning}</span>
+              <button onClick={() => refreshArena(wallet)} className="link-button">Refresh events</button>
+            </div>
+          ) : null}
 
           <section className="mini-panel timeline-panel">
             <div className="section-title">

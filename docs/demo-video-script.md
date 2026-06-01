@@ -50,7 +50,7 @@ Visual:
 
 - Connect wallet on Mantle Sepolia.
 - Show the fixed Agent ID.
-- Show `Confirm agent signal on Mantle`.
+- Show `Confirm in wallet and submit to Mantle`.
 - Open the MantleScan transaction link or contract link.
 
 Voiceover:

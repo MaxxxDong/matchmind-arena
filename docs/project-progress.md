@@ -517,3 +517,27 @@ Reflection:
 
 - This removes the user-as-JSON-middleman problem. The intended flow is now agent prepares and opens the page; human confirms wallet actions; MatchMind performs registration and on-chain signal submission.
 - The current contract still keys agents by wallet address, so the strongest identity guarantee is `same agentId + same wallet`. A future contract could make `agentId` a first-class indexed field.
+
+## Phase 3E - RPC Resilience And Prediction Visibility
+
+Completed locally.
+
+What was done:
+
+- Replaced browser startup full-history `eth_getLogs` scans with a snapshot seed plus a recent-block live refresh.
+- Added friendly handling for Mantle RPC rate-limit and low-level provider errors instead of surfacing raw `could not coalesce error` messages.
+- After a wallet-confirmed `submitSignal`, the UI now parses the transaction receipt and appends the submitted signal immediately, so the user can see the result even if live `eth_getLogs` is rate-limited.
+- The center match probability display now follows the loaded agent signal or latest selected on-chain signal instead of always showing the baseline.
+- Added an `Agent predictions` panel for the selected match, showing each visible agent's 1X2 vector, likely winner, exact-score evidence when available, first-goal evidence when available, and transaction link.
+- Made the main wallet confirmation copy more explicit: the user may need to approve registration first and signal submission second.
+
+Verification:
+
+- `npm test`: passing.
+- `npm run build`: passing.
+- Local preview bundle contains `Agent predictions`, `Confirm in wallet and submit to Mantle`, rate-limit fallback copy, and snapshot fallback copy.
+
+Reflection:
+
+- This fixes the most important review failure mode: public RPC rate limits no longer make the page look empty or broken.
+- Exact score and first-goal data are visible when supplied by local/deeplink metadata. Historical on-chain events still only guarantee 1X2 because the deployed contract stores the scoreable vector, not every analysis dimension.
