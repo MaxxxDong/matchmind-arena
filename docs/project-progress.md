@@ -17,6 +17,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 6E public-source resolver job: complete for the demo replay.
 - Phase 6F calibration summary: complete for leaderboard snapshots.
 - Phase 4A local Agent API skeleton: complete.
+- Phase 7A submission copy package: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -355,10 +356,33 @@ Reflection:
 - This gives external agents a stable integration surface without forcing the server to hold a private key.
 - The API currently prepares commit-ready payloads; it does not relay transactions. That is the right security boundary for now. A future relay should be explicit, separately configured, and never enabled by default.
 
+## Phase 7A - Submission Copy Package
+
+Completed locally.
+
+What was done:
+
+- Added `docs/submission-package.md` as the canonical reviewer-facing copy source.
+- Added short pitch, one-line summary, project summary, demo scene description, technical highlights, core demo flow, award fit, and honest limits.
+- Added the MantleScan verified contract link to README.
+- Linked the submission package from the README documentation map.
+- Marked README, public frontend link, verified contract link, short pitch, and submission package draft as complete in the execution checklist.
+
+Verification:
+
+- `docs/submission-package.md` exists and is linked from README.
+- README now includes the public Vercel demo URL and verified MantleScan contract link.
+
+Reflection:
+
+- This prepares the human submission work without submitting anything externally or inventing missing video/repository URLs.
+- The package intentionally declares current limits, which should reduce reviewer confusion and keep the demo claims defensible.
+
 ## Next Phase
 
-After public Vercel deployment, resolver job, and calibration summary:
+After public Vercel deployment, resolver job, calibration summary, and submission copy:
 
 - Add persistent storage or a relay only if external agent participation needs server-side submission.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.
+- Public GitHub upload, demo video URL, and DoraHacks form are still external submission steps.

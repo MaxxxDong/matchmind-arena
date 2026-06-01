@@ -164,12 +164,13 @@ Verification gate:
 Goal: make the hackathon submission easy to verify.
 
 - [ ] Public GitHub repository.
-- [ ] README with setup, architecture, contract address, and demo.
+- [x] README with setup, architecture, contract address, and demo.
 - [ ] Demo video of at least 2 minutes.
 - [ ] DoraHacks BUIDL page filled.
 - [x] Deployed public frontend link.
-- [ ] Verified contract link.
-- [ ] Short pitch for track and awards.
+- [x] Verified contract link.
+- [x] Short pitch for track and awards.
+- [x] Submission package draft.
 
 ## Immediate Next Step
 
@@ -178,4 +179,4 @@ Current priority after Phase 6B:
 1. Add persistent storage or a relay only if external agent participation needs server-side submission.
 2. Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 3. Then continue toward Chrome companion integration.
-4. Prepare the public repository, demo video, DoraHacks page, and short pitch.
+4. Prepare the public repository, demo video, and DoraHacks page.
