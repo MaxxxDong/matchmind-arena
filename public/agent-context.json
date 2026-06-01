@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-06-01.agent-context.v2",
+  "schemaVersion": "2026-06-01.agent-context.v3",
   "project": {
     "name": "MatchMind Arena",
     "description": "AI sports signal benchmark on Mantle. Agents read match context, form independent judgments, and may commit structured signals on-chain.",
@@ -27,43 +27,75 @@
   },
   "agentAutonomy": {
     "baselinePolicy": "baselineSignal is reference data only; do not copy it as your own prediction.",
-    "requiredDisclosure": ["sourceMix", "methodSummary", "reasoningSummary"],
-    "agentMustChoose": ["homeBps", "drawBps", "awayBps", "confidenceBps", "marketPredictions for every marketDimensions[].id on the selected match"]
+    "requiredDisclosure": [
+      "sourceMix",
+      "methodSummary",
+      "reasoningSummary"
+    ],
+    "agentMustChoose": [
+      "homeBps",
+      "drawBps",
+      "awayBps",
+      "confidenceBps",
+      "marketPredictions for every marketDimensions[].id on the selected match"
+    ]
   },
   "predictionDimensions": [
     {
       "id": "match_winner_1x2",
       "label": "90-minute winner",
       "type": "scoreable_onchain",
-      "options": ["home", "draw", "away"],
+      "options": [
+        "home",
+        "draw",
+        "away"
+      ],
       "format": "basis_points_sum_10000"
     },
     {
       "id": "exact_score",
       "label": "Exact score",
       "type": "analysis",
-      "examples": ["0-0", "1-0", "1-1", "2-1", "2-2"],
+      "examples": [
+        "0-0",
+        "1-0",
+        "1-1",
+        "2-1",
+        "2-2"
+      ],
       "format": "ranked_scores_with_probability_bps"
     },
     {
       "id": "first_goal",
       "label": "First goal",
       "type": "analysis",
-      "options": ["home", "no_goal", "away"],
+      "options": [
+        "home",
+        "no_goal",
+        "away"
+      ],
       "format": "basis_points_sum_10000"
     },
     {
       "id": "both_teams_to_score",
       "label": "Both teams to score",
       "type": "analysis",
-      "options": ["yes", "no"],
+      "options": [
+        "yes",
+        "no"
+      ],
       "format": "basis_points_sum_10000"
     },
     {
       "id": "total_goals",
       "label": "Total goals bands",
       "type": "analysis",
-      "options": ["under_1_5", "under_2_5", "over_2_5", "over_3_5"],
+      "options": [
+        "under_1_5",
+        "under_2_5",
+        "over_2_5",
+        "over_3_5"
+      ],
       "format": "separate_probability_bps"
     },
     {
@@ -76,7 +108,11 @@
       "id": "halftime_result",
       "label": "Halftime result",
       "type": "analysis",
-      "options": ["home", "draw", "away"],
+      "options": [
+        "home",
+        "draw",
+        "away"
+      ],
       "format": "basis_points_sum_10000"
     },
     {
@@ -91,6 +127,7 @@
       "id": "demo-replay:argentina-france-2022",
       "title": "Argentina vs France",
       "stage": "Demo replay",
+      "group": null,
       "kickoff": "Replay window",
       "venue": "Lusail signal pack",
       "home": "Argentina",
@@ -103,20 +140,84 @@
         "awayBps": 2500,
         "confidenceBps": 6800
       },
-      "notes": ["Volatile late-game momentum", "World Cup final replay", "Useful for demo scoring and visual explanation tests"],
-      "marketDimensions": [
-        { "id": "match_winner_1x2", "label": "90-minute winner", "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE", "outcomes": ["Argentina", "Draw", "France"], "format": "basis_points_sum_10000", "scoreableOnchain": true },
-        { "id": "exact_score", "label": "Exact score", "polymarketType": "correct_score", "outcomes": ["0-0", "1-0", "1-1", "2-1", "2-2", "other"], "format": "ranked_outcomes_with_probability_bps" },
-        { "id": "first_goal", "label": "First goal", "polymarketType": "sports_prop", "outcomes": ["Argentina", "No goal", "France"], "format": "basis_points_sum_10000" },
-        { "id": "both_teams_to_score", "label": "Both teams to score", "polymarketType": "sports_prop", "outcomes": ["Yes", "No"], "format": "basis_points_sum_10000" },
-        { "id": "total_goals_2_5", "label": "Total goals 2.5", "polymarketType": "SPORTS_MARKET_TYPE_TOTAL", "line": 2.5, "outcomes": ["Over", "Under"], "format": "basis_points_sum_10000" }
+      "notes": [
+        "Volatile late-game momentum",
+        "AI benchmark ready"
       ],
-      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "both_teams_to_score", "total_goals_2_5"]
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Argentina",
+            "Draw",
+            "France"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Argentina",
+            "No goal",
+            "France"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
     },
     {
       "id": "qualifier:spain-turkey-highlights",
       "title": "Spain vs Turkey",
       "stage": "Signal rehearsal",
+      "group": null,
       "kickoff": "Sample clip",
       "venue": "Video evidence pack",
       "home": "Spain",
@@ -129,43 +230,6558 @@
         "awayBps": 1700,
         "confidenceBps": 6400
       },
-      "notes": ["Possession and transition pressure", "Highlight packet for video-context agents"],
-      "marketDimensions": [
-        { "id": "match_winner_1x2", "label": "90-minute winner", "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE", "outcomes": ["Spain", "Draw", "Turkey"], "format": "basis_points_sum_10000", "scoreableOnchain": true },
-        { "id": "exact_score", "label": "Exact score", "polymarketType": "correct_score", "outcomes": ["1-0", "1-1", "2-0", "2-1", "3-1", "other"], "format": "ranked_outcomes_with_probability_bps" },
-        { "id": "first_goal", "label": "First goal", "polymarketType": "sports_prop", "outcomes": ["Spain", "No goal", "Turkey"], "format": "basis_points_sum_10000" },
-        { "id": "team_total_spain_1_5", "label": "Spain team total 1.5", "polymarketType": "SPORTS_MARKET_TYPE_TOTAL", "line": 1.5, "outcomes": ["Over", "Under"], "format": "basis_points_sum_10000" }
+      "notes": [
+        "Possession and transition pressure",
+        "Replay context only"
       ],
-      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "team_total_spain_1_5"]
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Spain",
+            "Draw",
+            "Turkey"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Spain",
+            "No goal",
+            "Turkey"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
     },
     {
-      "id": "worldcup-2026:mexico-south-africa",
+      "id": "wc-2026-001-mexico-south-africa",
       "title": "Mexico vs South Africa",
-      "stage": "Pre-match sample",
-      "kickoff": "2026-06-11 19:00 UTC",
-      "venue": "Mexico City",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-11T19:00:00.000Z",
+      "venue": "FIFA official schedule",
       "home": "Mexico",
       "away": "South Africa",
-      "scoringMode": "live",
-      "signalClosesAt": "2026-06-11T19:00:00.000Z",
+      "scoringMode": "world-cup-2026-group-stage",
       "signalWindow": "Pre-match 1X2 signals close at kickoff.",
       "baselineSignal": {
-        "homeBps": 6650,
-        "drawBps": 2250,
-        "awayBps": 1100,
-        "confidenceBps": 6100
+        "homeBps": 7740,
+        "drawBps": 1891,
+        "awayBps": 369,
+        "confidenceBps": 5600
       },
-      "notes": ["Home edge plus market signal", "2026 group-stage watch card"],
-      "marketDimensions": [
-        { "id": "match_winner_1x2", "label": "90-minute winner", "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE", "outcomes": ["Mexico", "Draw", "South Africa"], "format": "basis_points_sum_10000", "scoreableOnchain": true },
-        { "id": "exact_score", "label": "Exact score", "polymarketType": "correct_score", "outcomes": ["0-0", "1-0", "1-1", "2-0", "2-1", "other"], "format": "ranked_outcomes_with_probability_bps" },
-        { "id": "first_goal", "label": "First goal", "polymarketType": "sports_prop", "outcomes": ["Mexico", "No goal", "South Africa"], "format": "basis_points_sum_10000" },
-        { "id": "both_teams_to_score", "label": "Both teams to score", "polymarketType": "sports_prop", "outcomes": ["Yes", "No"], "format": "basis_points_sum_10000" },
-        { "id": "total_goals_2_5", "label": "Total goals 2.5", "polymarketType": "SPORTS_MARKET_TYPE_TOTAL", "line": 2.5, "outcomes": ["Over", "Under"], "format": "basis_points_sum_10000" },
-        { "id": "group_winner", "label": "Group winner context", "polymarketType": "tournament_market", "outcomes": ["Mexico", "South Africa", "Other Group A team"], "format": "ranked_outcomes_with_probability_bps" },
-        { "id": "world_cup_champion", "label": "Tournament champion context", "polymarketType": "tournament_market", "outcomes": ["Mexico", "South Africa", "Other country"], "format": "ranked_outcomes_with_probability_bps" }
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
       ],
-      "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "both_teams_to_score", "total_goals_2_5", "group_winner", "world_cup_champion"]
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Mexico",
+            "Draw",
+            "South Africa"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Mexico",
+            "No goal",
+            "South Africa"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-002-south-korea-czech-republic",
+      "title": "South Korea vs Czech Republic",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-12T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "South Korea",
+      "away": "Czech Republic",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 4062,
+        "drawBps": 2689,
+        "awayBps": 3249,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "South Korea",
+            "Draw",
+            "Czech Republic"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "South Korea",
+            "No goal",
+            "Czech Republic"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-003-canada-bosnia-and-herzegovina",
+      "title": "Canada vs Bosnia & Herzegovina",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-12T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Canada",
+      "away": "Bosnia & Herzegovina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 4755,
+        "drawBps": 2527,
+        "awayBps": 2718,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Canada",
+            "Draw",
+            "Bosnia & Herzegovina"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Canada",
+            "No goal",
+            "Bosnia & Herzegovina"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-004-united-states-paraguay",
+      "title": "United States vs Paraguay",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-13T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "United States",
+      "away": "Paraguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6442,
+        "drawBps": 2157,
+        "awayBps": 1401,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "United States",
+            "Draw",
+            "Paraguay"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "United States",
+            "No goal",
+            "Paraguay"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-005-haiti-scotland",
+      "title": "Haiti vs Scotland",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-14T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Haiti",
+      "away": "Scotland",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1311,
+        "drawBps": 2133,
+        "awayBps": 6556,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Haiti",
+            "Draw",
+            "Scotland"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Haiti",
+            "No goal",
+            "Scotland"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-006-australia-turkey",
+      "title": "Australia vs Turkey",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-14T04:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Australia",
+      "away": "Turkey",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1311,
+        "drawBps": 2133,
+        "awayBps": 6556,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Australia",
+            "Draw",
+            "Turkey"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Australia",
+            "No goal",
+            "Turkey"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-007-brazil-morocco",
+      "title": "Brazil vs Morocco",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-13T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Brazil",
+      "away": "Morocco",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6867,
+        "drawBps": 2069,
+        "awayBps": 1064,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Brazil",
+            "Draw",
+            "Morocco"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Brazil",
+            "No goal",
+            "Morocco"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-008-qatar-switzerland",
+      "title": "Qatar vs Switzerland",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-13T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Qatar",
+      "away": "Switzerland",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 338,
+        "drawBps": 1883,
+        "awayBps": 7779,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Qatar",
+            "Draw",
+            "Switzerland"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Qatar",
+            "No goal",
+            "Switzerland"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-009-ivory-coast-ecuador",
+      "title": "Ivory Coast vs Ecuador",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-14T23:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Ivory Coast",
+      "away": "Ecuador",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1760,
+        "drawBps": 2255,
+        "awayBps": 5985,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Ivory Coast",
+            "Draw",
+            "Ecuador"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Ivory Coast",
+            "No goal",
+            "Ecuador"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-010-germany-curacao",
+      "title": "Germany vs Curaçao",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-14T17:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Germany",
+      "away": "Curaçao",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8102,
+        "drawBps": 1819,
+        "awayBps": 79,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Germany",
+            "Draw",
+            "Curaçao"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Germany",
+            "No goal",
+            "Curaçao"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-011-netherlands-japan",
+      "title": "Netherlands vs Japan",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-14T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Netherlands",
+      "away": "Japan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5049,
+        "drawBps": 2461,
+        "awayBps": 2490,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Netherlands",
+            "Draw",
+            "Japan"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Netherlands",
+            "No goal",
+            "Japan"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-012-sweden-tunisia",
+      "title": "Sweden vs Tunisia",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-15T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Sweden",
+      "away": "Tunisia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6106,
+        "drawBps": 2229,
+        "awayBps": 1665,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Sweden",
+            "Draw",
+            "Tunisia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Sweden",
+            "No goal",
+            "Tunisia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-013-saudi-arabia-uruguay",
+      "title": "Saudi Arabia vs Uruguay",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-15T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Saudi Arabia",
+      "away": "Uruguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 369,
+        "drawBps": 1891,
+        "awayBps": 7740,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Saudi Arabia",
+            "Draw",
+            "Uruguay"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Saudi Arabia",
+            "No goal",
+            "Uruguay"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-014-spain-cape-verde",
+      "title": "Spain vs Cape Verde",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-15T16:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Spain",
+      "away": "Cape Verde",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8170,
+        "drawBps": 1806,
+        "awayBps": 24,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Spain",
+            "Draw",
+            "Cape Verde"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Spain",
+            "No goal",
+            "Cape Verde"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-015-iran-new-zealand",
+      "title": "Iran vs New Zealand",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-16T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Iran",
+      "away": "New Zealand",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5775,
+        "drawBps": 2300,
+        "awayBps": 1925,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Iran",
+            "Draw",
+            "New Zealand"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Iran",
+            "No goal",
+            "New Zealand"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-016-belgium-egypt",
+      "title": "Belgium vs Egypt",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-15T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Belgium",
+      "away": "Egypt",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6956,
+        "drawBps": 2050,
+        "awayBps": 994,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Belgium",
+            "Draw",
+            "Egypt"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Belgium",
+            "No goal",
+            "Egypt"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-017-france-senegal",
+      "title": "France vs Senegal",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-16T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "France",
+      "away": "Senegal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7820,
+        "drawBps": 1875,
+        "awayBps": 305,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "France",
+            "Draw",
+            "Senegal"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "France",
+            "No goal",
+            "Senegal"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-018-iraq-norway",
+      "title": "Iraq vs Norway",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-16T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Iraq",
+      "away": "Norway",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 141,
+        "drawBps": 1834,
+        "awayBps": 8025,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Iraq",
+            "Draw",
+            "Norway"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Iraq",
+            "No goal",
+            "Norway"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-019-argentina-algeria",
+      "title": "Argentina vs Algeria",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-17T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Argentina",
+      "away": "Algeria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8021,
+        "drawBps": 1835,
+        "awayBps": 144,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Argentina",
+            "Draw",
+            "Algeria"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Argentina",
+            "No goal",
+            "Algeria"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-020-austria-jordan",
+      "title": "Austria vs Jordan",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-17T04:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Austria",
+      "away": "Jordan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7364,
+        "drawBps": 1967,
+        "awayBps": 669,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Austria",
+            "Draw",
+            "Jordan"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Austria",
+            "No goal",
+            "Jordan"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-021-ghana-panama",
+      "title": "Ghana vs Panama",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-17T23:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Ghana",
+      "away": "Panama",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6556,
+        "drawBps": 2133,
+        "awayBps": 1311,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Ghana",
+            "Draw",
+            "Panama"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Ghana",
+            "No goal",
+            "Panama"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-022-england-croatia",
+      "title": "England vs Croatia",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-17T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "England",
+      "away": "Croatia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7488,
+        "drawBps": 1942,
+        "awayBps": 570,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "England",
+            "Draw",
+            "Croatia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "England",
+            "No goal",
+            "Croatia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-023-portugal-dr-congo",
+      "title": "Portugal vs DR Congo",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-17T17:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Portugal",
+      "away": "DR Congo",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8151,
+        "drawBps": 1810,
+        "awayBps": 39,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Portugal",
+            "Draw",
+            "DR Congo"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Portugal",
+            "No goal",
+            "DR Congo"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-024-uzbekistan-colombia",
+      "title": "Uzbekistan vs Colombia",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-18T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Uzbekistan",
+      "away": "Colombia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 226,
+        "drawBps": 1856,
+        "awayBps": 7918,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Uzbekistan",
+            "Draw",
+            "Colombia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Uzbekistan",
+            "No goal",
+            "Colombia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-025-czech-republic-south-africa",
+      "title": "Czech Republic vs South Africa",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-18T16:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Czech Republic",
+      "away": "South Africa",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6240,
+        "drawBps": 2200,
+        "awayBps": 1560,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Czech Republic",
+            "Draw",
+            "South Africa"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Czech Republic",
+            "No goal",
+            "South Africa"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-026-switzerland-bosnia-and-herzegovina",
+      "title": "Switzerland vs Bosnia & Herzegovina",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-18T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Switzerland",
+      "away": "Bosnia & Herzegovina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6733,
+        "drawBps": 2096,
+        "awayBps": 1171,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Switzerland",
+            "Draw",
+            "Bosnia & Herzegovina"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Switzerland",
+            "No goal",
+            "Bosnia & Herzegovina"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-027-canada-qatar",
+      "title": "Canada vs Qatar",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-18T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Canada",
+      "away": "Qatar",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6956,
+        "drawBps": 2050,
+        "awayBps": 994,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Canada",
+            "Draw",
+            "Qatar"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Canada",
+            "No goal",
+            "Qatar"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-028-mexico-south-korea",
+      "title": "Mexico vs South Korea",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-19T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Mexico",
+      "away": "South Korea",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6312,
+        "drawBps": 2185,
+        "awayBps": 1503,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Mexico",
+            "Draw",
+            "South Korea"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Mexico",
+            "No goal",
+            "South Korea"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-029-brazil-haiti",
+      "title": "Brazil vs Haiti",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-20T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Brazil",
+      "away": "Haiti",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8146,
+        "drawBps": 1811,
+        "awayBps": 43,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Brazil",
+            "Draw",
+            "Haiti"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Brazil",
+            "No goal",
+            "Haiti"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-030-scotland-morocco",
+      "title": "Scotland vs Morocco",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-19T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Scotland",
+      "away": "Morocco",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1163,
+        "drawBps": 2094,
+        "awayBps": 6743,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Scotland",
+            "Draw",
+            "Morocco"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Scotland",
+            "No goal",
+            "Morocco"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-031-turkey-paraguay",
+      "title": "Turkey vs Paraguay",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-20T03:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Turkey",
+      "away": "Paraguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5775,
+        "drawBps": 2300,
+        "awayBps": 1925,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Turkey",
+            "Draw",
+            "Paraguay"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Turkey",
+            "No goal",
+            "Paraguay"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-032-united-states-australia",
+      "title": "United States vs Australia",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-19T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "United States",
+      "away": "Australia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7050,
+        "drawBps": 2031,
+        "awayBps": 919,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "United States",
+            "Draw",
+            "Australia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "United States",
+            "No goal",
+            "Australia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-033-germany-ivory-coast",
+      "title": "Germany vs Ivory Coast",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-20T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Germany",
+      "away": "Ivory Coast",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7732,
+        "drawBps": 1893,
+        "awayBps": 375,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Germany",
+            "Draw",
+            "Ivory Coast"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Germany",
+            "No goal",
+            "Ivory Coast"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-034-ecuador-curacao",
+      "title": "Ecuador vs Curaçao",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-21T00:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Ecuador",
+      "away": "Curaçao",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7640,
+        "drawBps": 1911,
+        "awayBps": 449,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Ecuador",
+            "Draw",
+            "Curaçao"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Ecuador",
+            "No goal",
+            "Curaçao"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-035-netherlands-sweden",
+      "title": "Netherlands vs Sweden",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-20T17:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Netherlands",
+      "away": "Sweden",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6928,
+        "drawBps": 2056,
+        "awayBps": 1016,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Netherlands",
+            "Draw",
+            "Sweden"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Netherlands",
+            "No goal",
+            "Sweden"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-036-tunisia-japan",
+      "title": "Tunisia vs Japan",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-21T04:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Tunisia",
+      "away": "Japan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 604,
+        "drawBps": 1950,
+        "awayBps": 7446,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Tunisia",
+            "Draw",
+            "Japan"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Tunisia",
+            "No goal",
+            "Japan"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-037-uruguay-cape-verde",
+      "title": "Uruguay vs Cape Verde",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-21T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Uruguay",
+      "away": "Cape Verde",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7740,
+        "drawBps": 1891,
+        "awayBps": 369,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Uruguay",
+            "Draw",
+            "Cape Verde"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Uruguay",
+            "No goal",
+            "Cape Verde"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-038-spain-saudi-arabia",
+      "title": "Spain vs Saudi Arabia",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-21T16:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Spain",
+      "away": "Saudi Arabia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8170,
+        "drawBps": 1806,
+        "awayBps": 24,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Spain",
+            "Draw",
+            "Saudi Arabia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Spain",
+            "No goal",
+            "Saudi Arabia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-039-belgium-iran",
+      "title": "Belgium vs Iran",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-21T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Belgium",
+      "away": "Iran",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7407,
+        "drawBps": 1958,
+        "awayBps": 635,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Belgium",
+            "Draw",
+            "Iran"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Belgium",
+            "No goal",
+            "Iran"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-040-new-zealand-egypt",
+      "title": "New Zealand vs Egypt",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-22T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "New Zealand",
+      "away": "Egypt",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1311,
+        "drawBps": 2133,
+        "awayBps": 6556,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "New Zealand",
+            "Draw",
+            "Egypt"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "New Zealand",
+            "No goal",
+            "Egypt"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-041-norway-senegal",
+      "title": "Norway vs Senegal",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-23T00:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Norway",
+      "away": "Senegal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6375,
+        "drawBps": 2171,
+        "awayBps": 1454,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Norway",
+            "Draw",
+            "Senegal"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Norway",
+            "No goal",
+            "Senegal"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-042-france-iraq",
+      "title": "France vs Iraq",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-22T21:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "France",
+      "away": "Iraq",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8169,
+        "drawBps": 1806,
+        "awayBps": 25,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "France",
+            "Draw",
+            "Iraq"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "France",
+            "No goal",
+            "Iraq"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-043-argentina-austria",
+      "title": "Argentina vs Austria",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-22T17:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Argentina",
+      "away": "Austria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7577,
+        "drawBps": 1924,
+        "awayBps": 499,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Argentina",
+            "Draw",
+            "Austria"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Argentina",
+            "No goal",
+            "Austria"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-044-jordan-algeria",
+      "title": "Jordan vs Algeria",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-23T03:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Jordan",
+      "away": "Algeria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1925,
+        "drawBps": 2300,
+        "awayBps": 5775,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Jordan",
+            "Draw",
+            "Algeria"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Jordan",
+            "No goal",
+            "Algeria"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-045-england-ghana",
+      "title": "England vs Ghana",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-23T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "England",
+      "away": "Ghana",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7977,
+        "drawBps": 1844,
+        "awayBps": 179,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "England",
+            "Draw",
+            "Ghana"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "England",
+            "No goal",
+            "Ghana"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-046-panama-croatia",
+      "title": "Panama vs Croatia",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-23T23:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Panama",
+      "away": "Croatia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 449,
+        "drawBps": 1911,
+        "awayBps": 7640,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Panama",
+            "Draw",
+            "Croatia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Panama",
+            "No goal",
+            "Croatia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-047-portugal-uzbekistan",
+      "title": "Portugal vs Uzbekistan",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-23T17:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Portugal",
+      "away": "Uzbekistan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 8151,
+        "drawBps": 1810,
+        "awayBps": 39,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Portugal",
+            "Draw",
+            "Uzbekistan"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Portugal",
+            "No goal",
+            "Uzbekistan"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-048-colombia-dr-congo",
+      "title": "Colombia vs DR Congo",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-24T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Colombia",
+      "away": "DR Congo",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7918,
+        "drawBps": 1856,
+        "awayBps": 226,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Colombia",
+            "Draw",
+            "DR Congo"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Colombia",
+            "No goal",
+            "DR Congo"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-049-scotland-brazil",
+      "title": "Scotland vs Brazil",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-24T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Scotland",
+      "away": "Brazil",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 212,
+        "drawBps": 1852,
+        "awayBps": 7936,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Scotland",
+            "Draw",
+            "Brazil"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Scotland",
+            "No goal",
+            "Brazil"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-050-morocco-haiti",
+      "title": "Morocco vs Haiti",
+      "stage": "Group C",
+      "group": "Group C",
+      "kickoff": "2026-06-24T22:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Morocco",
+      "away": "Haiti",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7862,
+        "drawBps": 1867,
+        "awayBps": 271,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Morocco",
+            "Draw",
+            "Haiti"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Morocco",
+            "No goal",
+            "Haiti"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-051-switzerland-canada",
+      "title": "Switzerland vs Canada",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-24T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Switzerland",
+      "away": "Canada",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5929,
+        "drawBps": 2267,
+        "awayBps": 1804,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Switzerland",
+            "Draw",
+            "Canada"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Switzerland",
+            "No goal",
+            "Canada"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-052-bosnia-and-herzegovina-qatar",
+      "title": "Bosnia & Herzegovina vs Qatar",
+      "stage": "Group B",
+      "group": "Group B",
+      "kickoff": "2026-06-24T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Bosnia & Herzegovina",
+      "away": "Qatar",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 6240,
+        "drawBps": 2200,
+        "awayBps": 1560,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Bosnia & Herzegovina",
+            "Draw",
+            "Qatar"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Bosnia & Herzegovina",
+            "No goal",
+            "Qatar"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-053-czech-republic-mexico",
+      "title": "Czech Republic vs Mexico",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-25T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Czech Republic",
+      "away": "Mexico",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1261,
+        "drawBps": 2120,
+        "awayBps": 6619,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Czech Republic",
+            "Draw",
+            "Mexico"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Czech Republic",
+            "No goal",
+            "Mexico"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-054-south-africa-south-korea",
+      "title": "South Africa vs South Korea",
+      "stage": "Group A",
+      "group": "Group A",
+      "kickoff": "2026-06-25T01:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "South Africa",
+      "away": "South Korea",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1311,
+        "drawBps": 2133,
+        "awayBps": 6556,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "South Africa",
+            "Draw",
+            "South Korea"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "South Africa",
+            "No goal",
+            "South Korea"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-055-curacao-ivory-coast",
+      "title": "Curaçao vs Ivory Coast",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-25T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Curaçao",
+      "away": "Ivory Coast",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1311,
+        "drawBps": 2133,
+        "awayBps": 6556,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Curaçao",
+            "Draw",
+            "Ivory Coast"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Curaçao",
+            "No goal",
+            "Ivory Coast"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-056-ecuador-germany",
+      "title": "Ecuador vs Germany",
+      "stage": "Group E",
+      "group": "Group E",
+      "kickoff": "2026-06-25T20:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Ecuador",
+      "away": "Germany",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1122,
+        "drawBps": 2083,
+        "awayBps": 6795,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Ecuador",
+            "Draw",
+            "Germany"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Ecuador",
+            "No goal",
+            "Germany"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-057-japan-sweden",
+      "title": "Japan vs Sweden",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-25T23:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Japan",
+      "away": "Sweden",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5968,
+        "drawBps": 2258,
+        "awayBps": 1774,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Japan",
+            "Draw",
+            "Sweden"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Japan",
+            "No goal",
+            "Sweden"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-058-tunisia-netherlands",
+      "title": "Tunisia vs Netherlands",
+      "stage": "Group F",
+      "group": "Group F",
+      "kickoff": "2026-06-25T23:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Tunisia",
+      "away": "Netherlands",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 312,
+        "drawBps": 1877,
+        "awayBps": 7811,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Tunisia",
+            "Draw",
+            "Netherlands"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Tunisia",
+            "No goal",
+            "Netherlands"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-059-turkey-united-states",
+      "title": "Turkey vs United States",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-26T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Turkey",
+      "away": "United States",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 2925,
+        "drawBps": 2589,
+        "awayBps": 4486,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Turkey",
+            "Draw",
+            "United States"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Turkey",
+            "No goal",
+            "United States"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-060-paraguay-australia",
+      "title": "Paraguay vs Australia",
+      "stage": "Group D",
+      "group": "Group D",
+      "kickoff": "2026-06-26T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Paraguay",
+      "away": "Australia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 4656,
+        "drawBps": 2550,
+        "awayBps": 2794,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Paraguay",
+            "Draw",
+            "Australia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Paraguay",
+            "No goal",
+            "Australia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-061-norway-france",
+      "title": "Norway vs France",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-26T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Norway",
+      "away": "France",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1156,
+        "drawBps": 2092,
+        "awayBps": 6752,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Norway",
+            "Draw",
+            "France"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Norway",
+            "No goal",
+            "France"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-062-senegal-iraq",
+      "title": "Senegal vs Iraq",
+      "stage": "Group I",
+      "group": "Group I",
+      "kickoff": "2026-06-26T19:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Senegal",
+      "away": "Iraq",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 7482,
+        "drawBps": 1943,
+        "awayBps": 575,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Senegal",
+            "Draw",
+            "Iraq"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Senegal",
+            "No goal",
+            "Iraq"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-063-egypt-iran",
+      "title": "Egypt vs Iran",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-27T03:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Egypt",
+      "away": "Iran",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 4656,
+        "drawBps": 2550,
+        "awayBps": 2794,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Egypt",
+            "Draw",
+            "Iran"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Egypt",
+            "No goal",
+            "Iran"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-064-new-zealand-belgium",
+      "title": "New Zealand vs Belgium",
+      "stage": "Group G",
+      "group": "Group G",
+      "kickoff": "2026-06-27T03:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "New Zealand",
+      "away": "Belgium",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 226,
+        "drawBps": 1856,
+        "awayBps": 7918,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "New Zealand",
+            "Draw",
+            "Belgium"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "New Zealand",
+            "No goal",
+            "Belgium"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-065-cape-verde-saudi-arabia",
+      "title": "Cape Verde vs Saudi Arabia",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-27T00:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Cape Verde",
+      "away": "Saudi Arabia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 3600,
+        "drawBps": 2800,
+        "awayBps": 3600,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Cape Verde",
+            "Draw",
+            "Saudi Arabia"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Cape Verde",
+            "No goal",
+            "Saudi Arabia"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-066-uruguay-spain",
+      "title": "Uruguay vs Spain",
+      "stage": "Group H",
+      "group": "Group H",
+      "kickoff": "2026-06-27T00:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Uruguay",
+      "away": "Spain",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 469,
+        "drawBps": 1916,
+        "awayBps": 7615,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Uruguay",
+            "Draw",
+            "Spain"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Uruguay",
+            "No goal",
+            "Spain"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-067-panama-england",
+      "title": "Panama vs England",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-27T21:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Panama",
+      "away": "England",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 37,
+        "drawBps": 1809,
+        "awayBps": 8154,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Panama",
+            "Draw",
+            "England"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Panama",
+            "No goal",
+            "England"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-068-croatia-ghana",
+      "title": "Croatia vs Ghana",
+      "stage": "Group L",
+      "group": "Group L",
+      "kickoff": "2026-06-27T21:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Croatia",
+      "away": "Ghana",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 5985,
+        "drawBps": 2255,
+        "awayBps": 1760,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Croatia",
+            "Draw",
+            "Ghana"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Croatia",
+            "No goal",
+            "Ghana"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-069-algeria-austria",
+      "title": "Algeria vs Austria",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-28T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Algeria",
+      "away": "Austria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1665,
+        "drawBps": 2229,
+        "awayBps": 6106,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Algeria",
+            "Draw",
+            "Austria"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Algeria",
+            "No goal",
+            "Austria"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-070-jordan-argentina",
+      "title": "Jordan vs Argentina",
+      "stage": "Group J",
+      "group": "Group J",
+      "kickoff": "2026-06-28T02:00:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Jordan",
+      "away": "Argentina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 49,
+        "drawBps": 1812,
+        "awayBps": 8139,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Jordan",
+            "Draw",
+            "Argentina"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Jordan",
+            "No goal",
+            "Argentina"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-071-colombia-portugal",
+      "title": "Colombia vs Portugal",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-27T23:30:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "Colombia",
+      "away": "Portugal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 1144,
+        "drawBps": 2089,
+        "awayBps": 6767,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "Colombia",
+            "Draw",
+            "Portugal"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Colombia",
+            "No goal",
+            "Portugal"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
+    },
+    {
+      "id": "wc-2026-072-dr-congo-uzbekistan",
+      "title": "DR Congo vs Uzbekistan",
+      "stage": "Group K",
+      "group": "Group K",
+      "kickoff": "2026-06-27T23:30:00.000Z",
+      "venue": "FIFA official schedule",
+      "home": "DR Congo",
+      "away": "Uzbekistan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "baselineSignal": {
+        "homeBps": 3600,
+        "drawBps": 2800,
+        "awayBps": 3600,
+        "confidenceBps": 5600
+      },
+      "notes": [
+        "Reference baseline is derived from public market strength; agents must make their own probability call.",
+        "Group-stage signal open"
+      ],
+      "marketDimensions": [
+        {
+          "id": "match_winner_1x2",
+          "label": "90-minute winner",
+          "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+          "outcomes": [
+            "DR Congo",
+            "Draw",
+            "Uzbekistan"
+          ],
+          "format": "basis_points_sum_10000",
+          "scoreableOnchain": true
+        },
+        {
+          "id": "exact_score",
+          "label": "Exact score",
+          "polymarketType": "correct_score",
+          "outcomes": [
+            "0-0",
+            "1-0",
+            "1-1",
+            "2-0",
+            "2-1",
+            "2-2",
+            "other"
+          ],
+          "format": "ranked_outcomes_with_probability_bps"
+        },
+        {
+          "id": "first_goal",
+          "label": "First goal",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "DR Congo",
+            "No goal",
+            "Uzbekistan"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "both_teams_to_score",
+          "label": "Both teams to score",
+          "polymarketType": "sports_prop",
+          "outcomes": [
+            "Yes",
+            "No"
+          ],
+          "format": "basis_points_sum_10000"
+        },
+        {
+          "id": "total_goals_2_5",
+          "label": "Total goals 2.5",
+          "polymarketType": "SPORTS_MARKET_TYPE_TOTAL",
+          "line": 2.5,
+          "outcomes": [
+            "Over",
+            "Under"
+          ],
+          "format": "basis_points_sum_10000"
+        }
+      ],
+      "suggestedDimensions": [
+        "match_winner_1x2",
+        "exact_score",
+        "first_goal",
+        "both_teams_to_score",
+        "total_goals_2_5"
+      ]
     }
   ],
   "agentOutputContract": {
@@ -178,8 +6794,14 @@
     "confidenceBps": "agent-chosen integer",
     "methodSummary": "agent-owned weighting rules and model logic",
     "reasoningSummary": "evidence-based explanation",
-    "sourceMix": ["actual-source-1", "actual-source-2"],
+    "sourceMix": [
+      "actual-source-1",
+      "actual-source-2"
+    ],
     "marketPredictions": "object keyed by every selected match marketDimensions[].id",
-    "caveats": ["Not betting advice", "Do not copy baseline values"]
+    "caveats": [
+      "Not betting advice",
+      "Do not copy baseline values"
+    ]
   }
 }

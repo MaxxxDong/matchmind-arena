@@ -2,6 +2,17 @@ const { expect } = require("chai");
 const fs = require("node:fs");
 
 describe("Agent signal onboarding helpers", function () {
+  it("exposes a complete agent-selectable group-stage slate", async function () {
+    const { MATCHES } = await import("../src/data/matches.mjs");
+
+    const groupStageMatches = MATCHES.filter((match) => match.scoringMode === "world-cup-2026-group-stage");
+
+    expect(groupStageMatches).to.have.length(72);
+    expect(groupStageMatches.map((match) => match.id)).to.include("wc-2026-001-mexico-south-africa");
+    expect(new Set(groupStageMatches.map((match) => match.group))).to.have.length(12);
+    expect(groupStageMatches.every((match) => match.marketDimensions?.length >= 5)).to.equal(true);
+  });
+
   it("builds a no-wallet checklist for a complete agent signal", async function () {
     const { buildAgentSignalChecklist } = await import("../src/agentSignal.mjs");
     const { MATCHES } = await import("../src/data/matches.mjs");
@@ -75,7 +86,7 @@ describe("Agent signal onboarding helpers", function () {
     const { inferAgentSignalMatch, buildAgentSignalChecklist } = await import("../src/agentSignal.mjs");
     const { MATCHES } = await import("../src/data/matches.mjs");
     const currentMatch = MATCHES[0];
-    const targetMatch = MATCHES[2];
+    const targetMatch = MATCHES.find((match) => match.id === "wc-2026-001-mexico-south-africa");
     const signal = {
       matchId: targetMatch.id,
       agentId: "agent_mexico_probe",
@@ -96,16 +107,6 @@ describe("Agent signal onboarding helpers", function () {
         first_goal: { Mexico: 6200, "No goal": 700, "South Africa": 3100 },
         both_teams_to_score: { Yes: 4700, No: 5300 },
         total_goals_2_5: { Over: 5100, Under: 4900 },
-        group_winner: [
-          { outcome: "Mexico", bps: 4300 },
-          { outcome: "Other Group A team", bps: 5200 },
-          { outcome: "South Africa", bps: 500 },
-        ],
-        world_cup_champion: [
-          { outcome: "Mexico", bps: 900 },
-          { outcome: "South Africa", bps: 100 },
-          { outcome: "Other country", bps: 9000 },
-        ],
       },
     };
 
@@ -170,5 +171,50 @@ describe("Agent signal onboarding helpers", function () {
 
     expect(selected.txHash).to.equal("0xnew");
     expect(selected.signalId).to.equal(2);
+  });
+
+  it("builds a concise pre-wallet preview for the selected agent signal", async function () {
+    const { buildAgentSignalPreview } = await import("../src/agentSignal.mjs");
+    const { MATCHES } = await import("../src/data/matches.mjs");
+    const match = MATCHES.find((candidate) => candidate.id === "wc-2026-001-mexico-south-africa");
+    const preview = buildAgentSignalPreview({
+      matchId: match.id,
+      agentId: "agent_preview_probe",
+      agentName: "Preview Probe",
+      homeBps: 6100,
+      drawBps: 2500,
+      awayBps: 1400,
+      confidenceBps: 5400,
+      methodSummary: "Independent estimate.",
+      sourceMix: ["agent-context-json"],
+      marketPredictions: {
+        match_winner_1x2: { Mexico: 6100, Draw: 2500, "South Africa": 1400 },
+        exact_score: [{ outcome: "1-0", bps: 1600 }, { outcome: "other", bps: 8400 }],
+      },
+    }, match);
+
+    expect(preview.agentId).to.equal("agent_preview_probe");
+    expect(preview.matchTitle).to.equal("Mexico vs South Africa");
+    expect(preview.vectorText).to.equal("Mexico 61.0% / Draw 25.0% / South Africa 14.0%");
+    expect(preview.marketLines[0]).to.include("90-minute winner");
+    expect(preview.marketLines[1]).to.include("Exact score");
+  });
+
+  it("normalizes wallet rejection errors without leaking raw transaction payloads", async function () {
+    const { friendlyAgentError } = await import("../src/agentSignal.mjs");
+    const error = new Error('user rejected action (action="sendTransaction", reason="rejected", payload={"data":"0xdeadbeef"})');
+    error.code = 4001;
+
+    const message = friendlyAgentError(error);
+
+    expect(message).to.equal("Wallet request cancelled. No transaction was submitted.");
+    expect(message).not.to.include("0xdeadbeef");
+  });
+
+  it("blocks accidental duplicate primary submissions for the same agent match window", async function () {
+    const { duplicateSignalMessage } = await import("../src/agentSignal.mjs");
+
+    expect(duplicateSignalMessage(true)).to.equal("This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this demo to prevent accidental duplicate uploads.");
+    expect(duplicateSignalMessage(false)).to.equal("");
   });
 });

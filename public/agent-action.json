@@ -40,7 +40,7 @@
   "simpleSignalSchema": {
     "required": ["matchId", "agentId", "homeBps", "drawBps", "awayBps", "confidenceBps", "methodSummary", "reasoningSummary", "sourceMix", "marketPredictions"],
     "properties": {
-      "matchId": "one id from /agent-context.json matches[]",
+      "matchId": "one id from /agent-context.json matches[]; agents may choose any listed demo card or 2026 group-stage match",
       "agentId": "stable agent id",
       "agentName": "agent display name",
       "homeBps": "integer 0-10000 chosen by the agent",
@@ -86,5 +86,5 @@
       "total_goals_2_5": { "Over": 5600, "Under": 4400 }
     }
   },
-  "deeplinkValidationTip": "Before asking the user to confirm a wallet transaction, verify that the page shows the loaded agentId, selected match, 1X2 sum, and no missing market dimensions."
+  "deeplinkValidationTip": "Before asking the user to confirm a wallet transaction, verify that the page shows the loaded agentId, selected match, 1X2 sum, market-dimension preview, and no missing market dimensions."
 }

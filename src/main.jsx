@@ -26,7 +26,14 @@ import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
-import { buildAgentSignalChecklist, findAgentSignalRow, inferAgentSignalMatch } from "./agentSignal.mjs";
+import {
+  buildAgentSignalChecklist,
+  buildAgentSignalPreview,
+  duplicateSignalMessage,
+  findAgentSignalRow,
+  friendlyAgentError,
+  inferAgentSignalMatch,
+} from "./agentSignal.mjs";
 import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
@@ -347,14 +354,7 @@ function localSignalRecord(signalPayload, match, profile, extra = {}) {
 }
 
 function friendlyError(error) {
-  const message = String(error?.shortMessage || error?.message || error);
-  if (message.toLowerCase().includes("rate limit")) {
-    return "Mantle RPC is rate-limiting live event reads. Showing cached snapshot and any just-submitted wallet receipts; try Refresh later.";
-  }
-  if (message.includes("could not coalesce error")) {
-    return "Mantle RPC returned a low-level provider error. The app will keep cached data visible and retry on refresh.";
-  }
-  return message;
+  return friendlyAgentError(error);
 }
 
 function vectorWinner(signal, match) {
@@ -628,6 +628,11 @@ function App() {
     }
     return buildAgentSignalChecklist(agentSignalDraft, checklistMatch);
   }, [agentSignalDraft, checklistMatch]);
+  const agentPreview = useMemo(() => (
+    agentSignalDraft.__parseError
+      ? null
+      : buildAgentSignalPreview(agentSignalDraft, checklistMatch)
+  ), [agentSignalDraft, checklistMatch]);
   const signal = useMemo(() => agentCommitment ?? buildSignal(selectedMatch), [selectedMatch, agentCommitment]);
 
   const selectMatch = useCallback((matchId) => {
@@ -773,6 +778,16 @@ function App() {
       if (!record.registered) {
         throw new Error("Register this wallet as an agent before submitting a signal.");
       }
+      const alreadySubmitted = await readArena.primarySignalSubmitted(
+        record.agentIdHash,
+        signal.matchId,
+        signal.matchWindow,
+      );
+      const duplicateMessage = duplicateSignalMessage(alreadySubmitted);
+      if (duplicateMessage) {
+        setStatus(duplicateMessage);
+        return;
+      }
       const tx = await arena.submitSignal(signal);
       setTxHash(tx.hash);
       setStatus("Signal transaction sent. Waiting for Mantle confirmation...");
@@ -821,7 +836,7 @@ function App() {
           agentIdHash: registration.agentIdHash,
           metadataHash: registration.metadataHash,
           metadataUri: registration.metadataUri,
-          agentId: agentProfile.agentId,
+          agentId: activeProfile.agentId,
         }));
         setAgent({
           registered: true,
@@ -834,6 +849,22 @@ function App() {
       setStatus(record.registered
         ? "Approve the signal transaction in your wallet to commit this prediction on Mantle."
         : "Step 2/2: registration confirmed. Now approve the signal transaction in your wallet.");
+      const registeredAgent = record.registered
+        ? record
+        : {
+          agentIdHash: buildAgentRegistration(activeProfile, address).agentIdHash,
+        };
+      const alreadySubmitted = await readArena.primarySignalSubmitted(
+        registeredAgent.agentIdHash,
+        activeCommitment.matchId,
+        activeCommitment.matchWindow,
+      );
+      const duplicateMessage = duplicateSignalMessage(alreadySubmitted);
+      if (duplicateMessage) {
+        setAgentSignalError("");
+        setStatus(duplicateMessage);
+        return;
+      }
       const signalTx = await arena.submitSignal(activeCommitment);
       setTxHash(signalTx.hash);
       const receipt = await signalTx.wait();
@@ -847,8 +878,9 @@ function App() {
       await refreshArena(address);
       setStatus(`${activeProfile.name} signal committed on Mantle.`);
     } catch (error) {
-      setAgentSignalError(error.message || "");
-      setStatus(friendlyError(error));
+      const message = friendlyError(error);
+      setAgentSignalError(message === "Wallet request cancelled. No transaction was submitted." ? "" : message);
+      setStatus(message);
     } finally {
       setBusy("");
     }
@@ -1174,6 +1206,19 @@ function App() {
                 <span>Check the dry-run status below, then use the green button; approve wallet prompts to write on Mantle.</span>
               </div>
               <SignalChecklist checklist={agentChecklist} />
+              {agentPreview ? (
+                <div className="agent-preview-card">
+                  <span>Pre-submit preview</span>
+                  <strong>{agentPreview.agentName} · {agentPreview.matchTitle}</strong>
+                  <p>{agentPreview.vectorText} · confidence {agentPreview.confidenceText}</p>
+                  {agentPreview.method ? <small>{agentPreview.method}</small> : null}
+                  {agentPreview.marketLines.length ? (
+                    <ul>
+                      {agentPreview.marketLines.map((line) => <li key={line}>{line}</li>)}
+                    </ul>
+                  ) : null}
+                </div>
+              ) : null}
               <details className="debug-box">
                 <summary>No deeplink? Paste/import signal JSON</summary>
                 <p className="fallback-copy">
@@ -1213,7 +1258,7 @@ function App() {
               </p>
             )}
             <div className="button-row">
-              <button onClick={confirmAgentSignal} disabled={busy === "confirm"} className="primary">
+              <button onClick={confirmAgentSignal} disabled={busy === "confirm" || !agentChecklist.ok} className="primary">
                 {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
                 Confirm in wallet and submit to Mantle
               </button>

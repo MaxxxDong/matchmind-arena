@@ -423,6 +423,11 @@ button {
   padding: 18px;
 }
 
+.match-rail {
+  max-height: calc(100vh - 132px);
+  overflow: auto;
+}
+
 .section-title {
   justify-content: space-between;
   gap: 12px;
@@ -1021,6 +1026,55 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.agent-preview-card {
+  display: grid;
+  gap: 7px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in oklch, var(--blue), var(--line) 24%);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--blue), white 90%);
+}
+
+.agent-preview-card span {
+  color: oklch(36% 0.11 240);
+  font-size: 0.72rem;
+  font-weight: 860;
+  text-transform: uppercase;
+}
+
+.agent-preview-card strong,
+.agent-preview-card p,
+.agent-preview-card small,
+.agent-preview-card li {
+  overflow-wrap: anywhere;
+}
+
+.agent-preview-card p,
+.agent-preview-card small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.agent-preview-card ul {
+  display: grid;
+  gap: 5px;
+  max-height: 112px;
+  margin: 2px 0 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.agent-preview-card li {
+  padding: 6px 8px;
+  border-radius: calc(var(--radius) - 5px);
+  background: oklch(100% 0 0 / 0.56);
+  color: var(--ink);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .fallback-copy {
   margin: 8px 0 0;
   font-size: 0.84rem;
@@ -1031,6 +1085,9 @@ h1 {
 }
 
 .error-text {
+  max-height: 132px;
+  overflow: auto;
+  overflow-wrap: anywhere;
   padding: 10px 12px;
   border: 1px solid color-mix(in oklch, var(--red), white 38%);
   border-radius: var(--radius);
@@ -1099,6 +1156,7 @@ h1 {
 
 .notice span {
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .notice a {

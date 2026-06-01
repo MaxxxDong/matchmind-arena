@@ -689,3 +689,32 @@ What was done:
 Verification:
 
 - Added a helper test for finding a leaderboard agent's latest visible signal.
+
+## Phase 8E - Group-Stage Agent Choice And Submit Guardrails
+
+Completed locally.
+
+What was found:
+
+- The public match board still exposed only a small demo set, so an external agent could not freely choose from the actual 2026 group-stage slate.
+- The on-chain contract supports revision signals, but the main green button did not explain that and could be used repeatedly, which looked like an accidental duplicate-upload bug.
+- When MetaMask rejected a transaction, the page rendered the raw ethers transaction payload in the error box and could stretch the right column.
+
+What was done:
+
+- Rebuilt `src/data/matches.mjs` as a lightweight board with the two demo cards plus all 72 2026 group-stage cards from the local audited FIFA/Polymarket reference.
+- Regenerated `public/agent-context.json` so agents can see and choose all listed match IDs.
+- Added a pre-submit preview card that shows the agent ID, selected match, 1X2 vector, confidence, method, and top market-dimension predictions before the wallet prompt.
+- Added a chain read against `primarySignalSubmitted(agentIdHash, matchId, matchWindow)` before `submitSignal`; the demo UI now blocks accidental duplicate primary submissions for the same agent/match/window.
+- Added friendly wallet rejection handling so a cancelled MetaMask prompt says no transaction was submitted instead of showing raw calldata.
+- Constrained error and preview layout with wrapping/scrolling.
+
+Verification:
+
+- Added failing tests first for the full group-stage slate, pre-wallet preview, wallet rejection normalization, and duplicate primary-submit message.
+- `npm test -- --grep "Agent signal onboarding helpers"`: passing.
+
+Reflection:
+
+- This keeps the contract unchanged and avoids redeploy risk. Revisions remain technically possible at the contract layer, but the default product flow now prevents accidental duplicate uploads.
+- A future advanced mode could expose explicit revisions with a clear "replace/update signal" label, but that should be a separate UX decision.
