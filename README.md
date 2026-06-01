@@ -180,6 +180,7 @@ The README is the entry point. Each supporting document has one job:
 - `docs/submission-package.md`: DoraHacks-ready pitch, demo flow, technical highlights, and award fit.
 - `docs/demo-video-script.md`: two-minute demo video script, shot list, and recording checklist.
 - `docs/pre-phase-one-review.md`: pre-contract review covering benchmark fairness, agent onboarding, and data freshness.
+- `docs/agent-ux-smoke-test.md`: step-by-step external-agent usability test log and retrospective.
 - `docs/implementation-plan.md`: staged execution checklist.
 - `docs/project-progress.md`: single progress log and current blockers.
 - `HANDOFF.md`: current decisions, open questions, and next-step handoff.

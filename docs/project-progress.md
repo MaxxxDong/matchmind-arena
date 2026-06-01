@@ -595,3 +595,25 @@ Reflection:
 - This makes the identity story clearer for reviewers: the chain now sees a stable `agentIdHash`, not only a wallet address.
 - The market-dimension schema keeps agent outputs aligned with Polymarket-style markets without asking agents to invent unsupported fields.
 - Source-code verification is now covered by Sourcify `full_match`. Etherscan-compatible explorer API verification remains optional if a valid API key is added later.
+
+## Phase 8A - External Agent UX Smoke Test
+
+Completed locally.
+
+What was done:
+
+- Ran a step-by-step external-agent test through a Codex subagent instead of giving it a single command batch.
+- Recorded the process in `docs/agent-ux-smoke-test.md`.
+- The test agent successfully discovered the homepage, read `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, and `/llms.txt`, generated a full Argentina vs France signal, and constructed a deeplink.
+- Locally reconstructed the generated signal, verified base64url round-trip decoding, 1X2 sum, selected-match `marketPredictions` coverage, bps sums for sum-to-10000 dimensions, and `SignalArena.submitSignal` commitment generation.
+- Tightened `/agent-action.json` and `/agent-skill.md` examples so new agents use concrete selected-match outcome names and treat `marketPredictions` as canonical.
+
+Verification:
+
+- `npm run agent:minimal`: passing and prints a complete deeplink.
+- Local inline payload validation command: passing.
+
+Reflection:
+
+- The agent flow is usable for pre-chain preparation, but long deeplinks remain harder for some agent-controlled browser environments to preview.
+- A future no-wallet dry-run page or parsed-signal checklist would make the final pre-wallet handoff more obvious.

@@ -57,20 +57,15 @@ Return a simple JSON object with these fields:
   "reasoningSummary": "why this prediction makes sense",
   "sourceMix": ["actual data source 1", "actual data source 2"],
   "marketPredictions": {
-    "match_winner_1x2": { "Home team": 4400, "Draw": 3200, "Away team": 2400 },
+    "match_winner_1x2": { "Argentina": 4300, "Draw": 3000, "France": 2700 },
     "exact_score": [
-      { "outcome": "1-1", "bps": 1200 },
-      { "outcome": "other", "bps": 8800 }
+      { "outcome": "1-1", "bps": 1800 },
+      { "outcome": "2-1", "bps": 1600 },
+      { "outcome": "other", "bps": 6600 }
     ],
-    "first_goal": { "Home team": 4500, "No goal": 700, "Away team": 4800 }
-  },
-  "exactScore": [
-    { "score": "your score call", "bps": "your probability bps" }
-  ],
-  "firstGoal": {
-    "homeBps": "your probability bps",
-    "noGoalBps": "your probability bps",
-    "awayBps": "your probability bps"
+    "first_goal": { "Argentina": 4500, "No goal": 600, "France": 4900 },
+    "both_teams_to_score": { "Yes": 6400, "No": 3600 },
+    "total_goals_2_5": { "Over": 5600, "Under": 4400 }
   }
 }
 ```
@@ -79,6 +74,8 @@ Rules:
 
 - `homeBps + drawBps + awayBps` must equal `10000`.
 - `marketPredictions` must include every `marketDimensions[].id` for the selected match.
+- Use the exact outcome names from the selected match, such as `Argentina`, `Draw`, and `France`; do not replace them with generic labels like `Home team`.
+- `marketPredictions` is the canonical field. Legacy mirrors such as `exactScore` or `firstGoal` are optional and should be omitted unless they match `marketPredictions`.
 - For dimensions whose format is `basis_points_sum_10000`, the outcome probabilities must sum to `10000`.
 - `sourceMix` must list sources you actually used.
 - `methodSummary` should distinguish your agent from other agents.
