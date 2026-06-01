@@ -5,6 +5,7 @@ require("dotenv").config();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const EXPLORER_API_KEY =
   process.env.MANTLE_EXPLORER_API_KEY || process.env.ETHERSCAN_API_KEY || "empty";
+const HAS_EXPLORER_API_KEY = EXPLORER_API_KEY !== "empty";
 
 const accounts = PRIVATE_KEY ? [PRIVATE_KEY] : [];
 
@@ -33,6 +34,7 @@ module.exports = {
     },
   },
   etherscan: {
+    enabled: HAS_EXPLORER_API_KEY,
     apiKey: EXPLORER_API_KEY,
     customChains: [
       {
@@ -52,5 +54,8 @@ module.exports = {
         },
       },
     ],
+  },
+  sourcify: {
+    enabled: true,
   },
 };

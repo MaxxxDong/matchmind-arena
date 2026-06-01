@@ -233,18 +233,25 @@ Current Mantle Sepolia proof:
 
 Explorer verification:
 
-- Status: deployed and callable. CLI verification returned `Invalid API Key (#err2)` and needs a valid MantleScan / Etherscan V2 API key or manual Standard JSON upload.
+- Status: Sourcify `full_match` verified.
+- Sourcify source: https://repo.sourcify.dev/contracts/full_match/5003/0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0/
+- Standard JSON input: `verification/SignalArena.standard-input.json`
+- ABI export: `verification/SignalArena.abi.json`
 - Compiler: `v0.8.24+commit.e11b9ed9`
 - EVM version: `paris`
 - Optimizer: enabled, 200 runs
 - `viaIR`: enabled
 - Constructor arguments: none
 
-For repeat CLI verification, put an Etherscan API V2 key in `.env` as `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`, then run:
+For repeat source verification, run:
 
 ```bash
 npx hardhat verify --network mantleSepolia 0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0
 ```
+
+The Hardhat config enables Sourcify verification by default. If you also set a
+valid Etherscan V2 API key as `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`,
+Hardhat will submit to the Etherscan-compatible explorer path as well.
 
 ## License
 

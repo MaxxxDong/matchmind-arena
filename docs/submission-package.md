@@ -73,7 +73,7 @@ npm run snapshot:leaderboard
 ### 20 Project Deployment Award
 
 - Contract deployed on Mantle Sepolia.
-- Source-code verification is pending a valid explorer API key or manual Standard JSON upload; the contract is deployed and callable on Mantle Sepolia.
+- Source code is verified as a Sourcify `full_match`: https://repo.sourcify.dev/contracts/full_match/5003/0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0/
 - Public frontend deployed on Vercel.
 - At least one AI-powered on-chain callable path exists through `submitSignal`.
 - README includes setup, architecture, contract address, proof transactions, and demo URL.

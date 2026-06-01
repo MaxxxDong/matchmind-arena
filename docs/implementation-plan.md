@@ -170,6 +170,7 @@ Goal: make the hackathon submission easy to verify.
 - [ ] DoraHacks BUIDL page filled.
 - [x] Deployed public frontend link.
 - [x] Mantle contract link.
+- [x] Sourcify full-match source verification.
 - [x] Short pitch for track and awards.
 - [x] Submission package draft.
 - [x] Publication hygiene check for ignored secrets and local Vercel metadata.

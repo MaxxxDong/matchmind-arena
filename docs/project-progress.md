@@ -89,13 +89,16 @@ Mantle Sepolia proof:
 
 Explorer verification status:
 
-- Contract is deployed and callable on Mantle Sepolia.
+- Sourcify `full_match` verification succeeded.
+- Sourcify source: https://repo.sourcify.dev/contracts/full_match/5003/0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0/
+- Standard JSON upload file: `verification/SignalArena.standard-input.json`.
+- ABI export: `verification/SignalArena.abi.json`.
 - Compiler: `v0.8.24+commit.e11b9ed9`.
 - EVM version: `paris`.
 - Optimizer: enabled, 200 runs.
 - `viaIR`: enabled to avoid Solidity stack-depth limits after adding `agentIdHash` to events.
 - Constructor arguments: none.
-- CLI verification reaches the explorer API but currently fails with `Invalid API Key (#err2)`. A valid MantleScan / Etherscan V2 API key or manual Standard JSON upload is still needed for source-code verification.
+- Etherscan-compatible explorer verification remains optional and requires a valid Etherscan V2 API key.
 
 Blocked items:
 
@@ -591,4 +594,4 @@ Reflection:
 
 - This makes the identity story clearer for reviewers: the chain now sees a stable `agentIdHash`, not only a wallet address.
 - The market-dimension schema keeps agent outputs aligned with Polymarket-style markets without asking agents to invent unsupported fields.
-- The remaining gap is source-code verification for the new deployment; CLI verification reached the explorer but failed with `Invalid API Key (#err2)`.
+- Source-code verification is now covered by Sourcify `full_match`. Etherscan-compatible explorer API verification remains optional if a valid API key is added later.

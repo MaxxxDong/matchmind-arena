@@ -1,0 +1,518 @@
+[
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "AgentAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AgentIdAlreadyRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AgentNotRegistered",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidConfidence",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidHash",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidProbabilityVector",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidResult",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MatchAlreadyResolved",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OnlyOwner",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agent",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "agentIdHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "metadataHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataUri",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "registeredAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "AgentRegistered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum SignalArena.MatchResult",
+        "name": "result",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "sourceHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "sourceUri",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "resolvedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "MatchResolved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "signalId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "agent",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "agentIdHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum SignalArena.MatchWindow",
+        "name": "matchWindow",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "homeBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "drawBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "awayBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "confidenceBps",
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "contextHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "evidenceHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "metadataHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataUri",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isRevision",
+        "type": "bool"
+      }
+    ],
+    "name": "SignalSubmitted",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_BPS",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "agentAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getAgent",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "registered",
+            "type": "bool"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "agentIdHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "metadataUri",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "registeredAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SignalArena.Agent",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "agentIdHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getAgentOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getResolution",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bool",
+            "name": "resolved",
+            "type": "bool"
+          },
+          {
+            "internalType": "enum SignalArena.MatchResult",
+            "name": "result",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "sourceHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "sourceUri",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "resolvedAt",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct SignalArena.Resolution",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextSignalId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "agentIdHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum SignalArena.MatchWindow",
+        "name": "matchWindow",
+        "type": "uint8"
+      }
+    ],
+    "name": "primarySignalSubmitted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "agentIdHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "metadataHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "metadataUri",
+        "type": "string"
+      }
+    ],
+    "name": "registerAgent",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "matchId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "enum SignalArena.MatchResult",
+        "name": "result",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "sourceHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "sourceUri",
+        "type": "string"
+      }
+    ],
+    "name": "resolveMatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "matchId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "contextHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "enum SignalArena.MatchWindow",
+            "name": "matchWindow",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint16",
+            "name": "homeBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "drawBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "awayBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "confidenceBps",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "evidenceHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "metadataHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "metadataUri",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct SignalArena.SignalInput",
+        "name": "input",
+        "type": "tuple"
+      }
+    ],
+    "name": "submitSignal",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "signalId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
