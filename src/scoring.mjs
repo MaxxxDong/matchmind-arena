@@ -28,7 +28,25 @@ export function scoreSignal(event, resolution) {
   const correctIndex = actual.findIndex(Boolean);
   const logLoss = -Math.log(Math.max(predicted[correctIndex], 0.0001));
   const quality = Math.max(0, Math.round(100 - brier * 55 - logLoss * 12));
-  return { brier, logLoss, quality };
+  const [topOutcome] = predictedOutcome(event);
+  const hit = topOutcome === resolution.result;
+  const oneX2Points = Math.round((hit ? 10 : 0) + predicted[correctIndex] * 20 + quality * 0.35);
+  const exactScore = scoreExactScore(event, resolution);
+  const marketDimensions = scoreMarketDimensions(event, resolution);
+  const points = oneX2Points + exactScore.points + marketDimensions.points;
+  return {
+    brier,
+    logLoss,
+    quality,
+    hit,
+    exactScoreHit: exactScore.hit,
+    points,
+    pointsBreakdown: {
+      oneX2: oneX2Points,
+      exactScore: exactScore.points,
+      marketDimensions: marketDimensions.points,
+    },
+  };
 }
 
 function predictedOutcome(event) {
@@ -38,6 +56,66 @@ function predictedOutcome(event) {
     ["away", event.awayBps],
   ];
   return entries.sort((a, b) => b[1] - a[1])[0];
+}
+
+function normalizeOutcomeEntries(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => ({
+      outcome: String(item.outcome ?? item.score ?? item.label ?? ""),
+      bps: Number(item.bps ?? item.probabilityBps ?? item.value ?? 0),
+    })).filter((item) => item.outcome && Number.isFinite(item.bps));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).map(([outcome, bps]) => ({
+      outcome,
+      bps: Number(bps),
+    })).filter((item) => Number.isFinite(item.bps));
+  }
+  return [];
+}
+
+function marketPredictionsFrom(event) {
+  return event?.rawEvidence?.marketPredictions || event?.rawEvidence?.signals?.marketPredictions || {};
+}
+
+function topPredictionForDimension(event, match, dimensionId) {
+  if (dimensionId === "match_winner_1x2") {
+    const [outcome, bps] = predictedOutcome(event.signal || event);
+    const label = outcome === "home" ? match.home : outcome === "away" ? match.away : "Draw";
+    return { outcome: label, bps: Number(bps || 0) };
+  }
+  const entries = normalizeOutcomeEntries(marketPredictionsFrom(event)[dimensionId])
+    .sort((a, b) => b.bps - a.bps);
+  return entries[0] || null;
+}
+
+function scoreExactScore(event, resolution) {
+  if (!resolution?.exactScore) return { hit: false, points: 0 };
+  const entries = normalizeOutcomeEntries(marketPredictionsFrom(event).exact_score)
+    .sort((a, b) => b.bps - a.bps);
+  const match = entries.find((entry) => entry.outcome === resolution.exactScore);
+  if (!match) return { hit: false, points: 0 };
+  const topHit = entries[0]?.outcome === resolution.exactScore;
+  return {
+    hit: topHit,
+    points: Math.round((topHit ? 20 : 8) + match.bps / 500),
+  };
+}
+
+function scoreMarketDimensions(event, resolution) {
+  const outcomes = resolution?.marketOutcomes || {};
+  let points = 0;
+  let hits = 0;
+  for (const [dimensionId, actualOutcome] of Object.entries(outcomes)) {
+    const entries = normalizeOutcomeEntries(marketPredictionsFrom(event)[dimensionId])
+      .sort((a, b) => b.bps - a.bps);
+    const match = entries.find((entry) => entry.outcome === actualOutcome);
+    if (!match) continue;
+    const topHit = entries[0]?.outcome === actualOutcome;
+    if (topHit) hits += 1;
+    points += Math.round((topHit ? 8 : 3) + match.bps / 1000);
+  }
+  return { hits, points };
 }
 
 export function evaluateSignalEligibility(event, match) {
@@ -158,6 +236,12 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
       totalQuality: 0,
       totalBrier: 0,
       totalLogLoss: 0,
+      totalPoints: 0,
+      hits: 0,
+      exactScoreHits: 0,
+      oneX2Points: 0,
+      exactScorePoints: 0,
+      marketDimensionPoints: 0,
       latestBlock: 0,
     };
     current.signals += 1;
@@ -165,6 +249,12 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
     current.totalQuality += score.quality;
     current.totalBrier += score.brier;
     current.totalLogLoss += score.logLoss;
+    current.totalPoints += score.points;
+    current.hits += score.hit ? 1 : 0;
+    current.exactScoreHits += score.exactScoreHit ? 1 : 0;
+    current.oneX2Points += score.pointsBreakdown.oneX2;
+    current.exactScorePoints += score.pointsBreakdown.exactScore;
+    current.marketDimensionPoints += score.pointsBreakdown.marketDimensions;
     current.latestBlock = Math.max(current.latestBlock, event.blockNumber);
     byAgent.set(agentKey, current);
   }
@@ -172,10 +262,39 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
     .map((entry) => ({
       ...entry,
       quality: Math.round(entry.totalQuality / entry.resolved),
+      points: entry.totalPoints,
+      hitRate: entry.hits / entry.resolved,
       brier: entry.totalBrier / entry.resolved,
       logLoss: entry.totalLogLoss / entry.resolved,
     }))
-    .sort((a, b) => b.quality - a.quality || a.brier - b.brier || b.latestBlock - a.latestBlock);
+    .sort((a, b) => b.points - a.points || b.quality - a.quality || a.brier - b.brier || b.latestBlock - a.latestBlock);
+}
+
+export function buildPredictionConsensus(rows = [], match = {}, dimensionId = "match_winner_1x2") {
+  const dimension = (match.marketDimensions || []).find((item) => item.id === dimensionId)
+    || { id: dimensionId, label: dimensionId };
+  const byOutcome = new Map();
+  for (const row of rows) {
+    const prediction = topPredictionForDimension(row, match, dimensionId);
+    if (!prediction) continue;
+    const current = byOutcome.get(prediction.outcome) || {
+      outcome: prediction.outcome,
+      agentCount: 0,
+      totalBps: 0,
+      agents: [],
+    };
+    current.agentCount += 1;
+    current.totalBps += prediction.bps;
+    current.agents.push(row);
+    byOutcome.set(prediction.outcome, current);
+  }
+  const groups = [...byOutcome.values()]
+    .map((group) => ({
+      ...group,
+      averageBps: Math.round(group.totalBps / group.agentCount),
+    }))
+    .sort((a, b) => b.agentCount - a.agentCount || b.averageBps - a.averageBps || a.outcome.localeCompare(b.outcome));
+  return { dimension, groups };
 }
 
 export function buildResolutionEvidence(matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {

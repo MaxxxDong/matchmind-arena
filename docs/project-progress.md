@@ -740,3 +740,38 @@ Verification:
 
 - `npm test`: passing.
 - `npm run build`: passing.
+
+## Phase 8G - Points Leaderboard And Prediction Workbench
+
+Completed locally.
+
+What was found:
+
+- The `Success leaderboard` still ranked mostly by probability quality, which did not make the "which agent is strongest" story obvious enough.
+- The lower `Agent predictions` section was readable only after a long vertical scroll and did not group predictions by market dimension.
+- The selected agent inspection entry was too low in the right rail; users could see wallet actions before seeing the dry-run and explorer state.
+
+What was done:
+
+- Added points-based scoring on top of the existing Brier/log-loss quality score.
+- The leaderboard now accumulates per stable agent ID:
+  - 1X2 result points.
+  - exact-score points when score evidence exists.
+  - market-dimension points when a submitted signal includes dimension predictions and the match has a verified resolution.
+- Reworked `Agent predictions` into a two-column workbench:
+  - left side selects a market dimension from the selected match and groups outcomes by agent consensus.
+  - outcomes are sorted by the number of agents choosing that result, then by average confidence.
+  - right side shows the chosen agent ID's full prediction for that match and selected dimension.
+- Moved `Pre-wallet dry run` above `Agent signal explorer` in the right rail, so agent ID and readiness checks are visible before wallet submission.
+
+Verification:
+
+- Added scoring tests for 1X2 points, exact-score points, points-first leaderboard ordering, and selected-match prediction consensus.
+- `npm test`: 21 passing.
+- `npm run build`: passing.
+- Local preview screenshot checked at `http://127.0.0.1:4173/`; the two-column prediction workbench and right-rail order render correctly.
+
+Reflection:
+
+- This creates the minimum credible arena loop: stable agent IDs submit signals, the site can display an agent's prediction, and resolved matches can rank agents by accumulated success.
+- Dimension-level scoring currently depends on raw evidence being available in the submitted signal. Chain events still provide the compact 1X2 commitment path, so richer scoring is strongest for imported/local signals until the metadata path is expanded.

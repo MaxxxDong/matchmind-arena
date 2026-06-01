@@ -23,7 +23,7 @@ import {
 import "./styles.css";
 import { MATCHES } from "./data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
-import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
+import { RESULT_LABELS, buildLeaderboard, buildPredictionConsensus } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
 import {
@@ -596,6 +596,7 @@ function App() {
   const [agentSignalMode, setAgentSignalMode] = useState("");
   const [agentProfile, setAgentProfile] = useState(DEFAULT_AGENT_PROFILE);
   const [selectedSignalKey, setSelectedSignalKey] = useState("");
+  const [selectedPredictionDimensionId, setSelectedPredictionDimensionId] = useState("match_winner_1x2");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
@@ -983,6 +984,11 @@ function App() {
     index === list.findIndex((candidate) => candidate.key === row.key)
   ));
   const selectedPrediction = predictionRows.find((row) => row.key === selectedSignalKey) || null;
+  const selectedPredictionDimension = (selectedMatch.marketDimensions || []).find((dimension) => dimension.id === selectedPredictionDimensionId)
+    || selectedMatch.marketDimensions?.[0]
+    || { id: "match_winner_1x2", label: "90-minute winner" };
+  const predictionConsensus = buildPredictionConsensus(predictionRows, selectedMatch, selectedPredictionDimension.id);
+  const focusedPrediction = selectedPrediction || predictionConsensus.groups[0]?.agents[0] || predictionRows[0] || null;
   const activeSignal = selectedPrediction?.signal || agentCommitment || latestSelectedEvent || selectedMatch;
   const activeSignalLabel = selectedPrediction
     ? `${selectedPrediction.agent} selected signal`
@@ -1180,51 +1186,120 @@ function App() {
             {predictionRows.length === 0 ? (
               <p className="empty">No agent prediction is loaded for this match yet. Ask an agent to open the action deeplink, then confirm the wallet transaction.</p>
             ) : (
-              predictionRows.map((row) => {
-                const [winner, winnerBps] = vectorWinner(row.signal, selectedMatch);
-                return (
-                  <div
-                    className={`prediction-card ${selectedSignalKey === row.key ? "active" : ""}`}
-                    key={row.key}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => selectPredictionRow(row)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        selectPredictionRow(row);
-                      }
-                    }}
-                    aria-pressed={selectedSignalKey === row.key}
-                    aria-label={`Show ${row.agent} prediction on the main board`}
-                  >
-                    <div>
-                      <strong>{row.agent}</strong>
-                      <span>{row.source}</span>
-                    </div>
-                    <b>{winner} {formatPct(winnerBps)}</b>
-                    <p>
-                      1X2: {selectedMatch.home} {formatPct(row.signal.homeBps)} · Draw {formatPct(row.signal.drawBps)} · {selectedMatch.away} {formatPct(row.signal.awayBps)}
-                    </p>
-                    <small>{exactScoreText(row.rawEvidence)} · {firstGoalText(row.rawEvidence, selectedMatch)}</small>
-                    {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
-                      <small key={dimension.id}>{dimensionPredictionText(row.rawEvidence, dimension)}</small>
-                    ))}
-                    <small>{methodText(row.rawEvidence)}</small>
-                    <small>{sourceText(row.rawEvidence)}</small>
-                    {row.txHash ? (
-                      <a href={`${EXPLORER}/tx/${row.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
-                        Open tx <ExternalLink size={12} />
-                      </a>
-                    ) : null}
+              <div className="prediction-workbench">
+                <div className="prediction-left">
+                  <label className="dimension-picker">
+                    <span>Market view</span>
+                    <select
+                      value={selectedPredictionDimension.id}
+                      onChange={(event) => setSelectedPredictionDimensionId(event.target.value)}
+                    >
+                      {(selectedMatch.marketDimensions || []).map((dimension) => (
+                        <option key={dimension.id} value={dimension.id}>{dimension.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="consensus-list">
+                    {predictionConsensus.groups.length === 0 ? (
+                      <p className="empty">No agent has published this dimension yet.</p>
+                    ) : (
+                      predictionConsensus.groups.map((group) => (
+                        <button
+                          className="consensus-row"
+                          key={group.outcome}
+                          onClick={() => selectPredictionRow(group.agents[0])}
+                        >
+                          <span>{group.agentCount} agent{group.agentCount === 1 ? "" : "s"}</span>
+                          <strong>{group.outcome}</strong>
+                          <small>Average confidence {formatPct(group.averageBps)}</small>
+                        </button>
+                      ))
+                    )}
                   </div>
-                );
-              })
+                </div>
+                <div className="prediction-right">
+                  {focusedPrediction ? (() => {
+                    const [winner, winnerBps] = vectorWinner(focusedPrediction.signal, selectedMatch);
+                    return (
+                      <div className={`prediction-card ${selectedSignalKey === focusedPrediction.key ? "active" : ""}`}>
+                        <div>
+                          <strong>{focusedPrediction.agent}</strong>
+                          <span>{focusedPrediction.source}</span>
+                        </div>
+                        <b>{winner} {formatPct(winnerBps)}</b>
+                        <p>
+                          1X2: {selectedMatch.home} {formatPct(focusedPrediction.signal.homeBps)} · Draw {formatPct(focusedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(focusedPrediction.signal.awayBps)}
+                        </p>
+                        <small>{exactScoreText(focusedPrediction.rawEvidence)} · {firstGoalText(focusedPrediction.rawEvidence, selectedMatch)}</small>
+                        {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
+                          <small key={dimension.id}>{dimensionPredictionText(focusedPrediction.rawEvidence, dimension)}</small>
+                        ))}
+                        <small>{methodText(focusedPrediction.rawEvidence)}</small>
+                        <small>{sourceText(focusedPrediction.rawEvidence)}</small>
+                        {focusedPrediction.txHash ? (
+                          <a href={`${EXPLORER}/tx/${focusedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
+                            Open tx <ExternalLink size={12} />
+                          </a>
+                        ) : null}
+                      </div>
+                    );
+                  })() : null}
+                </div>
+              </div>
             )}
           </section>
         </section>
 
         <aside className="proof-desk">
+          <section className="mini-panel prewallet-panel">
+            <div className="section-title">
+              <span><CheckCircle2 size={18} /> Pre-wallet dry run</span>
+              <small>{agentChecklist.ok ? "ready" : "needs fix"}</small>
+            </div>
+            <SignalChecklist checklist={agentChecklist} />
+            {agentPreview ? (
+              <div className="agent-preview-card">
+                <span>Pre-submit preview</span>
+                <strong>{agentPreview.agentName} · {agentPreview.matchTitle}</strong>
+                <p>{agentPreview.vectorText} · confidence {agentPreview.confidenceText}</p>
+                {agentPreview.method ? <small>{agentPreview.method}</small> : null}
+                {agentPreview.marketLines.length ? (
+                  <ul>
+                    {agentPreview.marketLines.map((line) => <li key={line}>{line}</li>)}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
+
+          <section className="mini-panel">
+            <div className="section-title">
+              <span><Bot size={18} /> Agent signal explorer</span>
+              <small>{allPredictionRows.length} visible</small>
+            </div>
+            <p className="resolution-note">
+              Select any visible agent signal to load that prediction onto the main match board. Scored rows are eligible for the success leaderboard; pending rows wait for a verified result.
+            </p>
+            {allPredictionRows.length === 0 ? (
+              <p className="empty">No agent signal is visible yet. Load a deeplink locally or submit one on-chain first.</p>
+            ) : (
+              allPredictionRows.slice(0, 8).map((row) => {
+                const [winner, winnerBps] = vectorWinner(row.signal, row.match);
+                return (
+                  <button
+                    className={`signal-row-button ${selectedSignalKey === row.key ? "active" : ""}`}
+                    key={row.key}
+                    onClick={() => selectGlobalPredictionRow(row)}
+                  >
+                    <span>{row.scored ? "Scored" : "Pending"} · {row.source}</span>
+                    <strong>{row.agent}</strong>
+                    <small>{row.match.title} · {winner} {formatPct(winnerBps)}</small>
+                  </button>
+                );
+              })
+            )}
+          </section>
+
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
@@ -1247,20 +1322,6 @@ function App() {
                 <code>Open #agentSignal=&lt;base64url-json&gt;</code>
                 <span>Check the dry-run status below, then use the green button; approve wallet prompts to write on Mantle.</span>
               </div>
-              <SignalChecklist checklist={agentChecklist} />
-              {agentPreview ? (
-                <div className="agent-preview-card">
-                  <span>Pre-submit preview</span>
-                  <strong>{agentPreview.agentName} · {agentPreview.matchTitle}</strong>
-                  <p>{agentPreview.vectorText} · confidence {agentPreview.confidenceText}</p>
-                  {agentPreview.method ? <small>{agentPreview.method}</small> : null}
-                  {agentPreview.marketLines.length ? (
-                    <ul>
-                      {agentPreview.marketLines.map((line) => <li key={line}>{line}</li>)}
-                    </ul>
-                  ) : null}
-                </div>
-              ) : null}
               <details className="debug-box">
                 <summary>No deeplink? Paste/import signal JSON</summary>
                 <p className="fallback-copy">
@@ -1338,34 +1399,6 @@ function App() {
             </div>
           ) : null}
 
-          <section className="mini-panel">
-            <div className="section-title">
-              <span><Bot size={18} /> Agent signal explorer</span>
-              <small>{allPredictionRows.length} visible</small>
-            </div>
-            <p className="resolution-note">
-              Select any visible agent signal to load that prediction onto the main match board. Scored rows are eligible for the success leaderboard; pending rows wait for a verified result.
-            </p>
-            {allPredictionRows.length === 0 ? (
-              <p className="empty">No agent signal is visible yet. Load a deeplink locally or submit one on-chain first.</p>
-            ) : (
-              allPredictionRows.slice(0, 8).map((row) => {
-                const [winner, winnerBps] = vectorWinner(row.signal, row.match);
-                return (
-                  <button
-                    className={`signal-row-button ${selectedSignalKey === row.key ? "active" : ""}`}
-                    key={row.key}
-                    onClick={() => selectGlobalPredictionRow(row)}
-                  >
-                    <span>{row.scored ? "Scored" : "Pending"} · {row.source}</span>
-                    <strong>{row.agent}</strong>
-                    <small>{row.match.title} · {winner} {formatPct(winnerBps)}</small>
-                  </button>
-                );
-              })
-            )}
-          </section>
-
           <section className="mini-panel timeline-panel">
             <div className="section-title">
               <span><Layers3 size={18} /> Signal timeline</span>
@@ -1412,8 +1445,13 @@ function App() {
                     <strong>{agentLabel(entry.agent)}</strong>
                     <span>{entry.resolved} resolved signal{entry.resolved === 1 ? "" : "s"}</span>
                   </div>
-                  <b>{entry.quality}</b>
-                  <small>Brier {entry.brier.toFixed(3)} · Log loss {entry.logLoss.toFixed(3)}</small>
+                  <b>{entry.points}</b>
+                  <small>
+                    Quality {entry.quality} · Hit {Math.round(entry.hitRate * 100)}% · Brier {entry.brier.toFixed(3)} · Exact {entry.exactScoreHits}
+                  </small>
+                  <small>
+                    Points: 1X2 {entry.oneX2Points} · Score {entry.exactScorePoints} · Markets {entry.marketDimensionPoints}
+                  </small>
                   <button className="link-button leader-view" onClick={() => selectLeaderboardEntry(entry)}>
                     View signal on board
                   </button>
