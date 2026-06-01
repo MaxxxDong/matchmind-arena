@@ -79,7 +79,8 @@ button {
 .section-title,
 .stage-header p,
 .notice,
-.leader-row {
+.leader-row,
+.leader-card {
   display: flex;
   align-items: center;
 }
@@ -189,7 +190,7 @@ button {
 
 .command-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -683,6 +684,60 @@ h1 {
   color: var(--muted);
 }
 
+.resolution-note {
+  margin: -2px 0 12px;
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.leader-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 9px;
+  border: 1px solid color-mix(in oklch, var(--line), white 20%);
+  border-radius: var(--radius);
+  background: oklch(99% 0.01 94);
+}
+
+.leader-card:last-child {
+  margin-bottom: 0;
+}
+
+.leader-rank {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: oklch(98% 0.01 94);
+  background: var(--night);
+  font-weight: 860;
+}
+
+.leader-card strong,
+.leader-card span {
+  display: block;
+}
+
+.leader-card span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.leader-card b {
+  font-size: 1.7rem;
+}
+
+.leader-card small {
+  grid-column: 2 / -1;
+  color: var(--muted);
+}
+
 .spin {
   animation: spin 900ms linear infinite;
 }
@@ -730,6 +785,10 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .command-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .match-rail {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -758,7 +817,8 @@ h1 {
   }
 
   .prob-grid,
-  .match-rail {
+  .match-rail,
+  .command-strip {
     grid-template-columns: 1fr;
   }
 

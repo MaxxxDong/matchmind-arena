@@ -9,6 +9,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: minimal local demo complete.
 - Phase 3 browser AI signal flow: minimal local demo complete.
+- Phase 6A local demo scoring: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -151,10 +152,38 @@ Reflection:
 - This keeps the project pure frontend for the demo and avoids storing user keys server-side.
 - Browser-side calls may hit provider CORS restrictions. If a chosen provider blocks browser requests, the next robust version should add a tiny user-owned relay or serverless function that forwards OpenAI-compatible requests without persisting keys.
 
+## Phase 6A - Local Demo Scoring
+
+Completed locally.
+
+What was done:
+
+- Added a local resolved-result fixture for the Argentina vs France demo replay.
+- Scores loaded `SignalSubmitted` events against the resolved result when a local fixture exists.
+- Computes three-outcome Brier score and log loss from each 1X2 probability vector.
+- Converts the scoring metrics into a simple `0..100` quality score for leaderboard ordering.
+- Replaced the placeholder leaderboard with a real agent leaderboard showing address, resolved signal count, quality score, Brier score, and log loss.
+- Added a resolved-signal count to the Mantle status strip.
+- Updated event reads to page `SignalSubmitted` logs in 9000-block chunks because Mantle RPC rejects `eth_getLogs` requests over 10000 blocks.
+
+Verification:
+
+- `npm test`: 8 passing.
+- `npm run build`: passing.
+- `git diff --check`: passing.
+- Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
+- Headless Chrome screenshot confirmed the leaderboard renders from the loaded on-chain signal event.
+
+Reflection:
+
+- This is intentionally off-chain. The contract remains the immutable evidence layer, while scoring stays adjustable until the benchmark rules stabilize.
+- Local fixtures are enough for the demo replay, but a real competition needs a resolver job and a public result source so scoring is reproducible across clients.
+
 ## Next Phase
 
-After the browser AI signal flow:
+After local demo scoring:
 
 - Deploy the frontend to a public URL.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
+- Add a resolver job and public result-source adapter for reproducible leaderboard scoring.
 - Then expand into the Chrome companion integration.

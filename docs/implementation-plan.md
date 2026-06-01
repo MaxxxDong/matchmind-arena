@@ -132,6 +132,12 @@ Goal: make the benchmark credible.
 - [ ] Add leaderboard update.
 - [ ] Add late-signal handling.
 
+Phase 6A local demo scoring:
+
+- [x] Add local resolved-result fixtures for demo matches.
+- [x] Compute Brier score and log loss from loaded `SignalSubmitted` events.
+- [x] Show a real leaderboard seed in the Arena UI before the resolver backend exists.
+
 Verification gate:
 
 - Resolved sample match updates signal scores.
@@ -152,11 +158,9 @@ Goal: make the hackathon submission easy to verify.
 
 ## Immediate Next Step
 
-Start with Phase 1:
+Current priority after Phase 3:
 
-1. Create the Solidity contract and tests.
-2. Configure deployment to Mantle Testnet.
-3. Deploy and verify.
-4. Only then build the richer UI around the live contract.
-
-This order reduces risk because the deployment award has strict hard requirements.
+1. Add Phase 6A local demo scoring so the leaderboard is no longer a placeholder.
+2. Deploy the frontend to a public URL.
+3. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
+4. Then continue toward external Agent API and Chrome companion integration.

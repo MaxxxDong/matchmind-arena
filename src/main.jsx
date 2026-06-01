@@ -7,7 +7,6 @@ import {
   Bot,
   BrainCircuit,
   CheckCircle2,
-  CircleDollarSign,
   Clock3,
   ExternalLink,
   Gauge,
@@ -23,6 +22,11 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
+const RESULT_LABELS = {
+  home: "Home",
+  draw: "Draw",
+  away: "Away",
+};
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
 const EXPLORER = "https://sepolia.mantlescan.xyz";
@@ -99,6 +103,13 @@ const MATCHES = [
   },
 ];
 
+const DEMO_RESOLUTIONS = {
+  "demo-replay:argentina-france-2022": {
+    result: "draw",
+    source: "2022 World Cup final regular time finished 2-2 before extra time.",
+  },
+};
+
 const MODEL_CONFIG_KEY = "matchmind:model-config";
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
 const DEFAULT_MODEL_CONFIG = {
@@ -109,6 +120,7 @@ const DEFAULT_MODEL_CONFIG = {
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
 const readArena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, publicProvider);
+const LOG_CHUNK_SIZE = 9000;
 
 function shortHash(value) {
   if (!value) return "-";
@@ -117,6 +129,73 @@ function shortHash(value) {
 
 function formatPct(bps) {
   return `${(Number(bps) / 100).toFixed(1)}%`;
+}
+
+function matchByHash(matchId) {
+  return MATCHES.find((match) => ethers.id(match.id) === matchId);
+}
+
+function outcomeVector(result) {
+  if (result === "home") return [1, 0, 0];
+  if (result === "draw") return [0, 1, 0];
+  if (result === "away") return [0, 0, 1];
+  return null;
+}
+
+function scoreSignal(event, resolution) {
+  const actual = outcomeVector(resolution?.result);
+  if (!actual) return null;
+  const predicted = [event.homeBps, event.drawBps, event.awayBps].map((value) => value / 10000);
+  const brier = predicted.reduce((total, value, index) => total + (value - actual[index]) ** 2, 0);
+  const correctIndex = actual.findIndex(Boolean);
+  const logLoss = -Math.log(Math.max(predicted[correctIndex], 0.0001));
+  const quality = Math.max(0, Math.round(100 - brier * 55 - logLoss * 12));
+  return { brier, logLoss, quality };
+}
+
+function buildLeaderboard(events) {
+  const byAgent = new Map();
+  for (const event of events) {
+    const match = matchByHash(event.matchId);
+    const resolution = match ? DEMO_RESOLUTIONS[match.id] : null;
+    const score = scoreSignal(event, resolution);
+    if (!score) continue;
+    const current = byAgent.get(event.agent) ?? {
+      agent: event.agent,
+      signals: 0,
+      resolved: 0,
+      totalQuality: 0,
+      totalBrier: 0,
+      totalLogLoss: 0,
+      latestBlock: 0,
+    };
+    current.signals += 1;
+    current.resolved += 1;
+    current.totalQuality += score.quality;
+    current.totalBrier += score.brier;
+    current.totalLogLoss += score.logLoss;
+    current.latestBlock = Math.max(current.latestBlock, event.blockNumber);
+    byAgent.set(event.agent, current);
+  }
+  return [...byAgent.values()]
+    .map((entry) => ({
+      ...entry,
+      quality: Math.round(entry.totalQuality / entry.resolved),
+      brier: entry.totalBrier / entry.resolved,
+      logLoss: entry.totalLogLoss / entry.resolved,
+    }))
+    .sort((a, b) => b.quality - a.quality || a.brier - b.brier || b.latestBlock - a.latestBlock);
+}
+
+async function querySignalEvents() {
+  const latest = await publicProvider.getBlockNumber();
+  const filter = readArena.filters.SignalSubmitted();
+  const logs = [];
+  for (let fromBlock = DEPLOY_BLOCK; fromBlock <= latest; fromBlock += LOG_CHUNK_SIZE + 1) {
+    const toBlock = Math.min(fromBlock + LOG_CHUNK_SIZE, latest);
+    logs.push(...await readArena.queryFilter(filter, fromBlock, toBlock));
+  }
+  return logs;
 }
 
 function stableJson(value) {
@@ -277,7 +356,7 @@ function App() {
   const refreshArena = useCallback(async (address = wallet) => {
     const [next, logs] = await Promise.all([
       readArena.nextSignalId(),
-      readArena.queryFilter(readArena.filters.SignalSubmitted(), DEPLOY_BLOCK, "latest"),
+      querySignalEvents(),
     ]);
     setNextSignalId(Number(next));
     setEvents(
@@ -473,6 +552,8 @@ function App() {
 
   const selectedEvents = events.filter((event) => event.matchId === signal.matchId);
   const agentReady = Boolean(agent?.registered);
+  const selectedResolution = DEMO_RESOLUTIONS[selectedMatch.id];
+  const leaderboard = buildLeaderboard(events);
 
   return (
     <main className="app">
@@ -500,6 +581,7 @@ function App() {
         <Metric icon={<BadgeCheck size={18} />} label="Verified contract" value={shortHash(CONTRACT_ADDRESS)} />
         <Metric icon={<Activity size={18} />} label="Loaded signals" value={events.length} />
         <Metric icon={<Network size={18} />} label="Next signal" value={nextSignalId ?? "-"} />
+        <Metric icon={<Gauge size={18} />} label="Resolved scored" value={leaderboard.reduce((total, entry) => total + entry.resolved, 0)} />
       </section>
 
       <section className="arena-grid">
@@ -643,17 +725,29 @@ function App() {
 
           <section className="mini-panel">
             <div className="section-title">
-              <span><Gauge size={18} /> Leaderboard seed</span>
-              <small>live proof</small>
+              <span><Gauge size={18} /> Agent leaderboard</span>
+              <small>{leaderboard.length} scored</small>
             </div>
-            <div className="leader-row">
-              <span><Bot size={16} /> Browser demo agent</span>
-              <b>{events.length} signal{events.length === 1 ? "" : "s"}</b>
-            </div>
-            <div className="leader-row">
-              <span><CircleDollarSign size={16} /> Mantle proof</span>
-              <b>Verified</b>
-            </div>
+            {selectedResolution ? (
+              <p className="resolution-note">
+                Demo result: {RESULT_LABELS[selectedResolution.result]} · {selectedResolution.source}
+              </p>
+            ) : null}
+            {leaderboard.length === 0 ? (
+              <p className="empty">No resolved signal can be scored yet.</p>
+            ) : (
+              leaderboard.map((entry, index) => (
+                <div className="leader-card" key={entry.agent}>
+                  <div className="leader-rank">#{index + 1}</div>
+                  <div>
+                    <strong>{shortHash(entry.agent)}</strong>
+                    <span>{entry.resolved} resolved signal{entry.resolved === 1 ? "" : "s"}</span>
+                  </div>
+                  <b>{entry.quality}</b>
+                  <small>Brier {entry.brier.toFixed(3)} · Log loss {entry.logLoss.toFixed(3)}</small>
+                </div>
+              ))
+            )}
           </section>
         </aside>
       </section>
