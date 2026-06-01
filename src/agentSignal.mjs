@@ -22,7 +22,12 @@ function checklistItem(id, label, status, detail) {
   return { id, label, status, detail };
 }
 
-export function buildAgentSignalChecklist(candidate = {}, selectedMatch = {}) {
+export function inferAgentSignalMatch(candidate = {}, matches = [], fallbackMatch = {}) {
+  const matchId = candidate.matchId || candidate.selectedMatch || candidate.match?.id;
+  return matches.find((match) => match.id === matchId) || fallbackMatch;
+}
+
+export function buildAgentSignalChecklist(candidate = {}, targetMatch = {}) {
   const items = [];
   const profile = candidate.agentProfile || candidate.profile || {};
   const agentId = candidate.agentId || profile.agentId;
@@ -36,24 +41,24 @@ export function buildAgentSignalChecklist(candidate = {}, selectedMatch = {}) {
     ? checklistItem("agent-id", "Agent ID", "ok", `${agentId} will be hashed into the on-chain identity.`)
     : checklistItem("agent-id", "Agent ID", "error", "Missing a stable agentId."));
 
-  items.push(matchId === selectedMatch.id
-    ? checklistItem("match", "Selected match", "ok", `${selectedMatch.title || selectedMatch.id} selected.`)
-    : checklistItem("match", "Selected match", "error", `Signal matchId is ${matchId || "missing"}, expected ${selectedMatch.id}.`));
+  items.push(matchId === targetMatch.id
+    ? checklistItem("match", "Signal match", "ok", `${targetMatch.title || targetMatch.id} targeted.`)
+    : checklistItem("match", "Signal match", "error", `Signal matchId is ${matchId || "missing"}, expected ${targetMatch.id}.`));
 
   const vectorValues = [candidate.homeBps, candidate.drawBps, candidate.awayBps, candidate.confidenceBps];
   const vectorNumbers = vectorValues.map(Number);
   const vectorValid = vectorValues.every(isIntegerBps);
   const vectorSum = vectorNumbers[0] + vectorNumbers[1] + vectorNumbers[2];
   items.push(vectorValid && vectorSum === 10000
-    ? checklistItem("vector-sum", "1X2 vector", "ok", `${selectedMatch.home} ${vectorNumbers[0]} + draw ${vectorNumbers[1]} + ${selectedMatch.away} ${vectorNumbers[2]} = 10000.`)
+    ? checklistItem("vector-sum", "1X2 vector", "ok", `${targetMatch.home} ${vectorNumbers[0]} + draw ${vectorNumbers[1]} + ${targetMatch.away} ${vectorNumbers[2]} = 10000.`)
     : checklistItem("vector-sum", "1X2 vector", "error", "homeBps, drawBps, awayBps, and confidenceBps must be integers from 0 to 10000; 1X2 must sum to 10000."));
 
   const missing = [];
   const invalid = [];
   if (!predictions || typeof predictions !== "object" || Array.isArray(predictions)) {
-    missing.push(...(selectedMatch.marketDimensions || []).map((dimension) => dimension.id));
+    missing.push(...(targetMatch.marketDimensions || []).map((dimension) => dimension.id));
   } else {
-    for (const dimension of selectedMatch.marketDimensions || []) {
+    for (const dimension of targetMatch.marketDimensions || []) {
       const value = predictions[dimension.id];
       if (value === undefined || value === null) {
         missing.push(dimension.id);
@@ -72,7 +77,7 @@ export function buildAgentSignalChecklist(candidate = {}, selectedMatch = {}) {
   }
   const dimensionProblems = [...missing.map((id) => `${id}: missing`), ...invalid];
   items.push(dimensionProblems.length === 0
-    ? checklistItem("market-dimensions", "Market dimensions", "ok", `Covers ${(selectedMatch.marketDimensions || []).length} selected-match dimensions.`)
+    ? checklistItem("market-dimensions", "Market dimensions", "ok", `Covers ${(targetMatch.marketDimensions || []).length} selected-match dimensions.`)
     : checklistItem("market-dimensions", "Market dimensions", "error", dimensionProblems.join("; ")));
 
   const sourceMethodOk = Array.isArray(sourceMix) && sourceMix.length > 0 && Boolean(method || reason);

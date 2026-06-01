@@ -26,7 +26,7 @@ import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
-import { buildAgentSignalChecklist } from "./agentSignal.mjs";
+import { buildAgentSignalChecklist, inferAgentSignalMatch } from "./agentSignal.mjs";
 import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
@@ -607,6 +607,11 @@ function App() {
       return { __parseError: error.message };
     }
   }, [agentSignalText]);
+  const checklistMatch = useMemo(() => (
+    agentSignalDraft.__parseError
+      ? selectedMatch
+      : inferAgentSignalMatch(agentSignalDraft, MATCHES, selectedMatch)
+  ), [agentSignalDraft, selectedMatch]);
   const agentChecklist = useMemo(() => {
     if (agentSignalDraft.__parseError) {
       return {
@@ -620,8 +625,8 @@ function App() {
         }],
       };
     }
-    return buildAgentSignalChecklist(agentSignalDraft, selectedMatch);
-  }, [agentSignalDraft, selectedMatch]);
+    return buildAgentSignalChecklist(agentSignalDraft, checklistMatch);
+  }, [agentSignalDraft, checklistMatch]);
   const signal = useMemo(() => agentCommitment ?? buildSignal(selectedMatch), [selectedMatch, agentCommitment]);
 
   const selectMatch = useCallback((matchId) => {
@@ -782,14 +787,30 @@ function App() {
 
   async function confirmAgentSignal() {
     setBusy("confirm");
-    setStatus("Preparing wallet flow. You may need to approve two prompts: agent registration first, then signal commit.");
+    setStatus("Validating agent signal before wallet prompts...");
     try {
+      const signalPayload = parseAgentSignalPayload(agentSignalText, selectedMatch);
+      const activeMatch = signalPayload.match;
+      const activeProfile = signalPayload.profile;
+      const activeCommitment = signalPayload.commitment;
+      setSelectedId(activeMatch.id);
+      setAgentCommitment(activeCommitment);
+      setAgentSignalMode(signalPayload.mode);
+      setAgentProfile(activeProfile);
+      setLocalSignals(upsertLocalSignalRecord(localSignalRecord(
+        signalPayload,
+        activeMatch,
+        activeProfile,
+        { status: "loaded" },
+      )));
+      setAgentSignalError("");
+      setStatus("Preparing wallet flow. You may need to approve two prompts: agent registration first, then signal commit.");
       const { address, arena } = await getSignerContract();
       setWallet(address);
       const record = await readArena.getAgent(address);
       if (!record.registered) {
-        const registration = buildAgentRegistration(agentProfile, address);
-        setStatus(`Step 1/2: approve agent registration for ${agentProfile.name} (${agentProfile.agentId}) in your wallet.`);
+        const registration = buildAgentRegistration(activeProfile, address);
+        setStatus(`Step 1/2: approve agent registration for ${activeProfile.name} (${activeProfile.agentId}) in your wallet.`);
         const registerTx = await arena.registerAgent(registration.agentIdHash, registration.metadataHash, registration.metadataUri);
         setTxHash(registerTx.hash);
         await registerTx.wait();
@@ -810,19 +831,20 @@ function App() {
       setStatus(record.registered
         ? "Approve the signal transaction in your wallet to commit this prediction on Mantle."
         : "Step 2/2: registration confirmed. Now approve the signal transaction in your wallet.");
-      const signalTx = await arena.submitSignal(signal);
+      const signalTx = await arena.submitSignal(activeCommitment);
       setTxHash(signalTx.hash);
       const receipt = await signalTx.wait();
       const receiptEvents = signalEventsFromReceipt(receipt);
       setEvents((current) => mergeEvents(current, receiptEvents));
       setLocalSignals(upsertLocalSignalRecord(localSignalRecord({
         parsed: parseJsonOrEmpty(agentSignalText),
-        commitment: signal,
-        summary: agentCommitment ? "Committed agent-loaded signal." : "Committed baseline signal.",
-      }, selectedMatch, agentProfile, { status: "submitted", txHash: signalTx.hash })));
+        commitment: activeCommitment,
+        summary: "Committed agent-loaded signal.",
+      }, activeMatch, activeProfile, { status: "submitted", txHash: signalTx.hash })));
       await refreshArena(address);
-      setStatus(`${agentProfile.name} signal committed on Mantle.`);
+      setStatus(`${activeProfile.name} signal committed on Mantle.`);
     } catch (error) {
+      setAgentSignalError(error.message || "");
       setStatus(friendlyError(error));
     } finally {
       setBusy("");

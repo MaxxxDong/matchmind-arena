@@ -639,3 +639,32 @@ Reflection:
 
 - This closes the largest UX gap found by the subagent smoke test: the agent can now prepare a payload and the page can show readiness without requiring a wallet transaction first.
 - The schema is intentionally generic for payload shape; match-specific dimension coverage remains a runtime check because it depends on the selected match.
+
+## Phase 8C - Dry Run Consistency Review
+
+Completed locally.
+
+What was found:
+
+- The dry-run checklist originally validated against the currently selected UI match.
+- If an agent pasted a valid signal for a different match, the checklist could show a match error even though the import path would switch to that target match.
+- The green confirmation button also depended on the previously loaded commitment, so a user could edit or paste valid JSON and click the green button without first importing it.
+
+What was done:
+
+- Added `inferAgentSignalMatch()` so the dry-run checklist evaluates the signal against its own `matchId` when possible.
+- Updated the green confirmation flow to parse and load the current signal JSON before requesting wallet access or showing wallet prompts.
+- This prevents stale commitments from being submitted when the textarea contents changed.
+
+Verification:
+
+- Added a failing test for cross-match pasted signal inference, then implemented the fix.
+- `npm test -- --grep "infers the target match"`: passing.
+- `npm test`: 13 passing.
+- `npm run build`: passing.
+- Local preview probe: homepage and schema return 200; built bundle contains `Pre-wallet dry run` and `Paste/import signal JSON`.
+
+Reflection:
+
+- This makes the no-wallet dry-run behavior match the actual import/submit path.
+- A later full browser test with wallet confirmation can still add value, but the pre-wallet agent handoff is now internally consistent.
