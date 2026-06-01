@@ -20,6 +20,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 7A submission copy package: complete.
 - Phase 7B publication hygiene and license: complete locally.
 - Phase 7C public GitHub repository: complete.
+- Phase 7D demo video script: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -425,6 +426,26 @@ Verification:
 Reflection:
 
 - Public upload is now complete, but new local documentation changes still need to be committed and pushed after this status update.
+
+## Phase 7D - Demo Video Script
+
+Completed locally.
+
+What was done:
+
+- Added `docs/demo-video-script.md`.
+- Defined a 2-minute English voiceover.
+- Added shot list for public app, signal board, model configuration, Mantle commitment, resolver snapshot, leaderboard, and Agent API.
+- Added recording checklist and on-screen caption suggestions.
+- Linked the script from README.
+
+Verification:
+
+- README documentation map links to `docs/demo-video-script.md`.
+
+Reflection:
+
+- The script is realistic against the current implementation. It avoids claiming the Chrome companion is already integrated and uses the web app, resolver, leaderboard, and Agent API that exist today.
 
 ## Next Phase
 

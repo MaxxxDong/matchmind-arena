@@ -1,0 +1,114 @@
+# Demo Video Script
+
+Purpose: this is the canonical script and shot list for the hackathon demo video. The final video URL belongs in `docs/submission-package.md` after upload.
+
+Target length: 2 minutes.
+
+Language: English.
+
+## Structure
+
+### 0:00-0:15 - Product Hook
+
+Visual:
+
+- Open `https://matchmind-arena.vercel.app`.
+- Show the MatchMind Arena header, Mantle status strip, and match board.
+
+Voiceover:
+
+> MatchMind Arena turns live football into a public Turing test for AI agents. Agents submit structured match signals, commit them on Mantle, and get scored after public result resolution.
+
+### 0:15-0:35 - Match Context And Signal Board
+
+Visual:
+
+- Select `Argentina vs France`.
+- Show the probability cards and signal composer.
+- Briefly show the verified contract button.
+
+Voiceover:
+
+> Each match card has a compact context pack: teams, stage, signal window, baseline probability vector, and evidence notes. The benchmark uses a strict one-X-two signal: home, draw, and away probabilities must add up to 10,000 basis points.
+
+### 0:35-1:00 - AI Signal Generation
+
+Visual:
+
+- Show the OpenAI-compatible model fields.
+- If a key is configured, generate a signal.
+- If not, show the deterministic demo baseline and hashes.
+
+Voiceover:
+
+> A user can connect any OpenAI-compatible model. The model returns a structured signal, not free-form text. MatchMind validates the vector, creates context, evidence, and metadata hashes, and keeps private prompts or raw media off-chain.
+
+### 1:00-1:25 - Mantle Commitment
+
+Visual:
+
+- Connect wallet on Mantle Sepolia.
+- Show agent registration status.
+- Show `Commit signal`.
+- Open the MantleScan transaction link or contract link.
+
+Voiceover:
+
+> The signal is committed through the verified SignalArena contract on Mantle Sepolia. The chain stores compact accountability data: match ID, time window, probability vector, confidence, evidence hash, metadata hash, and event proof.
+
+### 1:25-1:45 - Resolver And Leaderboard
+
+Visual:
+
+- Show the leaderboard panel.
+- Show `snapshots/leaderboard.mantle-sepolia.json` locally or in the repo.
+- Highlight `calibrationSummary`, `scoringAudit`, and result source evidence.
+
+Voiceover:
+
+> After resolution, the scoring job pulls public result sources, records source hashes, reads Mantle signal events, and scores every eligible signal with Brier score, log loss, hit rate, confidence bins, and a normalized quality score.
+
+### 1:45-2:00 - Agent API And Closing
+
+Visual:
+
+- Show terminal commands:
+
+```bash
+npm run resolve:results
+npm run snapshot:leaderboard
+npm run api:agent
+npm run agent:example
+```
+
+- End on the public web app and GitHub repo.
+
+Voiceover:
+
+> External agents can also fetch match context and prepare commit-ready signal payloads through the local Agent API. MatchMind Arena is not a betting product. It is a consumer sports interface, an AI benchmark, and a Mantle accountability layer for real-time agent judgment.
+
+## Recording Checklist
+
+- Public web app opens successfully.
+- MantleScan contract link opens.
+- At least one signal event is visible in the app.
+- Leaderboard shows one scored signal.
+- Terminal can run:
+
+```bash
+npm run resolve:results
+npm run snapshot:leaderboard
+```
+
+- GitHub repo is visible: https://github.com/MaxxxDong/matchmind-arena
+- Live demo URL is visible: https://matchmind-arena.vercel.app
+
+## Captions / On-Screen Text
+
+- AI sports signal benchmark
+- Verified Mantle contract
+- Strict 1X2 probability vector
+- Evidence hashes, not raw private data
+- Public result-source resolver
+- Brier score, log loss, calibration
+- Agent API ready

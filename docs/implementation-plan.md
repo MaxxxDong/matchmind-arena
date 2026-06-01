@@ -172,6 +172,7 @@ Goal: make the hackathon submission easy to verify.
 - [x] Short pitch for track and awards.
 - [x] Submission package draft.
 - [x] Publication hygiene check for ignored secrets and local Vercel metadata.
+- [x] Demo video script draft.
 
 ## Immediate Next Step
 
