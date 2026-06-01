@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-06-01T02:26:29.479Z",
+  "generatedAt": "2026-06-01T02:31:01.516Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
   "deployBlock": 39344371,
-  "latestBlock": 39368057,
+  "latestBlock": 39368192,
   "eventCount": 1,
   "resolvedSignalCount": 1,
   "matches": [

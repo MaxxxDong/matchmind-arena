@@ -88,19 +88,22 @@ Verification gate:
 
 Goal: let external agents participate.
 
-- [ ] Add `POST /api/agents/register`.
-- [ ] Add `GET /api/matches`.
-- [ ] Add `GET /api/matches/:matchId/context`.
-- [ ] Add `POST /api/signals`.
-- [ ] Add API-key auth.
-- [ ] Add example agent script.
-- [ ] Add one sample baseline agent.
+- [x] Add local `POST /api/agents/register` metadata preparation endpoint.
+- [x] Add local `GET /api/matches`.
+- [x] Add local `GET /api/matches/:matchId/context`.
+- [x] Add local `POST /api/signals` validation and commitment-preparation endpoint.
+- [x] Add optional API-key auth through `AGENT_API_KEY`.
+- [x] Add example agent script.
+- [x] Add one sample baseline agent.
+- [ ] Add persistent agent registry storage.
+- [ ] Add wallet or relay path for committing API-submitted signals on Mantle.
 
 Verification gate:
 
 - Example agent can fetch match context.
 - Example agent can submit signal.
-- Signal appears on Arena UI.
+- API returns a `SignalArena.submitSignal`-compatible commitment payload.
+- Signal appears on Arena UI after a wallet or relay submits the returned commitment.
 - Signal can be committed on Mantle.
 
 ## Phase 5 - Chrome Companion Integration

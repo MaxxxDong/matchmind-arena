@@ -25,6 +25,7 @@ import { MATCHES } from "./data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
+import { buildSignalCommitment } from "./signals.mjs";
 
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
@@ -89,56 +90,19 @@ async function querySignalEvents() {
   }));
 }
 
-function stableJson(value) {
-  if (Array.isArray(value)) {
-    return `[${value.map(stableJson).join(",")}]`;
-  }
-  if (value && typeof value === "object") {
-    return `{${Object.keys(value)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`)
-      .join(",")}}`;
-  }
-  return JSON.stringify(value);
-}
-
 function buildSignal(match, aiSignal) {
-  const homeBps = aiSignal?.homeBps ?? match.homeBps;
-  const drawBps = aiSignal?.drawBps ?? match.drawBps;
-  const awayBps = aiSignal?.awayBps ?? match.awayBps;
-  const confidenceBps = aiSignal?.confidenceBps ?? match.confidenceBps;
-  const context = {
-    matchId: match.id,
-    title: match.title,
-    source: "MatchMind browser context pack",
-    notes: [match.bias, match.status, match.venue],
-  };
-  const metadata = {
-    app: "MatchMind Arena",
+  return buildSignalCommitment(match, {
+    homeBps: aiSignal?.homeBps ?? match.homeBps,
+    drawBps: aiSignal?.drawBps ?? match.drawBps,
+    awayBps: aiSignal?.awayBps ?? match.awayBps,
+    confidenceBps: aiSignal?.confidenceBps ?? match.confidenceBps,
     model: aiSignal?.model ?? "demo-sports-signal-agent",
     explanation: aiSignal?.explanation ??
       "Demo signal generated from match context, replay evidence labels, and tactical momentum notes.",
-    probabilities: {
-      home: homeBps,
-      draw: drawBps,
-      away: awayBps,
-    },
-    confidenceBps,
     generatedBy: aiSignal ? "user-configured-model" : "deterministic-demo",
     generatedAt: aiSignal?.generatedAt ?? "demo",
-  };
-  return {
-    matchId: ethers.id(match.id),
-    contextHash: ethers.id(stableJson(context)),
-    matchWindow: match.window,
-    homeBps,
-    drawBps,
-    awayBps,
-    confidenceBps,
-    evidenceHash: ethers.id(aiSignal ? stableJson(aiSignal.rawEvidence) : `evidence:${match.id}:browser-demo`),
-    metadataHash: ethers.id(stableJson(metadata)),
-    metadataUri: `https://matchmind-arena.local/signals/${encodeURIComponent(match.id)}`,
-  };
+    rawEvidence: aiSignal?.rawEvidence,
+  });
 }
 
 function readModelConfig() {

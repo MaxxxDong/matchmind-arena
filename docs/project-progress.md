@@ -13,6 +13,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 6B reproducible scoring snapshot: complete.
 - Phase 6C public result-source evidence: complete for the demo replay.
 - Phase 6D closed-window scoring audit: complete for local and snapshot scoring.
+- Phase 4A local Agent API skeleton: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -253,11 +254,41 @@ Reflection:
 - This is the right level for the current stage: it prevents silent scoring of late live signals while preserving explicitly labeled demo replay mode.
 - The next hardening step is to make the resolver job enforce these windows automatically when it writes future live resolutions.
 
+## Phase 4A - Local Agent API Skeleton
+
+Completed locally.
+
+What was done:
+
+- Added `scripts/agent-api-server.mjs`, a dependency-free local HTTP API bound to `127.0.0.1`.
+- Added `GET /api/health`.
+- Added `GET /api/matches`.
+- Added `GET /api/matches/:matchId/context`.
+- Added `POST /api/agents/register` for deterministic metadata preparation.
+- Added `POST /api/signals` for 1X2 vector validation and `SignalArena.submitSignal` commitment payload generation.
+- Added optional Bearer auth through `AGENT_API_KEY`.
+- Added `scripts/example-agent.mjs` as a baseline agent that fetches context and returns a baseline commitment.
+- Moved signal hashing and commitment construction to `src/signals.mjs` so the frontend and Agent API use the same hash logic.
+
+Verification:
+
+- Local health endpoint returned `ok: true`.
+- Local match list returned the Argentina vs France demo context.
+- `node scripts/example-agent.mjs` returned a commitment payload with `matchId`, `contextHash`, `evidenceHash`, `metadataHash`, and 1X2 bps fields.
+- With `AGENT_API_KEY=test-key`, unauthenticated `POST /api/signals` returned HTTP 401.
+- With `Authorization: Bearer test-key`, `POST /api/signals` returned `accepted: true`.
+
+Reflection:
+
+- This gives external agents a stable integration surface without forcing the server to hold a private key.
+- The API currently prepares commit-ready payloads; it does not relay transactions. That is the right security boundary for now. A future relay should be explicit, separately configured, and never enabled by default.
+
 ## Next Phase
 
 After reproducible scoring snapshot:
 
 - Deploy the frontend to a public URL.
 - Add a resolver job that pulls from public result sources and enforces live-match windows.
+- Add persistent storage or a relay only if external agent participation needs server-side submission.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.

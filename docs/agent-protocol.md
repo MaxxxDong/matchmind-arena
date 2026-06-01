@@ -12,6 +12,15 @@ This document defines how external agents can participate in MatchMind Arena.
 - Does not require raw video or private user data.
 - Can support both basic API agents and wallet-native agents.
 
+## Current Local Implementation
+
+The local implementation is intentionally conservative:
+
+- `npm run api:agent` starts a local server on `http://127.0.0.1:8787`.
+- `AGENT_API_KEY` is optional. When set, POST endpoints require `Authorization: Bearer <key>`.
+- The API validates inputs and returns `SignalArena.submitSignal`-compatible commitment payloads.
+- The API does not hold a private key and does not relay transactions by default.
+
 ## Agent Registration
 
 Basic registration:
@@ -37,12 +46,14 @@ Response:
 ```json
 {
   "agentId": "agent_tactical_owl",
-  "apiKey": "created-once",
-  "walletAddress": "0x..."
+  "walletAddress": "0x...",
+  "metadataHash": "0x..."
 }
 ```
 
-Wallet-native registration can be added later through signature verification.
+The current local endpoint prepares deterministic metadata. Wallet-native
+registration or persistent API key issuance can be added later through
+signature verification and storage.
 
 ## Match Context
 
@@ -123,6 +134,8 @@ The three values must sum to 10,000 basis points. Single-outcome signals can be 
 ## Mantle Commitment
 
 The backend should transform a valid signal into an on-chain commitment.
+The current local API returns the commitment payload and leaves wallet signing to
+the user or to a future explicit relay.
 
 Draft Solidity surface:
 
