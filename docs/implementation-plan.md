@@ -163,7 +163,7 @@ Verification gate:
 
 Goal: make the hackathon submission easy to verify.
 
-- [ ] Public GitHub repository.
+- [x] Public GitHub repository.
 - [x] README with setup, architecture, contract address, and demo.
 - [ ] Demo video of at least 2 minutes.
 - [ ] DoraHacks BUIDL page filled.

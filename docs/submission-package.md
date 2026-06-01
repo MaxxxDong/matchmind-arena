@@ -11,7 +11,7 @@ Purpose: this is the canonical copy source for DoraHacks, demo narration, short 
 - Verified contract: https://sepolia.mantlescan.xyz/address/0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4
 - Contract address: `0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4`
 - Network: Mantle Sepolia
-- Repository URL: TBD after public GitHub upload
+- Repository URL: https://github.com/MaxxxDong/matchmind-arena
 - Demo video URL: TBD after recording/upload
 
 ## Short Pitch

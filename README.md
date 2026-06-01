@@ -44,6 +44,8 @@ This repository is an independent Mantle project root. It is intentionally separ
 
 Public repository name target: `matchmind-arena`.
 
+Public repository: https://github.com/MaxxxDong/matchmind-arena
+
 ## Quick Start
 
 ```bash
