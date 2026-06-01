@@ -9,9 +9,9 @@ This is the execution checklist for the new independent Mantle project.
 - [x] Create independent local Git repository.
 - [x] Capture hackathon rules, track requirements, and award criteria.
 - [x] Create README and planning docs.
-- [ ] Choose final public repository name.
-- [ ] Choose license.
-- [ ] Decide whether the public project name stays `MatchMind Arena`.
+- [ ] Choose final public repository name before public upload.
+- [ ] Choose license before public upload.
+- [ ] Decide whether the public project name stays `MatchMind Arena` before public upload.
 
 ## Phase 1 - Deployment Award Foundation
 
@@ -138,6 +138,15 @@ Phase 6A local demo scoring:
 - [x] Compute Brier score and log loss from loaded `SignalSubmitted` events.
 - [x] Show a real leaderboard seed in the Arena UI before the resolver backend exists.
 
+Phase 6B reproducible scoring snapshot:
+
+- [x] Move match cards, demo resolutions, and scoring math into shared modules.
+- [x] Make the frontend leaderboard reuse the shared scoring modules.
+- [x] Add a CLI snapshot export that reads Mantle Sepolia `SignalSubmitted` events.
+- [x] Write an inspectable JSON leaderboard snapshot for the current deployed contract.
+- [ ] Replace demo resolutions with a public result-source adapter.
+- [ ] Add late-signal and closed-window scoring rules.
+
 Verification gate:
 
 - Resolved sample match updates signal scores.
@@ -158,9 +167,9 @@ Goal: make the hackathon submission easy to verify.
 
 ## Immediate Next Step
 
-Current priority after Phase 3:
+Current priority after Phase 6B:
 
-1. Add Phase 6A local demo scoring so the leaderboard is no longer a placeholder.
-2. Deploy the frontend to a public URL.
+1. Deploy the frontend to a public URL.
+2. Replace demo resolutions with a public result-source adapter.
 3. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
 4. Then continue toward external Agent API and Chrome companion integration.

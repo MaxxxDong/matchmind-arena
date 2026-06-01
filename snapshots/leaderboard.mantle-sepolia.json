@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-06-01T02:18:57.822Z",
+  "network": "mantle-sepolia",
+  "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
+  "deployBlock": 39344371,
+  "latestBlock": 39367831,
+  "eventCount": 1,
+  "resolvedSignalCount": 1,
+  "matches": [
+    {
+      "id": "demo-replay:argentina-france-2022",
+      "title": "Argentina vs France",
+      "resolved": true,
+      "resolution": {
+        "result": "draw",
+        "source": "2022 World Cup final regular time finished 2-2 before extra time."
+      }
+    },
+    {
+      "id": "qualifier:spain-turkey-highlights",
+      "title": "Spain vs Turkey",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "worldcup-2026:mexico-south-africa",
+      "title": "Mexico vs South Africa",
+      "resolved": false,
+      "resolution": null
+    }
+  ],
+  "leaderboard": [
+    {
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "signals": 1,
+      "resolved": 1,
+      "totalQuality": 39,
+      "totalBrier": 0.8257999999999999,
+      "totalLogLoss": 1.3093333199837622,
+      "latestBlock": 39344391,
+      "quality": 39,
+      "brier": 0.8257999999999999,
+      "logLoss": 1.3093333199837622
+    }
+  ],
+  "events": [
+    {
+      "signalId": 1,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchWindow": 4,
+      "homeBps": 4800,
+      "drawBps": 2700,
+      "awayBps": 2500,
+      "confidenceBps": 6800,
+      "contextHash": "0xf4d3a6512a3751dbaa278c28eebed17b2bb1ff39553fc33bab2e17447a0b6df8",
+      "evidenceHash": "0xb36cc85f3e573b243761d55ad8059a3e8dc918af145a54d298d49e6b953eb3f9",
+      "metadataHash": "0xebfaf08b912ac8ccc62d2947f1cd04f4b6e16312f14c79873c20287fd9b21826",
+      "metadataUri": "https://example.com/signals/demo-replay-1",
+      "isRevision": false,
+      "txHash": "0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c",
+      "blockNumber": 39344391
+    }
+  ]
+}

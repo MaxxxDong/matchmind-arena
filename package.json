@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
     "deploy:mantle-sepolia": "hardhat run scripts/deploy-signal-arena.js --network mantleSepolia",
-    "submit-demo:mantle-sepolia": "hardhat run scripts/submit-demo-signal.js --network mantleSepolia"
+    "submit-demo:mantle-sepolia": "hardhat run scripts/submit-demo-signal.js --network mantleSepolia",
+    "snapshot:leaderboard": "node scripts/export-leaderboard-snapshot.mjs"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.8",

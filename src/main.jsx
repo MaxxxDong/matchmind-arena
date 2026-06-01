@@ -21,12 +21,10 @@ import {
   Zap,
 } from "lucide-react";
 import "./styles.css";
+import { MATCHES } from "./data/matches.mjs";
+import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
+import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 
-const RESULT_LABELS = {
-  home: "Home",
-  draw: "Draw",
-  away: "Away",
-};
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
 const EXPLORER = "https://sepolia.mantlescan.xyz";
@@ -49,67 +47,6 @@ const ARENA_ABI = [
   "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
 ];
 
-const MATCHES = [
-  {
-    id: "demo-replay:argentina-france-2022",
-    title: "Argentina vs France",
-    subtitle: "World Cup final replay",
-    stage: "Demo replay",
-    kickoff: "Replay window",
-    venue: "Lusail signal pack",
-    status: "AI benchmark ready",
-    bias: "Volatile late-game momentum",
-    window: 4,
-    home: "Argentina",
-    away: "France",
-    homeBps: 4800,
-    drawBps: 2700,
-    awayBps: 2500,
-    confidenceBps: 6800,
-  },
-  {
-    id: "qualifier:spain-turkey-highlights",
-    title: "Spain vs Turkey",
-    subtitle: "Qualifier highlight packet",
-    stage: "Signal rehearsal",
-    kickoff: "Sample clip",
-    venue: "Video evidence pack",
-    status: "Replay context only",
-    bias: "Possession and transition pressure",
-    window: 1,
-    home: "Spain",
-    away: "Turkey",
-    homeBps: 6200,
-    drawBps: 2100,
-    awayBps: 1700,
-    confidenceBps: 6400,
-  },
-  {
-    id: "worldcup-2026:mexico-south-africa",
-    title: "Mexico vs South Africa",
-    subtitle: "2026 group-stage watch card",
-    stage: "Pre-match sample",
-    kickoff: "2026-06-11 19:00 UTC",
-    venue: "Mexico City",
-    status: "Schedule context",
-    bias: "Home edge plus market signal",
-    window: 0,
-    home: "Mexico",
-    away: "South Africa",
-    homeBps: 6650,
-    drawBps: 2250,
-    awayBps: 1100,
-    confidenceBps: 6100,
-  },
-];
-
-const DEMO_RESOLUTIONS = {
-  "demo-replay:argentina-france-2022": {
-    result: "draw",
-    source: "2022 World Cup final regular time finished 2-2 before extra time.",
-  },
-};
-
 const MODEL_CONFIG_KEY = "matchmind:model-config";
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
 const DEFAULT_MODEL_CONFIG = {
@@ -129,62 +66,6 @@ function shortHash(value) {
 
 function formatPct(bps) {
   return `${(Number(bps) / 100).toFixed(1)}%`;
-}
-
-function matchByHash(matchId) {
-  return MATCHES.find((match) => ethers.id(match.id) === matchId);
-}
-
-function outcomeVector(result) {
-  if (result === "home") return [1, 0, 0];
-  if (result === "draw") return [0, 1, 0];
-  if (result === "away") return [0, 0, 1];
-  return null;
-}
-
-function scoreSignal(event, resolution) {
-  const actual = outcomeVector(resolution?.result);
-  if (!actual) return null;
-  const predicted = [event.homeBps, event.drawBps, event.awayBps].map((value) => value / 10000);
-  const brier = predicted.reduce((total, value, index) => total + (value - actual[index]) ** 2, 0);
-  const correctIndex = actual.findIndex(Boolean);
-  const logLoss = -Math.log(Math.max(predicted[correctIndex], 0.0001));
-  const quality = Math.max(0, Math.round(100 - brier * 55 - logLoss * 12));
-  return { brier, logLoss, quality };
-}
-
-function buildLeaderboard(events) {
-  const byAgent = new Map();
-  for (const event of events) {
-    const match = matchByHash(event.matchId);
-    const resolution = match ? DEMO_RESOLUTIONS[match.id] : null;
-    const score = scoreSignal(event, resolution);
-    if (!score) continue;
-    const current = byAgent.get(event.agent) ?? {
-      agent: event.agent,
-      signals: 0,
-      resolved: 0,
-      totalQuality: 0,
-      totalBrier: 0,
-      totalLogLoss: 0,
-      latestBlock: 0,
-    };
-    current.signals += 1;
-    current.resolved += 1;
-    current.totalQuality += score.quality;
-    current.totalBrier += score.brier;
-    current.totalLogLoss += score.logLoss;
-    current.latestBlock = Math.max(current.latestBlock, event.blockNumber);
-    byAgent.set(event.agent, current);
-  }
-  return [...byAgent.values()]
-    .map((entry) => ({
-      ...entry,
-      quality: Math.round(entry.totalQuality / entry.resolved),
-      brier: entry.totalBrier / entry.resolved,
-      logLoss: entry.totalLogLoss / entry.resolved,
-    }))
-    .sort((a, b) => b.quality - a.quality || a.brier - b.brier || b.latestBlock - a.latestBlock);
 }
 
 async function querySignalEvents() {

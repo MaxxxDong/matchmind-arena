@@ -4,12 +4,13 @@ Purpose: this is the single progress log for completed project phases and curren
 
 ## Status Summary
 
-- Phase 0: complete.
+- Phase 0: research and repo setup complete; public repo name and license are still publishing decisions.
 - Phase 1 local contract foundation: complete.
 - Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: minimal local demo complete.
 - Phase 3 browser AI signal flow: minimal local demo complete.
 - Phase 6A local demo scoring: complete.
+- Phase 6B reproducible scoring snapshot: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -179,11 +180,35 @@ Reflection:
 - This is intentionally off-chain. The contract remains the immutable evidence layer, while scoring stays adjustable until the benchmark rules stabilize.
 - Local fixtures are enough for the demo replay, but a real competition needs a resolver job and a public result source so scoring is reproducible across clients.
 
+## Phase 6B - Reproducible Scoring Snapshot
+
+Completed locally.
+
+What was done:
+
+- Moved match cards to `src/data/matches.mjs`.
+- Moved demo result fixtures to `src/data/resolutions.mjs`.
+- Moved result labels, result-vector conversion, Brier score, log loss, and leaderboard sorting to `src/scoring.mjs`.
+- Updated the React app to use the shared scoring modules instead of private UI-only scoring functions.
+- Added `npm run snapshot:leaderboard` through `scripts/export-leaderboard-snapshot.mjs`.
+- The snapshot script reads Mantle Sepolia `SignalSubmitted` events in 9000-block chunks, scores resolved demo events, and writes `snapshots/leaderboard.mantle-sepolia.json`.
+
+Verification:
+
+- `npm run snapshot:leaderboard`: passing.
+- Snapshot output: 1 `SignalSubmitted` event loaded, 1 scored signal.
+- Generated snapshot: `snapshots/leaderboard.mantle-sepolia.json`.
+
+Reflection:
+
+- This closes the gap between "leaderboard visible in the browser" and "raw scoring data is inspectable." Judges or agents can now reproduce the current leaderboard without opening the UI.
+- The scoring source is still a local demo resolution. The next credible upgrade is not more UI polish; it is a public result-source adapter plus closed-window rules so future signals are scored from a stable external reference.
+
 ## Next Phase
 
-After local demo scoring:
+After reproducible scoring snapshot:
 
 - Deploy the frontend to a public URL.
-- Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Add a resolver job and public result-source adapter for reproducible leaderboard scoring.
+- Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.
