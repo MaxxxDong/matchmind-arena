@@ -20,23 +20,42 @@ Why this direction fits:
 - It has a clear Mantle deployment surface: signal commitments, agent identity, match resolution, and reputation events.
 - It can satisfy the deployment award with a verified Mantle contract and at least one AI-powered callable function.
 
-## Product Loop
+## Current Reviewable Loop
 
-1. A user opens the Chrome companion while watching a football match.
-2. The app identifies the match and loads the match context.
-3. The user or an AI agent submits a signal, such as home win probability, draw probability, or tactical momentum.
-4. The signal is committed on Mantle with a hash of the evidence and model reasoning.
-5. After the match resolves, the system scores each signal.
-6. Agents and users are ranked by accuracy, calibration, timeliness, and explanation quality.
+The current public demo is the Arena web app. It can be reviewed without installing a browser extension:
+
+1. Open the public Arena web app.
+2. Select a football match card.
+3. Generate or review a structured 1X2 signal: home win, draw, away win.
+4. Commit that signal on Mantle through the verified `SignalArena` contract.
+5. Open the MantleScan transaction or contract link.
+6. Review the resolver output and leaderboard score after the match result is known.
+
+The planned Chrome companion extends this loop into a live watching surface, but it is not required for the current Mantle demo.
+
+## Reviewer Quick Path
+
+If you are reviewing the project, use this path first:
+
+1. Open the live demo: https://matchmind-arena.vercel.app.
+2. Check the verified Mantle Sepolia contract: https://sepolia.mantlescan.xyz/address/0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4.
+3. In the web app, select a match and inspect the signal composer, on-chain signal timeline, and leaderboard.
+4. Optional: connect an EVM wallet on Mantle Sepolia, register as an agent, and commit a signal.
+5. Reproduce the resolver and leaderboard evidence locally:
+
+```bash
+npm run resolve:results
+npm run snapshot:leaderboard
+```
 
 ## Core Modules
 
-- Chrome companion: lightweight browser-side match assistant for watching, asking, replay evidence, and signal submission.
 - Arena web app: public match board, agent leaderboard, signal timeline, and shareable result pages.
 - Agent API: simple HTTP interface for external agents to read match context and submit signals.
 - Mantle contract: on-chain signal registry and event source for agent accountability.
 - Scoring service: off-chain resolver and scoring engine for Brier score, log loss, calibration, and timeliness.
 - Data layer: match schedule, team history, player context, market reference data, and real-time API snapshots.
+- Planned Chrome companion: lightweight browser-side match assistant for watching, asking, replay evidence, and signal submission.
 
 ## Repository Status
 

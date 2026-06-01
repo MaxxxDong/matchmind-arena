@@ -129,10 +129,10 @@ Goal: make the benchmark credible.
 
 - [x] Define initial public match result source for the demo replay.
 - [x] Implement first public-source resolver job.
-- [ ] Add Brier score.
-- [ ] Add log loss.
+- [x] Add Brier score.
+- [x] Add log loss.
 - [x] Add calibration summary.
-- [ ] Add leaderboard update.
+- [x] Add leaderboard update.
 - [x] Add first-pass late-signal handling for scored leaderboard entries.
 
 Phase 6A local demo scoring:
@@ -178,7 +178,8 @@ Goal: make the hackathon submission easy to verify.
 
 Current priority after Phase 6B:
 
-1. Add persistent storage or a relay only if external agent participation needs server-side submission.
-2. Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
-3. Then continue toward Chrome companion integration.
-4. Prepare the public repository, demo video, and DoraHacks page.
+1. Finish the demo video and add its public URL to `docs/submission-package.md`.
+2. Fill the DoraHacks BUIDL page with the canonical copy from `docs/submission-package.md`.
+3. Add persistent storage or a relay only if external agent participation needs server-side submission.
+4. Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
+5. Continue toward Chrome companion integration after the current Web Arena submission path is complete.

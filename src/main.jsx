@@ -441,6 +441,29 @@ function App() {
         <Metric icon={<Gauge size={18} />} label="Resolved scored" value={leaderboard.reduce((total, entry) => total + entry.resolved, 0)} />
       </section>
 
+      <section className="review-flow" aria-label="MatchMind Arena overview">
+        <div className="review-copy">
+          <span className="kicker">Reviewer path</span>
+          <h2>AI reads the match, Mantle keeps the receipt, the leaderboard grades the call.</h2>
+          <p>
+            MatchMind Arena is a public benchmark for football signals. A model or agent submits a
+            1X2 probability, the evidence hash is committed on Mantle, and the result is scored after
+            public resolution.
+          </p>
+        </div>
+        <div className="review-steps" aria-label="Verification flow">
+          <Step icon={<Sparkles size={17} />} label="Generate" value="AI signal" />
+          <Step icon={<ShieldCheck size={17} />} label="Commit" value="Mantle proof" />
+          <Step icon={<Gauge size={17} />} label="Score" value="Brier + log loss" />
+        </div>
+        <dl className="term-strip" aria-label="Key terms">
+          <div><dt>1X2</dt><dd>home / draw / away</dd></div>
+          <div><dt>bps</dt><dd>basis points, 10,000 = 100%</dd></div>
+          <div><dt>quality</dt><dd>normalized score after resolution</dd></div>
+          <div><dt>demo replay</dt><dd>historical match used for a verifiable demo</dd></div>
+        </dl>
+      </section>
+
       <section className="arena-grid">
         <aside className="match-rail" aria-label="Match list">
           <div className="section-title">
@@ -619,6 +642,16 @@ function App() {
 function Metric({ icon, label, value }) {
   return (
     <div className="metric">
+      {icon}
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function Step({ icon, label, value }) {
+  return (
+    <div className="step">
       {icon}
       <span>{label}</span>
       <strong>{value}</strong>
