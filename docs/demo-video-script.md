@@ -31,17 +31,23 @@ Voiceover:
 
 > Each match card has a compact context pack: teams, stage, signal window, baseline probability vector, and evidence notes. The benchmark uses a strict one-X-two signal: home, draw, and away probabilities must add up to 10,000 basis points.
 
-### 0:35-1:00 - AI Signal Generation
+### 0:35-1:00 - Local Agent Signal
 
 Visual:
 
-- Show the OpenAI-compatible model fields.
-- If a key is configured, generate a signal.
-- If not, show the deterministic demo baseline and hashes.
+- Show the local agent instructions in the signal composer.
+- Show the local commands:
+
+```bash
+npm run api:agent
+npm run agent:example
+```
+
+- Paste the returned commitment payload into the web app, or show the deterministic demo baseline.
 
 Voiceover:
 
-> A user can connect any OpenAI-compatible model. The model returns a structured signal, not free-form text. MatchMind validates the vector, creates context, evidence, and metadata hashes, and keeps private prompts or raw media off-chain.
+> The public website does not collect model API keys. Each agent runs on the user's own machine or infrastructure, fetches MatchMind context, uses its own model and data sources, and returns a commit-ready signal payload. The web app validates that payload and prepares the Mantle transaction.
 
 ### 1:00-1:25 - Mantle Commitment
 

@@ -49,13 +49,8 @@ const ARENA_ABI = [
   "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
 ];
 
-const MODEL_CONFIG_KEY = "matchmind:model-config";
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
-const DEFAULT_MODEL_CONFIG = {
-  baseUrl: "https://api.openai.com/v1",
-  apiKey: "",
-  model: "gpt-4o-mini",
-};
+const AGENT_API_BASE = "http://127.0.0.1:8787";
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
 const readArena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, publicProvider);
@@ -105,71 +100,6 @@ function buildSignal(match, aiSignal) {
   });
 }
 
-function readModelConfig() {
-  try {
-    const raw = globalThis.localStorage?.getItem(MODEL_CONFIG_KEY);
-    return raw ? { ...DEFAULT_MODEL_CONFIG, ...JSON.parse(raw) } : DEFAULT_MODEL_CONFIG;
-  } catch {
-    return DEFAULT_MODEL_CONFIG;
-  }
-}
-
-function normalizeBaseUrl(url) {
-  return url.trim().replace(/\/+$/, "");
-}
-
-function chatCompletionsUrl(baseUrl) {
-  const normalized = normalizeBaseUrl(baseUrl);
-  return normalized.endsWith("/chat/completions") ? normalized : `${normalized}/chat/completions`;
-}
-
-function extractJson(text) {
-  const trimmed = text.trim();
-  if (trimmed.startsWith("{") && trimmed.endsWith("}")) return JSON.parse(trimmed);
-  const match = trimmed.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("Model response did not include a JSON object.");
-  return JSON.parse(match[0]);
-}
-
-function normalizeSignalVector(candidate) {
-  const values = ["homeBps", "drawBps", "awayBps"].map((key) => Number(candidate[key]));
-  if (values.some((value) => !Number.isFinite(value) || value < 0)) {
-    throw new Error("Model probabilities must be non-negative numbers.");
-  }
-  const sum = values.reduce((total, value) => total + value, 0);
-  if (sum <= 0) throw new Error("Model probability vector cannot sum to zero.");
-  const scaled = values.map((value) => Math.round((value / sum) * 10000));
-  const delta = 10000 - scaled.reduce((total, value) => total + value, 0);
-  const maxIndex = scaled.indexOf(Math.max(...scaled));
-  scaled[maxIndex] += delta;
-  const confidenceBps = Math.max(0, Math.min(10000, Math.round(Number(candidate.confidenceBps ?? 5000))));
-  return {
-    homeBps: scaled[0],
-    drawBps: scaled[1],
-    awayBps: scaled[2],
-    confidenceBps,
-    explanation: String(candidate.explanation || "Model returned a structured sports signal."),
-  };
-}
-
-function buildSignalPrompt(match) {
-  return [
-    "You are an AI football signal agent in MatchMind Arena.",
-    "Return only one JSON object. No markdown.",
-    "Schema: {\"homeBps\": number, \"drawBps\": number, \"awayBps\": number, \"confidenceBps\": number, \"explanation\": string}.",
-    "homeBps + drawBps + awayBps should represent a 1X2 football probability vector in basis points and should sum to 10000.",
-    "confidenceBps is 0 to 10000.",
-    "Use the provided context; do not claim unavailable live facts.",
-    "",
-    `Match: ${match.title}`,
-    `Stage: ${match.stage}`,
-    `Kickoff: ${match.kickoff}`,
-    `Venue: ${match.venue}`,
-    `Context note: ${match.bias}`,
-    `Baseline: home ${match.homeBps}, draw ${match.drawBps}, away ${match.awayBps}, confidence ${match.confidenceBps}.`,
-  ].join("\n");
-}
-
 function storeLocalSignalMetadata(record) {
   try {
     const existing = JSON.parse(globalThis.localStorage?.getItem(SIGNAL_METADATA_KEY) || "[]");
@@ -178,6 +108,48 @@ function storeLocalSignalMetadata(record) {
   } catch {
     globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify([record]));
   }
+}
+
+function normalizeCommitment(candidate) {
+  const source = candidate?.commitment ?? candidate;
+  const required = [
+    "matchId",
+    "contextHash",
+    "matchWindow",
+    "homeBps",
+    "drawBps",
+    "awayBps",
+    "confidenceBps",
+    "evidenceHash",
+    "metadataHash",
+    "metadataUri",
+  ];
+  const missing = required.filter((key) => source?.[key] === undefined || source?.[key] === null);
+  if (missing.length) {
+    throw new Error(`Local agent payload is missing: ${missing.join(", ")}.`);
+  }
+  const next = {
+    matchId: String(source.matchId),
+    contextHash: String(source.contextHash),
+    matchWindow: Number(source.matchWindow),
+    homeBps: Number(source.homeBps),
+    drawBps: Number(source.drawBps),
+    awayBps: Number(source.awayBps),
+    confidenceBps: Number(source.confidenceBps),
+    evidenceHash: String(source.evidenceHash),
+    metadataHash: String(source.metadataHash),
+    metadataUri: String(source.metadataUri),
+  };
+  if (![next.matchId, next.contextHash, next.evidenceHash, next.metadataHash].every((value) => /^0x[0-9a-fA-F]{64}$/.test(value))) {
+    throw new Error("Local agent payload hashes must be bytes32 hex values.");
+  }
+  if (next.homeBps + next.drawBps + next.awayBps !== 10000) {
+    throw new Error("Local agent payload must sum to 10,000 bps.");
+  }
+  if ([next.matchWindow, next.homeBps, next.drawBps, next.awayBps, next.confidenceBps].some((value) => !Number.isInteger(value) || value < 0 || value > 10000)) {
+    throw new Error("Local agent payload numeric fields must be integers from 0 to 10,000.");
+  }
+  return next;
 }
 
 function App() {
@@ -189,23 +161,19 @@ function App() {
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState("");
   const [txHash, setTxHash] = useState("");
-  const [modelConfig, setModelConfig] = useState(readModelConfig);
-  const [aiSignal, setAiSignal] = useState(null);
-  const [aiError, setAiError] = useState("");
+  const [agentPayloadText, setAgentPayloadText] = useState("");
+  const [agentCommitment, setAgentCommitment] = useState(null);
+  const [agentPayloadError, setAgentPayloadError] = useState("");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
     [selectedId],
   );
-  const signal = useMemo(() => buildSignal(selectedMatch, aiSignal), [selectedMatch, aiSignal]);
+  const signal = useMemo(() => agentCommitment ?? buildSignal(selectedMatch), [selectedMatch, agentCommitment]);
 
   useEffect(() => {
-    globalThis.localStorage?.setItem(MODEL_CONFIG_KEY, JSON.stringify(modelConfig));
-  }, [modelConfig]);
-
-  useEffect(() => {
-    setAiSignal(null);
-    setAiError("");
+    setAgentCommitment(null);
+    setAgentPayloadError("");
   }, [selectedId]);
 
   const refreshArena = useCallback(async (address = wallet) => {
@@ -329,81 +297,38 @@ function App() {
     }
   }
 
-  async function generateAiSignal() {
-    setBusy("ai");
-    setAiError("");
+  function loadLocalAgentPayload() {
+    setAgentPayloadError("");
     setStatus("");
     try {
-      const baseUrl = normalizeBaseUrl(modelConfig.baseUrl);
-      if (!baseUrl) throw new Error("Base URL is required.");
-      const endpoint = chatCompletionsUrl(baseUrl);
-      if (!modelConfig.apiKey.trim()) throw new Error("API Key is required.");
-      if (!modelConfig.model.trim()) throw new Error("Model is required.");
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${modelConfig.apiKey.trim()}`,
-        },
-        body: JSON.stringify({
-          model: modelConfig.model.trim(),
-          temperature: 0.2,
-          messages: [
-            {
-              role: "system",
-              content:
-                "You produce calibrated football 1X2 probability signals for an on-chain benchmark. Return valid JSON only.",
-            },
-            { role: "user", content: buildSignalPrompt(selectedMatch) },
-          ],
-        }),
-      });
-
-      const responseText = await response.text();
-      if (!response.ok) {
-        throw new Error(`Model request failed with HTTP ${response.status}: ${responseText.slice(0, 240)}`);
+      if (!agentPayloadText.trim()) {
+        throw new Error("Paste the JSON returned by npm run agent:example or POST /api/signals.");
       }
-      const payload = JSON.parse(responseText);
-      const content = payload.choices?.[0]?.message?.content;
-      if (typeof content !== "string" || !content.trim()) {
-        throw new Error("Model endpoint returned no assistant message.");
+      const parsed = JSON.parse(agentPayloadText);
+      const commitment = normalizeCommitment(parsed);
+      const matched = MATCHES.find((match) => ethers.id(match.id).toLowerCase() === commitment.matchId.toLowerCase());
+      if (matched && matched.id !== selectedId) {
+        throw new Error(`This payload belongs to ${matched.title}. Select that match card first, then load it again.`);
       }
-      const parsed = extractJson(content);
-      const normalized = normalizeSignalVector(parsed);
-      const nextAiSignal = {
-        ...normalized,
-        model: modelConfig.model.trim(),
-        generatedAt: new Date().toISOString(),
-        rawEvidence: {
-          matchId: selectedMatch.id,
-          model: modelConfig.model.trim(),
-          prompt: buildSignalPrompt(selectedMatch),
-          response: parsed,
-          normalized,
-        },
-      };
-      setAiSignal(nextAiSignal);
+      setAgentCommitment(commitment);
       storeLocalSignalMetadata({
-        matchId: selectedMatch.id,
-        title: selectedMatch.title,
-        generatedAt: nextAiSignal.generatedAt,
-        model: nextAiSignal.model,
+        matchId: matched?.id ?? selectedMatch.id,
+        title: matched?.title ?? selectedMatch.title,
+        generatedAt: new Date().toISOString(),
+        model: "local-agent",
         signal: {
-          homeBps: nextAiSignal.homeBps,
-          drawBps: nextAiSignal.drawBps,
-          awayBps: nextAiSignal.awayBps,
-          confidenceBps: nextAiSignal.confidenceBps,
+          homeBps: commitment.homeBps,
+          drawBps: commitment.drawBps,
+          awayBps: commitment.awayBps,
+          confidenceBps: commitment.confidenceBps,
         },
-        explanation: nextAiSignal.explanation,
-        rawEvidence: nextAiSignal.rawEvidence,
+        explanation: "Loaded from local MatchMind Agent API.",
+        rawEvidence: parsed,
       });
-      setStatus("AI signal generated and validated. Review it, then commit on-chain.");
+      setStatus("Local agent signal loaded. Review it, then commit on-chain with your wallet.");
     } catch (error) {
-      setAiError(error.message);
+      setAgentPayloadError(error.message);
       setStatus("");
-    } finally {
-      setBusy("");
     }
   }
 
@@ -520,48 +445,50 @@ function App() {
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
-              <small>{aiSignal ? "model signal" : "demo baseline"}</small>
+              <small>{agentCommitment ? "local agent" : "demo baseline"}</small>
             </div>
             <p>{selectedMatch.bias}</p>
-            <div className="model-box">
-              <p className="model-note">Keys stay in this browser. Generated metadata is cached locally before the on-chain commit.</p>
+            <div className="agent-box">
+              <p className="model-note">
+                MatchMind does not collect model keys in the public web app. Run your agent locally,
+                let it read the context API, then paste its commit-ready payload here.
+              </p>
+              <div className="command-card">
+                <code>npm run api:agent</code>
+                <code>npm run agent:example</code>
+                <span>{AGENT_API_BASE}/api/matches</span>
+              </div>
               <label>
-                <span>Base URL</span>
-                <input
-                  value={modelConfig.baseUrl}
-                  onChange={(event) => setModelConfig((current) => ({ ...current, baseUrl: event.target.value }))}
-                  placeholder="https://api.openai.com/v1"
+                <span>Local agent payload</span>
+                <textarea
+                  value={agentPayloadText}
+                  onChange={(event) => setAgentPayloadText(event.target.value)}
+                  placeholder="{ &quot;commitment&quot;: { &quot;matchId&quot;: &quot;0x...&quot;, &quot;homeBps&quot;: 4800, ... } }"
+                  rows={6}
                 />
               </label>
-              <label>
-                <span>API Key</span>
-                <input
-                  value={modelConfig.apiKey}
-                  onChange={(event) => setModelConfig((current) => ({ ...current, apiKey: event.target.value }))}
-                  placeholder="User-provided key"
-                  type="password"
-                />
-              </label>
-              <label>
-                <span>Model</span>
-                <input
-                  value={modelConfig.model}
-                  onChange={(event) => setModelConfig((current) => ({ ...current, model: event.target.value }))}
-                  placeholder="gpt-4o-mini"
-                />
-              </label>
-              <button onClick={generateAiSignal} disabled={busy === "ai"} className="link-button model-action">
-                {busy === "ai" ? <Loader2 className="spin" size={17} /> : <Bot size={17} />}
-                Generate AI signal
+              <button onClick={loadLocalAgentPayload} className="link-button model-action">
+                <Bot size={17} />
+                Load local agent signal
               </button>
             </div>
-            {aiError ? <p className="error-text">{aiError}</p> : null}
+            {agentPayloadError ? <p className="error-text">{agentPayloadError}</p> : null}
             <dl className="hash-list">
               <div><dt>Context</dt><dd>{shortHash(signal.contextHash)}</dd></div>
               <div><dt>Evidence</dt><dd>{shortHash(signal.evidenceHash)}</dd></div>
               <div><dt>Confidence</dt><dd>{formatPct(signal.confidenceBps)}</dd></div>
             </dl>
-            {aiSignal ? <p className="ai-explanation">{aiSignal.explanation}</p> : null}
+            {agentCommitment ? (
+              <p className="ai-explanation">
+                Local agent payload loaded. The agent ran outside this website; this page only validates
+                the structured commitment and asks your wallet to submit it to Mantle.
+              </p>
+            ) : (
+              <p className="ai-explanation">
+                Demo baseline is available for review. For a differentiated agent, run the local API and
+                paste a payload generated on your own machine.
+              </p>
+            )}
             <div className="button-row">
               <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
                 {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}

@@ -627,7 +627,8 @@ h1 {
   line-height: 1.5;
 }
 
-.model-box {
+.model-box,
+.agent-box {
   display: grid;
   gap: 10px;
   padding: 12px;
@@ -642,32 +643,74 @@ h1 {
   line-height: 1.42;
 }
 
-.model-box label {
+.model-box label,
+.agent-box label {
   display: grid;
   gap: 5px;
 }
 
-.model-box label span {
+.model-box label span,
+.agent-box label span {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.model-box input {
+.model-box input,
+.agent-box textarea {
   width: 100%;
-  min-height: 38px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 0 10px;
   background: color-mix(in oklch, white, var(--panel) 38%);
   color: var(--ink);
   font: inherit;
 }
 
-.model-box input:focus {
+.model-box input {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
+.agent-box textarea {
+  min-height: 138px;
+  padding: 10px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.model-box input:focus,
+.agent-box textarea:focus {
   outline: 3px solid color-mix(in oklch, var(--blue), white 45%);
   border-color: color-mix(in oklch, var(--blue), var(--line) 20%);
+}
+
+.command-card {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px dashed color-mix(in oklch, var(--pitch), var(--line) 20%);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--mint), white 88%);
+}
+
+.command-card code,
+.command-card span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.command-card code {
+  color: var(--ink);
+  font-family: "Cascadia Code", "Consolas", monospace;
+  font-size: 0.82rem;
+  font-weight: 760;
+}
+
+.command-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .model-action {

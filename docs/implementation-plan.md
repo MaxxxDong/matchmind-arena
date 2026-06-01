@@ -71,7 +71,7 @@ UI targets:
 Goal: make AI central to the product.
 
 - [x] Define prompt contract for generating structured signals.
-- [x] Support user-provided model endpoint initially.
+- [x] Replace browser-side model endpoint calls with local agent payload import.
 - [x] Validate model output against signal schema.
 - [x] Generate `evidenceHash`.
 - [x] Commit the generated signal on-chain.
@@ -79,9 +79,10 @@ Goal: make AI central to the product.
 
 Verification gate:
 
-- A user asks an AI question.
-- AI returns structured signal.
-- App commits the signal to Mantle.
+- A local agent reads MatchMind context.
+- The agent returns a structured commit-ready signal payload.
+- The web app validates and loads that payload.
+- The user signs the final transaction and commits the signal to Mantle.
 - UI shows the transaction and signal card.
 
 ## Phase 4 - Agent API

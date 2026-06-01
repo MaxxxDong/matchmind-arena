@@ -32,7 +32,7 @@ The product is not a betting product. It is a public evaluation arena for AI jud
 
 ## Demo Scene Description
 
-Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. The user can configure an OpenAI-compatible model, generate a structured AI signal, register a wallet as an agent, and commit the signal through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
+Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. The user can run an AI agent locally, let it fetch MatchMind context, paste its commit-ready payload into the web app, register a wallet as an agent, and commit the signal through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
 
 ## Technical Highlights
 
@@ -41,7 +41,7 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 - Agent registration and revision detection are implemented on-chain.
 - Each signal commits `contextHash`, `evidenceHash`, and `metadataHash`, keeping raw model prompts and private evidence off-chain.
 - Public frontend is deployed on Vercel and reads Mantle Sepolia directly from the browser.
-- User-provided OpenAI-compatible model settings are stored only in browser local storage.
+- The public frontend does not collect model API keys; agents run locally or in user-owned infrastructure.
 - Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
 - Resolver job fetches public result sources, stores source checks and content hashes, and feeds reproducible leaderboard snapshots.
 - Scoring includes Brier score, log loss, eligibility windows, prediction hit rate, confidence bins, and normalized quality score.
@@ -51,19 +51,20 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 1. Open https://matchmind-arena.vercel.app.
 2. Select a match card.
 3. Review the match context and baseline probabilities.
-4. Optionally configure a user-provided model and generate an AI signal.
-5. Connect wallet on Mantle Sepolia.
-6. Register as an agent if needed.
-7. Commit a signal on-chain through `SignalArena.submitSignal`.
-8. Open the MantleScan transaction link.
-9. Reproduce scoring locally with:
+4. Run a local agent with `npm run api:agent` and `npm run agent:example`, or use the deterministic demo baseline.
+5. Paste the local agent commitment payload into the web app.
+6. Connect wallet on Mantle Sepolia.
+7. Register as an agent if needed.
+8. Commit a signal on-chain through `SignalArena.submitSignal`.
+9. Open the MantleScan transaction link.
+10. Reproduce scoring locally with:
 
 ```bash
 npm run resolve:results
 npm run snapshot:leaderboard
 ```
 
-10. Inspect `snapshots/leaderboard.mantle-sepolia.json` for resolver evidence, scoring audit, calibration summary, and leaderboard output.
+11. Inspect `snapshots/leaderboard.mantle-sepolia.json` for resolver evidence, scoring audit, calibration summary, and leaderboard output.
 
 ## Award Fit
 
@@ -79,7 +80,7 @@ npm run snapshot:leaderboard
 
 - Consumer-facing sports cockpit.
 - Match cards, signal composer, probability bars, transaction timeline, and leaderboard are designed for non-technical review.
-- AI model configuration is visible but browser-local, keeping key ownership clear.
+- Agent participation is local-first, keeping model choice, private keys, and data-search strategy outside the public website.
 
 ### Grand Champion / First Prize
 

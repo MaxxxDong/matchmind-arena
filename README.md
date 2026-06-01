@@ -92,9 +92,10 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The frontend reads the verified Mantle Sepolia
 `SignalArena` contract, shows submitted signal events, connects an EVM wallet,
-registers the connected wallet as an agent, generates a 1X2 signal through a
-user-provided OpenAI-compatible model endpoint, and commits the signal hash trail.
-Without a model key, the app still shows the deterministic demo baseline.
+registers the connected wallet as an agent, accepts commit-ready payloads from a
+local agent, and commits the signal hash trail. The public web app does not ask
+users to paste model API keys into the browser. Without a local agent payload,
+the app still shows the deterministic demo baseline.
 
 Public demo:
 
@@ -127,6 +128,14 @@ npm run agent:example
 Set `AGENT_API_KEY` to require `Authorization: Bearer <key>` on POST endpoints.
 The local API prepares `SignalArena.submitSignal`-compatible payloads; it does
 not hold a private key or relay transactions by default.
+
+Local agent flow:
+
+1. Start `npm run api:agent` on your own computer.
+2. Let your agent fetch `/api/matches` or `/api/matches/:matchId/context`.
+3. Let your agent call `POST /api/signals` with its own model, data sources, and reasoning process.
+4. Paste the returned `commitment` JSON into the public web app.
+5. Sign the final Mantle transaction with your wallet.
 
 ## Documentation Map
 
@@ -164,7 +173,7 @@ The current web app is in `src/` and is intentionally small:
 - `src/resultSources.mjs`: public result-source evidence and deterministic source hashes.
 - `src/scoring.mjs`: shared Brier score, log loss, eligibility audit, calibration summary, and leaderboard logic.
 - `src/signals.mjs`: shared stable JSON hashing, signal vector validation, and commitment construction.
-- Browser-local model settings and generated signal metadata are stored in `localStorage`; no API keys are committed to the repository.
+- Locally loaded signal metadata is stored in `localStorage`; the public frontend does not collect model API keys.
 - `src/styles.css`: responsive live-sports dashboard styling.
 - `index.html`: Vite entry.
 

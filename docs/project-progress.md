@@ -455,3 +455,27 @@ After public Vercel deployment, resolver job, calibration summary, submission co
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.
 - Public GitHub upload, demo video URL, and DoraHacks form are still external submission steps.
+
+## Phase 3B - Local Agent Product Boundary
+
+Completed locally.
+
+What was done:
+
+- Removed the public web app's browser-side model endpoint and API key form.
+- Reframed the signal composer around a local agent workflow.
+- Added a local agent payload textarea that accepts the `commitment` JSON returned by `npm run agent:example` or `POST /api/signals`.
+- Added validation for required commitment fields, bytes32 hashes, bps sums, and numeric bounds before the web app can use the payload.
+- Updated README, submission copy, demo script, and implementation checklist so the project no longer claims that users should configure an OpenAI-compatible model directly in the public website.
+
+Reason:
+
+- Browser-side model calls can fail with `Failed to fetch` because many model gateways block cross-origin frontend requests or expect server-side usage.
+- More importantly, a real hackathon agent should run on the user's machine or infrastructure, choose its own model and data sources, fetch MatchMind context, and then return a structured payload. The website should provide the arena, context, validation, wallet signing, and scoring, not host every participant's model key.
+
+Verification:
+
+- `npm test`: passing.
+- `npm run build`: passing.
+- `npm run api:agent` started successfully on `http://127.0.0.1:8787`.
+- `npm run agent:example` returned a `commitment` payload for `demo-replay:argentina-france-2022`.
