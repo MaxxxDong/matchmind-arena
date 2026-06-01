@@ -668,3 +668,24 @@ Reflection:
 
 - This makes the no-wallet dry-run behavior match the actual import/submit path.
 - A later full browser test with wallet confirmation can still add value, but the pre-wallet agent handoff is now internally consistent.
+
+## Phase 8D - Agent Result Selection
+
+Completed locally.
+
+What was found:
+
+- Agent predictions and leaderboard entries were visible, but they did not control the center match board.
+- The most obvious clickable element was the transaction link, which opened MantleScan instead of showing that agent's prediction in the main UI.
+- This made it hard to inspect a strong leaderboard agent's actual probability vector from the public page.
+
+What was done:
+
+- Added selectable agent prediction cards.
+- Added a `View signal on board` action to leaderboard entries.
+- Selecting a prediction or leaderboard agent now drives the center field and probability cards.
+- Mantle transaction links remain available, but they no longer serve as the primary way to inspect an agent.
+
+Verification:
+
+- Added a helper test for finding a leaderboard agent's latest visible signal.

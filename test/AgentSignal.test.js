@@ -134,4 +134,41 @@ describe("Agent signal onboarding helpers", function () {
     ]);
     expect(schema.properties.marketPredictions.description).to.include("canonical");
   });
+
+  it("finds a leaderboard agent's latest visible signal", async function () {
+    const { findAgentSignalRow } = await import("../src/agentSignal.mjs");
+    const events = [
+      {
+        signalId: 1,
+        agent: "0x1111111111111111111111111111111111111111",
+        agentIdHash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        matchId: "0xmatch1",
+        blockNumber: 10,
+        txHash: "0xold",
+        homeBps: 4800,
+        drawBps: 2700,
+        awayBps: 2500,
+      },
+      {
+        signalId: 2,
+        agent: "0x1111111111111111111111111111111111111111",
+        agentIdHash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        matchId: "0xmatch2",
+        blockNumber: 12,
+        txHash: "0xnew",
+        homeBps: 5200,
+        drawBps: 3000,
+        awayBps: 1800,
+      },
+    ];
+
+    const selected = findAgentSignalRow({
+      agent: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      agentIdHash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      wallet: "0x1111111111111111111111111111111111111111",
+    }, events);
+
+    expect(selected.txHash).to.equal("0xnew");
+    expect(selected.signalId).to.equal(2);
+  });
 });

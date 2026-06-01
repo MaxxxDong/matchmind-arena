@@ -92,3 +92,18 @@ export function buildAgentSignalChecklist(candidate = {}, targetMatch = {}) {
     items,
   };
 }
+
+export function findAgentSignalRow(leaderboardEntry = {}, events = []) {
+  const candidates = new Set([
+    leaderboardEntry.agent,
+    leaderboardEntry.agentIdHash,
+    leaderboardEntry.wallet,
+  ].filter(Boolean).map((value) => String(value).toLowerCase()));
+
+  return events
+    .filter((event) => (
+      candidates.has(String(event.agent).toLowerCase())
+      || candidates.has(String(event.agentIdHash || "").toLowerCase())
+    ))
+    .sort((a, b) => Number(b.blockNumber || 0) - Number(a.blockNumber || 0))[0] || null;
+}

@@ -26,7 +26,7 @@ import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
-import { buildAgentSignalChecklist, inferAgentSignalMatch } from "./agentSignal.mjs";
+import { buildAgentSignalChecklist, findAgentSignalRow, inferAgentSignalMatch } from "./agentSignal.mjs";
 import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
@@ -595,6 +595,7 @@ function App() {
   const [agentSignalError, setAgentSignalError] = useState("");
   const [agentSignalMode, setAgentSignalMode] = useState("");
   const [agentProfile, setAgentProfile] = useState(DEFAULT_AGENT_PROFILE);
+  const [selectedSignalKey, setSelectedSignalKey] = useState("");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
@@ -634,6 +635,7 @@ function App() {
     setAgentCommitment(null);
     setAgentSignalError("");
     setAgentSignalMode("");
+    setSelectedSignalKey("");
   }, []);
 
   useEffect(() => {
@@ -652,6 +654,7 @@ function App() {
       setAgentCommitment(parsedSignal.commitment);
       setAgentSignalMode("agent deeplink");
       setAgentProfile(profile);
+      setSelectedSignalKey("");
       setLocalSignals(upsertLocalSignalRecord(localSignalRecord(parsedSignal, parsedSignal.match, profile, { status: "loaded" })));
       setStatus(`Loaded ${profile.name} (${profile.agentId}) from agent deeplink. Next: click the green confirmation button, then approve wallet prompts.`);
     } catch (error) {
@@ -862,6 +865,7 @@ function App() {
       setAgentCommitment(commitment);
       setAgentSignalMode(signalPayload.mode);
       setAgentProfile(signalPayload.profile);
+      setSelectedSignalKey("");
       setLocalSignals(upsertLocalSignalRecord(localSignalRecord(
         signalPayload,
         matched ?? selectedMatch,
@@ -882,12 +886,6 @@ function App() {
   const selectedMatchHash = ethers.id(selectedMatch.id).toLowerCase();
   const selectedEvents = events.filter((event) => String(event.matchId).toLowerCase() === selectedMatchHash);
   const latestSelectedEvent = selectedEvents[0] || null;
-  const activeSignal = agentCommitment || latestSelectedEvent || selectedMatch;
-  const activeSignalLabel = agentCommitment
-    ? `${agentProfile.agentId} loaded signal`
-    : latestSelectedEvent
-      ? `${agentLabel(latestSelectedEvent.agent)} latest on-chain signal`
-      : "Baseline market reference";
   const selectedLocalSignals = localSignals.filter((record) => record.matchId === selectedMatch.id);
   const predictionRows = [
     ...selectedLocalSignals.map((record) => ({
@@ -897,6 +895,7 @@ function App() {
       signal: record.signal,
       rawEvidence: record.rawEvidence,
       txHash: record.txHash,
+      matchId: record.matchId,
     })),
     ...selectedEvents.map((event) => ({
       key: `chain:${event.txHash}:${event.signalId}`,
@@ -905,6 +904,7 @@ function App() {
       signal: event,
       rawEvidence: null,
       txHash: event.txHash,
+      matchId: selectedMatch.id,
     })),
   ].filter((row, index, list) => (
     index === list.findIndex((candidate) => (
@@ -915,9 +915,34 @@ function App() {
       && (candidate.txHash || "") === (row.txHash || "")
     ))
   ));
+  const selectedPrediction = predictionRows.find((row) => row.key === selectedSignalKey) || null;
+  const activeSignal = selectedPrediction?.signal || agentCommitment || latestSelectedEvent || selectedMatch;
+  const activeSignalLabel = selectedPrediction
+    ? `${selectedPrediction.agent} selected signal`
+    : agentCommitment
+      ? `${agentProfile.agentId} loaded signal`
+      : latestSelectedEvent
+        ? `${agentLabel(latestSelectedEvent.agentIdHash || latestSelectedEvent.agent)} latest on-chain signal`
+        : "Baseline market reference";
   const agentReady = Boolean(agent?.registered);
   const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
   const leaderboard = buildLeaderboard(events);
+  const selectPredictionRow = useCallback((row) => {
+    setSelectedSignalKey(row.key);
+    setAgentCommitment(null);
+    setAgentSignalError("");
+    setAgentSignalMode("selected signal");
+  }, []);
+  const selectLeaderboardEntry = useCallback((entry) => {
+    const event = findAgentSignalRow(entry, events);
+    if (!event) return;
+    const match = MATCHES.find((candidate) => ethers.id(candidate.id).toLowerCase() === String(event.matchId).toLowerCase());
+    if (match && match.id !== selectedId) setSelectedId(match.id);
+    setSelectedSignalKey(`chain:${event.txHash}:${event.signalId}`);
+    setAgentCommitment(null);
+    setAgentSignalError("");
+    setAgentSignalMode("leaderboard signal");
+  }, [events, selectedId]);
 
   return (
     <main className="app">
@@ -1084,7 +1109,21 @@ function App() {
               predictionRows.map((row) => {
                 const [winner, winnerBps] = vectorWinner(row.signal, selectedMatch);
                 return (
-                  <div className="prediction-card" key={row.key}>
+                  <div
+                    className={`prediction-card ${selectedSignalKey === row.key ? "active" : ""}`}
+                    key={row.key}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => selectPredictionRow(row)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        selectPredictionRow(row);
+                      }
+                    }}
+                    aria-pressed={selectedSignalKey === row.key}
+                    aria-label={`Show ${row.agent} prediction on the main board`}
+                  >
                     <div>
                       <strong>{row.agent}</strong>
                       <span>{row.source}</span>
@@ -1100,7 +1139,7 @@ function App() {
                     <small>{methodText(row.rawEvidence)}</small>
                     <small>{sourceText(row.rawEvidence)}</small>
                     {row.txHash ? (
-                      <a href={`${EXPLORER}/tx/${row.txHash}`} target="_blank" rel="noreferrer">
+                      <a href={`${EXPLORER}/tx/${row.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
                         Open tx <ExternalLink size={12} />
                       </a>
                     ) : null}
@@ -1256,6 +1295,9 @@ function App() {
                   </div>
                   <b>{entry.quality}</b>
                   <small>Brier {entry.brier.toFixed(3)} · Log loss {entry.logLoss.toFixed(3)}</small>
+                  <button className="link-button leader-view" onClick={() => selectLeaderboardEntry(entry)}>
+                    View signal on board
+                  </button>
                 </div>
               ))
             )}
