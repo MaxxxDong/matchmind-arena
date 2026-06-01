@@ -813,3 +813,34 @@ Reflection:
 
 - This better matches the arena goal: users can inspect market consensus first, then drill into individual agents only when needed.
 - For dimensions other than 1X2, the distribution depends on agents submitting full `marketPredictions`; on-chain compact events still cannot reconstruct those dimensions without metadata retrieval.
+
+## Phase 8I - Leaderboard Rail And Prediction Board Layout Correction
+
+Completed locally.
+
+What was found:
+
+- The right rail still had an `Agent signal explorer` panel above the wallet composer, so the real leaderboard was visually buried below the timeline.
+- The `Agent predictions` market distribution had become a vertical stack, while the intended layout is a left market/outcome selector plus a right data board.
+- Single-agent detail was still competing with the market distribution area, which made the aggregate view feel like text instead of a structured data surface.
+
+What was done:
+
+- Replaced the `Agent signal explorer` position with a real `Leaderboard` panel.
+- The leaderboard now shows scored agents directly in the upper right rail using points-first ordering from `buildLeaderboard()`.
+- Clicking a leaderboard row selects that agent's latest scored signal, projects it onto the main board, and displays a detailed card in the leaderboard panel.
+- Restored `Agent predictions` to a two-column layout:
+  - left: market dropdown and all outcome rows.
+  - right: selected outcome data board with vote count, average probability, total score, probability buckets, and agent rows.
+- Removed the separate single-agent card from the bottom of `Agent predictions`.
+
+Verification:
+
+- `npm test`: 21 passing.
+- `npm run build`: passing.
+- Local preview screenshot checked at `http://127.0.0.1:4173/`; the upper right rail now shows `Leaderboard`, and `Agent predictions` renders as the intended two-column market selector plus data board.
+
+Reflection:
+
+- This makes the hierarchy clearer: match-level market distribution stays in the central match area, while agent ranking and agent detail live in the right rail.
+- The leaderboard is still intentionally scored-only; pending group-stage agents should not appear as winners until resolved results exist.

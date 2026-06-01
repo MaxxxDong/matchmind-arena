@@ -956,38 +956,6 @@ function App() {
       && (candidate.txHash || "") === (row.txHash || "")
     ))
   ));
-  const allPredictionRows = [
-    ...localSignals.map((record) => {
-      const match = MATCHES.find((candidate) => candidate.id === record.matchId);
-      return {
-        key: `local:${record.agentId}:${record.generatedAt}:${record.txHash || "draft"}`,
-        source: record.status === "submitted" ? "Submitted from this browser" : "Loaded in this browser",
-        agent: record.agentId,
-        signal: record.signal,
-        rawEvidence: record.rawEvidence,
-        txHash: record.txHash,
-        match,
-        matchId: record.matchId,
-        scored: Boolean(match && DEMO_RESOLUTIONS[match.id]),
-      };
-    }),
-    ...events.map((event) => {
-      const match = matchByHash.get(String(event.matchId).toLowerCase());
-      return {
-        key: `chain:${event.txHash}:${event.signalId}`,
-        source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
-        agent: agentLabel(event.agentIdHash || event.agent),
-        signal: event,
-        rawEvidence: null,
-        txHash: event.txHash,
-        match,
-        matchId: match?.id,
-        scored: Boolean(match && DEMO_RESOLUTIONS[match.id]),
-      };
-    }),
-  ].filter((row) => row.match).filter((row, index, list) => (
-    index === list.findIndex((candidate) => candidate.key === row.key)
-  ));
   const selectedPrediction = predictionRows.find((row) => row.key === selectedSignalKey) || null;
   const selectedPredictionDimension = (selectedMatch.marketDimensions || []).find((dimension) => dimension.id === selectedPredictionDimensionId)
     || selectedMatch.marketDimensions?.[0]
@@ -1015,13 +983,6 @@ function App() {
     setAgentSignalError("");
     setAgentSignalMode("selected signal");
   }, []);
-  const selectGlobalPredictionRow = useCallback((row) => {
-    if (row.matchId && row.matchId !== selectedId) setSelectedId(row.matchId);
-    setSelectedSignalKey(row.key);
-    setAgentCommitment(null);
-    setAgentSignalError("");
-    setAgentSignalMode("selected signal");
-  }, [selectedId]);
   const selectLeaderboardEntry = useCallback((entry) => {
     const event = findAgentSignalRow(entry, events);
     if (!event) return;
@@ -1279,36 +1240,6 @@ function App() {
                     </div>
                   </div>
                 ) : null}
-                <div className="selected-agent-reader">
-                  {selectedPrediction ? (() => {
-                    const [winner, winnerBps] = vectorWinner(selectedPrediction.signal, selectedMatch);
-                    return (
-                      <div className="prediction-card active">
-                        <div>
-                          <strong>{selectedPrediction.agent}</strong>
-                          <span>{selectedPrediction.source}</span>
-                        </div>
-                        <b>{winner} {formatPct(winnerBps)}</b>
-                        <p>
-                          1X2: {selectedMatch.home} {formatPct(selectedPrediction.signal.homeBps)} · Draw {formatPct(selectedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(selectedPrediction.signal.awayBps)}
-                        </p>
-                        <small>{exactScoreText(selectedPrediction.rawEvidence)} · {firstGoalText(selectedPrediction.rawEvidence, selectedMatch)}</small>
-                        {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
-                          <small key={dimension.id}>{dimensionPredictionText(selectedPrediction.rawEvidence, dimension)}</small>
-                        ))}
-                        <small>{methodText(selectedPrediction.rawEvidence)}</small>
-                        <small>{sourceText(selectedPrediction.rawEvidence)}</small>
-                        {selectedPrediction.txHash ? (
-                          <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
-                            Open tx <ExternalLink size={12} />
-                          </a>
-                        ) : null}
-                      </div>
-                    );
-                  })() : (
-                    <p className="empty">Select an agent row above to project that signal onto the main board.</p>
-                  )}
-                </div>
               </div>
             )}
           </section>
@@ -1336,32 +1267,63 @@ function App() {
             ) : null}
           </section>
 
-          <section className="mini-panel">
+          <section className="mini-panel leaderboard-panel">
             <div className="section-title">
-              <span><Bot size={18} /> Agent signal explorer</span>
-              <small>{allPredictionRows.length} visible</small>
+              <span><Gauge size={18} /> Leaderboard</span>
+              <small>{leaderboard.length} scored</small>
             </div>
-            <p className="resolution-note">
-              Select any visible agent signal to load that prediction onto the main match board. Scored rows are eligible for the success leaderboard; pending rows wait for a verified result.
-            </p>
-            {allPredictionRows.length === 0 ? (
-              <p className="empty">No agent signal is visible yet. Load a deeplink locally or submit one on-chain first.</p>
+            {selectedResolution ? (
+              <p className="resolution-note">
+                Points rank first; quality, Brier, and latest block break ties. Demo result: {RESULT_LABELS[selectedResolution.result]}.
+              </p>
             ) : (
-              allPredictionRows.slice(0, 8).map((row) => {
-                const [winner, winnerBps] = vectorWinner(row.signal, row.match);
-                return (
-                  <button
-                    className={`signal-row-button ${selectedSignalKey === row.key ? "active" : ""}`}
-                    key={row.key}
-                    onClick={() => selectGlobalPredictionRow(row)}
-                  >
-                    <span>{row.scored ? "Scored" : "Pending"} · {row.source}</span>
-                    <strong>{row.agent}</strong>
-                    <small>{row.match.title} · {winner} {formatPct(winnerBps)}</small>
-                  </button>
-                );
-              })
+              <p className="resolution-note">
+                Rankings only include resolved matches. Group-stage predictions stay pending until verified results are added.
+              </p>
             )}
+            {leaderboard.length === 0 ? (
+              <p className="empty">No resolved signal can be scored yet.</p>
+            ) : (
+              leaderboard.map((entry, index) => (
+                <button className="leader-row-button" key={entry.agent} onClick={() => selectLeaderboardEntry(entry)}>
+                  <span className="leader-avatar">#{index + 1}</span>
+                  <span>
+                    <strong>{agentLabel(entry.agent)}</strong>
+                    <small>{entry.resolved} resolved · hit {Math.round(entry.hitRate * 100)}%</small>
+                  </span>
+                  <b>{entry.points}</b>
+                </button>
+              ))
+            )}
+            {selectedPrediction ? (() => {
+              const [winner, winnerBps] = vectorWinner(selectedPrediction.signal, selectedMatch);
+              return (
+                <div className="leader-agent-detail">
+                  <div className="leader-agent-top">
+                    <span>Selected agent</span>
+                    <strong>{selectedPrediction.agent}</strong>
+                  </div>
+                  <div className="leader-agent-score">
+                    <b>{winner}</b>
+                    <strong>{formatPct(winnerBps)}</strong>
+                  </div>
+                  <p>
+                    1X2: {selectedMatch.home} {formatPct(selectedPrediction.signal.homeBps)} · Draw {formatPct(selectedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(selectedPrediction.signal.awayBps)}
+                  </p>
+                  <small>{exactScoreText(selectedPrediction.rawEvidence)} · {firstGoalText(selectedPrediction.rawEvidence, selectedMatch)}</small>
+                  {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
+                    <small key={dimension.id}>{dimensionPredictionText(selectedPrediction.rawEvidence, dimension)}</small>
+                  ))}
+                  <small>{methodText(selectedPrediction.rawEvidence)}</small>
+                  <small>{sourceText(selectedPrediction.rawEvidence)}</small>
+                  {selectedPrediction.txHash ? (
+                    <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
+                      Open tx <ExternalLink size={12} />
+                    </a>
+                  ) : null}
+                </div>
+              );
+            })() : null}
           </section>
 
           <section className="signal-composer">
@@ -1481,48 +1443,6 @@ function App() {
             )}
           </section>
 
-          <section className="mini-panel">
-            <div className="section-title">
-              <span><Gauge size={18} /> Success leaderboard</span>
-              <small>{leaderboard.length} scored</small>
-            </div>
-            {selectedResolution ? (
-              <p className="resolution-note">
-                Demo result: {RESULT_LABELS[selectedResolution.result]} · {selectedResolution.source}
-                {" "}
-                <a href={selectedResolution.sourceUri} target="_blank" rel="noreferrer">
-                  FIFA source <ExternalLink size={12} />
-                </a>
-              </p>
-            ) : (
-              <p className="resolution-note">
-                Rankings only include resolved matches with verified results. Group-stage predictions stay pending until the resolver adds the final result.
-              </p>
-            )}
-            {leaderboard.length === 0 ? (
-              <p className="empty">No resolved signal can be scored yet.</p>
-            ) : (
-              leaderboard.map((entry, index) => (
-                <div className="leader-card" key={entry.agent}>
-                  <div className="leader-rank">#{index + 1}</div>
-                  <div>
-                    <strong>{agentLabel(entry.agent)}</strong>
-                    <span>{entry.resolved} resolved signal{entry.resolved === 1 ? "" : "s"}</span>
-                  </div>
-                  <b>{entry.points}</b>
-                  <small>
-                    Quality {entry.quality} · Hit {Math.round(entry.hitRate * 100)}% · Brier {entry.brier.toFixed(3)} · Exact {entry.exactScoreHits}
-                  </small>
-                  <small>
-                    Points: 1X2 {entry.oneX2Points} · Score {entry.exactScorePoints} · Markets {entry.marketDimensionPoints}
-                  </small>
-                  <button className="link-button leader-view" onClick={() => selectLeaderboardEntry(entry)}>
-                    View signal on board
-                  </button>
-                </div>
-              ))
-            )}
-          </section>
         </aside>
       </section>
     </main>
