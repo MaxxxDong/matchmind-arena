@@ -1,15 +1,18 @@
 {
-  "generatedAt": "2026-06-01T02:22:25.920Z",
+  "generatedAt": "2026-06-01T02:26:29.479Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
   "deployBlock": 39344371,
-  "latestBlock": 39367935,
+  "latestBlock": 39368057,
   "eventCount": 1,
   "resolvedSignalCount": 1,
   "matches": [
     {
       "id": "demo-replay:argentina-france-2022",
       "title": "Argentina vs France",
+      "scoringMode": "demo-replay",
+      "signalClosesAt": null,
+      "signalWindow": "Historical replay signals are accepted only for explicitly labeled demo scoring.",
       "resolved": true,
       "resolution": {
         "result": "draw",
@@ -27,14 +30,39 @@
     {
       "id": "qualifier:spain-turkey-highlights",
       "title": "Spain vs Turkey",
+      "scoringMode": "demo-replay",
+      "signalClosesAt": null,
+      "signalWindow": "Historical replay signals are accepted only for explicitly labeled demo scoring.",
       "resolved": false,
       "resolution": null
     },
     {
       "id": "worldcup-2026:mexico-south-africa",
       "title": "Mexico vs South Africa",
+      "scoringMode": "live",
+      "signalClosesAt": "2026-06-11T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
       "resolved": false,
       "resolution": null
+    }
+  ],
+  "scoringAudit": [
+    {
+      "signalId": 1,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchKey": "demo-replay:argentina-france-2022",
+      "submittedAt": "2026-05-31T13:17:35.000Z",
+      "eligibility": {
+        "eligible": true,
+        "reason": "demo-replay-window"
+      },
+      "scored": true,
+      "score": {
+        "brier": 0.8257999999999999,
+        "logLoss": 1.3093333199837622,
+        "quality": 39
+      }
     }
   ],
   "leaderboard": [
@@ -67,7 +95,9 @@
       "metadataUri": "https://example.com/signals/demo-replay-1",
       "isRevision": false,
       "txHash": "0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c",
-      "blockNumber": 39344391
+      "blockNumber": 39344391,
+      "blockTimestamp": 1780233455,
+      "submittedAt": "2026-05-31T13:17:35.000Z"
     }
   ]
 }

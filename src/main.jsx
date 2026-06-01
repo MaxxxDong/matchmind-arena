@@ -77,7 +77,16 @@ async function querySignalEvents() {
     const toBlock = Math.min(fromBlock + LOG_CHUNK_SIZE, latest);
     logs.push(...await readArena.queryFilter(filter, fromBlock, toBlock));
   }
-  return logs;
+  const blockNumbers = [...new Set(logs.map((log) => log.blockNumber))];
+  const blocks = await Promise.all(blockNumbers.map(async (blockNumber) => publicProvider.getBlock(blockNumber)));
+  const timestamps = new Map(blocks.filter(Boolean).map((block) => [block.number, Number(block.timestamp)]));
+  return logs.map((log) => ({
+    log,
+    blockTimestamp: timestamps.get(log.blockNumber) ?? null,
+    submittedAt: timestamps.has(log.blockNumber)
+      ? new Date(timestamps.get(log.blockNumber) * 1000).toISOString()
+      : null,
+  }));
 }
 
 function stableJson(value) {
@@ -245,7 +254,7 @@ function App() {
       logs
         .slice()
         .reverse()
-        .map((log) => ({
+        .map(({ log, blockTimestamp, submittedAt }) => ({
           signalId: Number(log.args.signalId),
           agent: log.args.agent,
           matchId: log.args.matchId,
@@ -256,6 +265,8 @@ function App() {
           isRevision: log.args.isRevision,
           txHash: log.transactionHash,
           blockNumber: log.blockNumber,
+          blockTimestamp,
+          submittedAt,
         })),
     );
 
@@ -599,7 +610,7 @@ function App() {
                 <a className="timeline-item" href={`${EXPLORER}/tx/${event.txHash}`} target="_blank" rel="noreferrer" key={`${event.txHash}-${event.signalId}`}>
                   <span>#{event.signalId} · block {event.blockNumber}</span>
                   <strong>{formatPct(event.homeBps)} / {formatPct(event.drawBps)} / {formatPct(event.awayBps)}</strong>
-                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {shortHash(event.agent)}</small>
+                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {shortHash(event.agent)} · {event.submittedAt ?? "time pending"}</small>
                 </a>
               ))
             )}

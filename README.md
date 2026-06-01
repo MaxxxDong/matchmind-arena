@@ -79,8 +79,8 @@ npm run snapshot:leaderboard
 ```
 
 The command reads Mantle Sepolia `SignalSubmitted` events from the deployed
-`SignalArena` contract, scores resolved demo signals with the same logic used by
-the web app, attaches public result-source evidence, and writes
+`SignalArena` contract, attaches block timestamps, scores eligible resolved
+signals with the same logic used by the web app, attaches public result-source evidence, and writes
 `snapshots/leaderboard.mantle-sepolia.json`.
 
 ## Documentation Map
@@ -115,7 +115,7 @@ The current web app is in `src/` and is intentionally small:
 - `src/data/matches.mjs`: demo match cards shared by the UI and snapshot exporter.
 - `src/data/resolutions.mjs`: local resolved-result fixtures for demo scoring.
 - `src/resultSources.mjs`: public result-source evidence and deterministic source hashes.
-- `src/scoring.mjs`: shared Brier score, log loss, and leaderboard logic.
+- `src/scoring.mjs`: shared Brier score, log loss, eligibility audit, and leaderboard logic.
 - Browser-local model settings and generated signal metadata are stored in `localStorage`; no API keys are committed to the repository.
 - `src/styles.css`: responsive live-sports dashboard styling.
 - `index.html`: Vite entry.

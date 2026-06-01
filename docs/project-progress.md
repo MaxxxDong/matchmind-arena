@@ -12,6 +12,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 6A local demo scoring: complete.
 - Phase 6B reproducible scoring snapshot: complete.
 - Phase 6C public result-source evidence: complete for the demo replay.
+- Phase 6D closed-window scoring audit: complete for local and snapshot scoring.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -227,11 +228,36 @@ Reflection:
 - This improves judge reproducibility because the demo result is no longer just a local assertion.
 - It is still not a full resolver job. The next step should define closed-window rules and then make a script or service that maps future match IDs to public result sources without hand-editing fixtures.
 
+## Phase 6D - Closed-Window Scoring Audit
+
+Completed locally.
+
+What was done:
+
+- Added `scoringMode`, `signalWindow`, and `signalClosesAt` fields to match cards.
+- Demo replay matches are explicitly marked as `demo-replay` so historical demo signals are not confused with live competition signals.
+- The 2026 Mexico vs South Africa sample is marked as `live` and closes at kickoff.
+- Added `evaluateSignalEligibility` and `buildScoringAudit` to shared scoring logic.
+- The leaderboard now scores only eligible resolved signals.
+- The UI and snapshot exporter now read the block timestamp for each `SignalSubmitted` event.
+- Snapshot output includes `submittedAt`, `eligibility`, `scored`, and score details for each loaded event.
+
+Verification:
+
+- `npm run snapshot:leaderboard`: passing.
+- Snapshot shows the current demo signal as `eligible: true` with reason `demo-replay-window`.
+- Snapshot includes the event `submittedAt` derived from its Mantle Sepolia block timestamp.
+
+Reflection:
+
+- This is the right level for the current stage: it prevents silent scoring of late live signals while preserving explicitly labeled demo replay mode.
+- The next hardening step is to make the resolver job enforce these windows automatically when it writes future live resolutions.
+
 ## Next Phase
 
 After reproducible scoring snapshot:
 
 - Deploy the frontend to a public URL.
-- Add closed-window scoring rules and a resolver job that pulls from public result sources.
+- Add a resolver job that pulls from public result sources and enforces live-match windows.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.

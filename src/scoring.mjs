@@ -31,13 +31,55 @@ export function scoreSignal(event, resolution) {
   return { brier, logLoss, quality };
 }
 
-export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
-  const byAgent = new Map();
-  for (const event of events) {
+export function evaluateSignalEligibility(event, match) {
+  if (!match) {
+    return { eligible: false, reason: "unknown-match" };
+  }
+  if (match.scoringMode === "demo-replay") {
+    return { eligible: true, reason: "demo-replay-window" };
+  }
+  if (!match.signalClosesAt) {
+    return { eligible: true, reason: "no-close-window-configured" };
+  }
+  if (!event.submittedAt) {
+    return { eligible: false, reason: "missing-submission-timestamp" };
+  }
+  const submittedAt = Date.parse(event.submittedAt);
+  const closesAt = Date.parse(match.signalClosesAt);
+  if (!Number.isFinite(submittedAt) || !Number.isFinite(closesAt)) {
+    return { eligible: false, reason: "invalid-window-timestamp" };
+  }
+  if (submittedAt > closesAt) {
+    return { eligible: false, reason: "late-signal", closesAt: match.signalClosesAt };
+  }
+  return { eligible: true, reason: "inside-signal-window", closesAt: match.signalClosesAt };
+}
+
+export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+  return events.map((event) => {
     const match = matchByHash(event.matchId, matches);
     const resolution = match ? resolutions[match.id] : null;
-    const score = scoreSignal(event, resolution);
-    if (!score) continue;
+    const eligibility = evaluateSignalEligibility(event, match);
+    const score = eligibility.eligible ? scoreSignal(event, resolution) : null;
+    return {
+      signalId: event.signalId,
+      agent: event.agent,
+      matchId: event.matchId,
+      matchKey: match?.id ?? null,
+      submittedAt: event.submittedAt ?? null,
+      eligibility,
+      scored: Boolean(score),
+      score,
+    };
+  });
+}
+
+export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+  const byAgent = new Map();
+  for (const audit of buildScoringAudit(events, matches, resolutions)) {
+    if (!audit.score) continue;
+    const event = events.find((candidate) => candidate.signalId === audit.signalId && candidate.agent === audit.agent);
+    const score = audit.score;
     const current = byAgent.get(event.agent) ?? {
       agent: event.agent,
       signals: 0,
@@ -69,6 +111,9 @@ export function buildResolutionEvidence(matches = MATCHES, resolutions = DEMO_RE
   return matches.map((match) => ({
     id: match.id,
     title: match.title,
+    scoringMode: match.scoringMode,
+    signalClosesAt: match.signalClosesAt ?? null,
+    signalWindow: match.signalWindow,
     resolved: Boolean(resolutions[match.id]),
     resolution: resolutions[match.id] ? attachResultSource(resolutions[match.id]) : null,
   }));

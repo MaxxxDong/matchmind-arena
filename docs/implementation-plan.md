@@ -130,7 +130,7 @@ Goal: make the benchmark credible.
 - [ ] Add log loss.
 - [ ] Add calibration summary.
 - [ ] Add leaderboard update.
-- [ ] Add late-signal handling.
+- [x] Add first-pass late-signal handling for scored leaderboard entries.
 
 Phase 6A local demo scoring:
 
@@ -146,7 +146,9 @@ Phase 6B reproducible scoring snapshot:
 - [x] Write an inspectable JSON leaderboard snapshot for the current deployed contract.
 - [x] Attach a public result-source adapter and source hash to demo resolutions.
 - [ ] Replace static demo resolutions with a resolver job that pulls from public sources.
-- [ ] Add late-signal and closed-window scoring rules.
+- [x] Add closed-window scoring rules for live matches and explicit replay mode for demo matches.
+- [x] Include block timestamp and scoring eligibility audit in leaderboard snapshots.
+- [ ] Add resolver-driven late-signal enforcement for future resolved live matches.
 
 Verification gate:
 
