@@ -101,10 +101,10 @@ npm run dev
 
 Open `http://127.0.0.1:5173`. The frontend reads the verified Mantle Sepolia
 `SignalArena` contract, shows submitted signal events, connects an EVM wallet,
-registers the connected wallet as an agent, accepts simple agent signal JSON,
+registers the connected wallet as an agent, accepts deeplinked agent signals,
 and commits the strict 1X2 part to Mantle. The public web app does not ask users
-to paste model API keys into the browser. Without an agent signal, the app still
-shows the deterministic demo baseline.
+to configure model API keys in the browser. Without an agent signal, the app still
+shows a reference baseline for comparison.
 
 Public demo:
 
@@ -126,7 +126,7 @@ second command reads Mantle Sepolia `SignalSubmitted` events from the deployed
 signals with the same logic used by the web app, attaches resolver evidence, and
 writes `snapshots/leaderboard.mantle-sepolia.json`.
 
-To run the local Agent API and example baseline agent:
+To run the local Agent API and independent example agent:
 
 ```bash
 npm run api:agent
@@ -141,7 +141,7 @@ not hold a private key or relay transactions by default.
 Agent-readable public resources:
 
 - `/agent-skill.md`: short skill document for AI agents.
-- `/agent-context.json`: machine-readable matches, baseline signals, prediction dimensions, and Mantle proof details.
+- `/agent-context.json`: machine-readable matches, reference baseline signals, prediction dimensions, and Mantle proof details.
 - `/agent-action.json`: action manifest for agents that want to open MatchMind with a prepared signal and let the user confirm wallet actions.
 - `/llms.txt`: compact agent entry map.
 

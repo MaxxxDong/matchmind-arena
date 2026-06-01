@@ -145,7 +145,7 @@
       "suggestedDimensions": ["match_winner_1x2", "exact_score", "first_goal", "group_winner", "tournament_context"]
     }
   ],
-  "recommendedAgentOutput": {
+  "agentOutputContract": {
     "summary": "Short user-facing explanation.",
     "agentId": "stable agent id",
     "agentName": "agent display name",

@@ -463,7 +463,7 @@ function matchFromSignal(candidate, fallbackMatch) {
 
 function parseAgentSignalPayload(text, match) {
   if (!text.trim()) {
-    throw new Error("Paste a simple agent signal JSON or a commit-ready payload.");
+    throw new Error("Provide a simple agent signal JSON or a commit-ready payload.");
   }
   const parsed = JSON.parse(text);
   if (parsed?.commitment || parsed?.contextHash || parsed?.metadataHash) {
@@ -956,7 +956,7 @@ function App() {
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
-              <small>{agentCommitment ? agentSignalMode : "demo baseline"}</small>
+              <small>{agentCommitment ? agentSignalMode : "reference baseline"}</small>
             </div>
             <p>{selectedMatch.bias}</p>
             <div className="agent-box">
@@ -976,7 +976,7 @@ function App() {
                 <span>Then use the green button below; approve wallet prompts to write on Mantle.</span>
               </div>
               <details className="debug-box">
-                <summary>Advanced: paste or inspect signal JSON</summary>
+                <summary>Advanced fallback: inspect or manually load signal JSON</summary>
                 <label>
                   <span>Agent signal JSON</span>
                   <textarea
@@ -1005,8 +1005,8 @@ function App() {
               </p>
             ) : (
               <p className="ai-explanation">
-                The website exposes the match context and supported dimensions for agents. The example
-                JSON is intentionally simple so any AI agent can produce it quickly.
+                The website exposes match context and supported dimensions. Agents should use their own
+                method, sources, and probability weighting instead of copying baseline values.
               </p>
             )}
             <div className="button-row">
@@ -1014,15 +1014,20 @@ function App() {
                 {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
                 Confirm in wallet and submit to Mantle
               </button>
-              <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
-                {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
-                {agentReady ? "Agent ready" : "Register agent"}
-              </button>
-              <button onClick={submitSignal} disabled={busy === "signal"} className="secondary">
-                {busy === "signal" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
-                Commit signal
-              </button>
             </div>
+            <details className="debug-box">
+              <summary>Advanced wallet actions</summary>
+              <div className="button-row">
+                <button onClick={registerAgent} disabled={busy === "register" || agentReady} className="secondary">
+                  {busy === "register" ? <Loader2 className="spin" size={18} /> : <Bot size={18} />}
+                  {agentReady ? "Agent ready" : "Register agent only"}
+                </button>
+                <button onClick={submitSignal} disabled={busy === "signal"} className="secondary">
+                  {busy === "signal" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
+                  Submit signal only
+                </button>
+              </div>
+            </details>
           </section>
 
           {(status || txHash) && (

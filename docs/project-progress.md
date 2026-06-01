@@ -162,6 +162,8 @@ Reflection:
 
 Completed locally.
 
+Superseded by Phase 3B and Phase 3D/3F. The public web app no longer asks users to configure browser-side model endpoints or provide model API keys; agents run locally or in user-owned infrastructure and pass structured signals through the action/deeplink flow.
+
 What was done:
 
 - Added user-provided OpenAI-compatible model settings in the signal composer.
@@ -170,7 +172,7 @@ What was done:
 - Parses model output, validates non-negative numeric probabilities, normalizes the vector to exactly `10000` bps, and clamps confidence to `0..10000`.
 - Uses AI output to generate the signal `contextHash`, `evidenceHash`, and `metadataHash`.
 - Stores full generated signal metadata in browser-local cache before the user commits the hash trail on-chain.
-- Keeps the deterministic demo baseline as fallback when no model is configured.
+- Historical note: this fallback has been reframed as a reference baseline only. Current agent-facing resources explicitly say agents must not copy baseline values.
 
 Verification:
 
