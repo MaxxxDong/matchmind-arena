@@ -14,11 +14,12 @@ async function main() {
   console.log(`Agent: ${agent.address}`);
   console.log(`SignalArena: ${SIGNAL_ARENA_ADDRESS}`);
 
-  const agentMetadataHash = ethers.id("agent:demo-ai-sports-signal");
+  const agentIdHash = ethers.id("agent:demo-ai-sports-signal");
+  const agentMetadataHash = ethers.id("agent-metadata:demo-ai-sports-signal");
   const agentRecord = await arena.getAgent(agent.address);
 
   if (!agentRecord.registered) {
-    const registerTx = await arena.registerAgent(agentMetadataHash, "https://example.com/agents/demo");
+    const registerTx = await arena.registerAgent(agentIdHash, agentMetadataHash, "https://example.com/agents/demo");
     console.log(`Register tx: ${registerTx.hash}`);
     await registerTx.wait();
   }
@@ -46,4 +47,3 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-

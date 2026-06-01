@@ -21,6 +21,9 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 7B publication hygiene and license: complete locally.
 - Phase 7C public GitHub repository: complete.
 - Phase 7D demo video script: complete.
+- Phase 8A agent onboarding example: complete.
+- Phase 8B first-class on-chain agent ID hash: complete.
+- Phase 8C market-dimension prediction schema: complete.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -55,6 +58,7 @@ What was done:
 - Added `SignalArena` Solidity contract.
 - Added strict 1X2 probability validation.
 - Added agent registration.
+- Upgraded agent registration to include a first-class `agentIdHash`.
 - Added signal submission with revision detection.
 - Added match resolution with source hash and URI.
 - Added Mantle Sepolia and Mantle mainnet network configuration.
@@ -67,7 +71,7 @@ What was done:
 
 Verification:
 
-- `npm test`: 8 passing.
+- `npm test`: 9 passing.
 - `npm run compile`: passing.
 - `npx hardhat run scripts/deploy-signal-arena.js`: passing on local Hardhat network.
 - `npm audit --omit=dev`: 0 vulnerabilities.
@@ -78,22 +82,20 @@ Verification:
 Mantle Sepolia proof:
 
 - Deployer / demo agent: `0xA4a5B46c6109b61337C22428556B5259185cBE5B`
-- SignalArena contract: `0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4`
-- Deploy tx: `0xfc255bc191e0c1b6e95ec3f4bd191e809047e2ed30d9e71c5736389700e660ff`
-- Agent registration tx: `0x86d5bbf171db6cf5327bce47d0237230595126544fed38f09ff59240e4e8ae0e`
-- Demo signal tx: `0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c`
+- SignalArena contract: `0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0`
+- Deploy tx: `0xbb1d98ba48f8d41cc8177e6725a282df634fc4ac6a694805ac34729d5f1b33a6`
+- Agent registration tx: `0x3de74f1fbb1ee4096de3dae50fa2551737cfaf998c1889b775f594d5b9a7a40a`
+- Demo signal tx: `0x13777acb9536a6c6e0de6453d916360e7682c99b7c2f1a36e61cfc828a3a204e`
 
 Explorer verification status:
 
-- MantleScan manual Standard JSON verification succeeded.
-- Standard JSON upload file: `verification/SignalArena.standard-input.json`.
+- Contract is deployed and callable on Mantle Sepolia.
 - Compiler: `v0.8.24+commit.e11b9ed9`.
 - EVM version: `paris`.
 - Optimizer: enabled, 200 runs.
+- `viaIR`: enabled to avoid Solidity stack-depth limits after adding `agentIdHash` to events.
 - Constructor arguments: none.
-- MantleScan returned: `Successfully generated matching Bytecode and ABI for Contract Address [0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4]`.
-- Hardhat verification now targets Etherscan API V2; it requires `MANTLE_EXPLORER_API_KEY` or `ETHERSCAN_API_KEY`.
-- Current CLI probe reaches Etherscan V2 and fails only with `Invalid API Key`, which confirms the old HTML/V1 endpoint issue is fixed.
+- CLI verification reaches the explorer API but currently fails with `Invalid API Key (#err2)`. A valid MantleScan / Etherscan V2 API key or manual Standard JSON upload is still needed for source-code verification.
 
 Blocked items:
 
@@ -115,7 +117,7 @@ What was done:
 - Added a Vite / React web app.
 - Added a live sports dashboard UI for match selection, match detail, probability cards, timeline, and leaderboard seed.
 - Reads `SignalArena.nextSignalId`, connected agent status, and `SignalSubmitted` events from Mantle Sepolia.
-- Uses deployment block `39344371` as the event scan start to avoid slow full-chain log reads.
+- Uses deployment block `39386150` as the event scan start to avoid slow full-chain log reads.
 - Connects an EVM wallet and switches/adds Mantle Sepolia.
 - Allows the connected wallet to call `registerAgent`.
 - Allows a registered wallet to commit a structured demo AI 1X2 signal through `submitSignal`.
@@ -124,7 +126,7 @@ What was done:
 Verification:
 
 - `npm run compile`: passing.
-- `npm test`: 8 passing.
+- `npm test`: 9 passing.
 - `npm run build`: passing.
 - `npm audit --omit=dev`: 0 vulnerabilities.
 - Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
@@ -176,7 +178,7 @@ What was done:
 
 Verification:
 
-- `npm test`: 8 passing.
+- `npm test`: 9 passing.
 - `npm run build`: passing.
 - `git diff --check`: passing.
 - Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
@@ -203,7 +205,7 @@ What was done:
 
 Verification:
 
-- `npm test`: 8 passing.
+- `npm test`: 9 passing.
 - `npm run build`: passing.
 - `git diff --check`: passing.
 - Local dev server: `http://127.0.0.1:5173` returns HTTP 200.
@@ -369,14 +371,14 @@ What was done:
 
 - Added `docs/submission-package.md` as the canonical reviewer-facing copy source.
 - Added short pitch, one-line summary, project summary, demo scene description, technical highlights, core demo flow, award fit, and honest limits.
-- Added the MantleScan verified contract link to README.
+- Added the MantleScan contract link to README.
 - Linked the submission package from the README documentation map.
-- Marked README, public frontend link, verified contract link, short pitch, and submission package draft as complete in the execution checklist.
+- Marked README, public frontend link, contract link, short pitch, and submission package draft as complete in the execution checklist.
 
 Verification:
 
 - `docs/submission-package.md` exists and is linked from README.
-- README now includes the public Vercel demo URL and verified MantleScan contract link.
+- README now includes the public Vercel demo URL and MantleScan contract link.
 
 Reflection:
 
@@ -500,7 +502,7 @@ What was done:
 Reflection:
 
 - This is closer to the intended product: an agent can arrive at the website, read shared context and skill instructions, use its own tools and user guidance, return a simple judgment, and then let MatchMind commit the scoreable proof on Mantle.
-- Exact score and first-goal predictions are currently analysis evidence rather than on-chain score fields. The deployed contract still scores strict 1X2 because that is the stable, already verified on-chain surface.
+- Exact score and first-goal predictions are currently analysis evidence rather than on-chain score fields. The deployed contract still scores strict 1X2 because that is the stable, deployed on-chain surface.
 
 ## Phase 3D - Agent Deeplink And Fixed Identity
 
@@ -560,3 +562,33 @@ Reflection:
 
 - This keeps the benchmark fairer: MatchMind defines the scoring surface and data contract, while each agent owns its evidence, weighting, and prediction style.
 - The app still validates only what it must validate for scoring: probability vector shape, source disclosure, and method visibility. It does not force a model, strategy, or fixed data weighting.
+
+## Phase 8 - Agent ID Hash And Market Dimensions
+
+Completed locally and deployed to Mantle Sepolia.
+
+What was done:
+
+- Added `agent-examples/minimal-node-agent.mjs` and `agent-examples/README.md` as a minimal external agent integration path.
+- Added `npm run agent:minimal`.
+- Upgraded `SignalArena.registerAgent` to accept `agentIdHash`.
+- Added `agentIdHash` to `AgentRegistered` and `SignalSubmitted` events.
+- Added on-chain uniqueness for `agentIdHash` without adding multi-wallet migration.
+- Updated revision detection to key by `agentIdHash + matchId + matchWindow`.
+- Added match-specific `marketDimensions`.
+- Required simple agent signals to include `marketPredictions` for every listed market dimension on the selected match.
+- Updated the UI to show required market dimensions and agent predictions for those dimensions.
+- Redeployed `SignalArena` to Mantle Sepolia and submitted a demo signal against the upgraded contract.
+
+Verification:
+
+- `npm test`: 9 passing.
+- `npm run build`: passing.
+- `npm run deploy:mantle-sepolia`: deployed `0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0`.
+- `npm run submit-demo:mantle-sepolia`: registered demo agent and submitted demo signal.
+
+Reflection:
+
+- This makes the identity story clearer for reviewers: the chain now sees a stable `agentIdHash`, not only a wallet address.
+- The market-dimension schema keeps agent outputs aligned with Polymarket-style markets without asking agents to invent unsupported fields.
+- The remaining gap is source-code verification for the new deployment; CLI verification reached the explorer but failed with `Invalid API Key (#err2)`.

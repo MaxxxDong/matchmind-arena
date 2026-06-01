@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-01T02:56:26.395Z",
+  "generatedAt": "2026-06-01T12:33:14.424Z",
   "network": "mantle-sepolia",
-  "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
-  "deployBlock": 39344371,
-  "latestBlock": 39368955,
+  "contractAddress": "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0",
+  "deployBlock": 39386150,
+  "latestBlock": 39386259,
   "eventCount": 1,
   "resolvedSignalCount": 1,
   "resolutionSource": {
     "path": "snapshots/resolutions.mantle-sepolia.json",
-    "generatedAt": "2026-06-01T02:56:24.680Z",
+    "generatedAt": "2026-06-01T12:32:55.365Z",
     "resolver": "matchmind-public-result-resolver"
   },
   "matches": [
@@ -24,7 +24,7 @@
         "resultScope": "regular-time-1x2",
         "sourceId": "espnArgentinaFrance2022",
         "source": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
-        "resolvedAt": "2026-06-01T02:56:23.751Z",
+        "resolvedAt": "2026-06-01T12:32:53.580Z",
         "resolverStatus": "verified-from-public-source",
         "sourceProvider": "ESPN",
         "sourceTitle": "Argentina 3-3 France (Dec 18, 2022) Final Score",
@@ -57,9 +57,10 @@
     {
       "signalId": 1,
       "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
       "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
       "matchKey": "demo-replay:argentina-france-2022",
-      "submittedAt": "2026-05-31T13:17:35.000Z",
+      "submittedAt": "2026-06-01T12:30:45.000Z",
       "eligibility": {
         "eligible": true,
         "reason": "demo-replay-window"
@@ -116,13 +117,15 @@
   },
   "leaderboard": [
     {
-      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agent": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "wallet": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
       "signals": 1,
       "resolved": 1,
       "totalQuality": 39,
       "totalBrier": 0.8257999999999999,
       "totalLogLoss": 1.3093333199837622,
-      "latestBlock": 39344391,
+      "latestBlock": 39386186,
       "quality": 39,
       "brier": 0.8257999999999999,
       "logLoss": 1.3093333199837622
@@ -132,6 +135,7 @@
     {
       "signalId": 1,
       "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
       "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
       "matchWindow": 4,
       "homeBps": 4800,
@@ -143,10 +147,10 @@
       "metadataHash": "0xebfaf08b912ac8ccc62d2947f1cd04f4b6e16312f14c79873c20287fd9b21826",
       "metadataUri": "https://example.com/signals/demo-replay-1",
       "isRevision": false,
-      "txHash": "0xc711d5b9337aaa6fe6608d260626e8db0aa666ff59e0bc8c0123da560598e35c",
-      "blockNumber": 39344391,
-      "blockTimestamp": 1780233455,
-      "submittedAt": "2026-05-31T13:17:35.000Z"
+      "txHash": "0x13777acb9536a6c6e0de6453d916360e7682c99b7c2f1a36e61cfc828a3a204e",
+      "blockNumber": 39386186,
+      "blockTimestamp": 1780317045,
+      "submittedAt": "2026-06-01T12:30:45.000Z"
     }
   ]
 }

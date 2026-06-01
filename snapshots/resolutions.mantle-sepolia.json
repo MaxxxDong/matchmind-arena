@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-01T02:56:24.680Z",
+  "generatedAt": "2026-06-01T12:32:55.365Z",
   "resolver": "matchmind-public-result-resolver",
   "resolutions": {
     "demo-replay:argentina-france-2022": {
@@ -7,7 +7,7 @@
       "resultScope": "regular-time-1x2",
       "sourceId": "espnArgentinaFrance2022",
       "source": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
-      "resolvedAt": "2026-06-01T02:56:23.751Z",
+      "resolvedAt": "2026-06-01T12:32:53.580Z",
       "resolverStatus": "verified-from-public-source",
       "sourceProvider": "ESPN",
       "sourceTitle": "Argentina 3-3 France (Dec 18, 2022) Final Score",
@@ -24,9 +24,9 @@
       "uri": "https://global.espn.com/football/match/_/gameId/633850",
       "status": 200,
       "ok": true,
-      "checkedAt": "2026-06-01T02:56:23.751Z",
-      "contentLength": 405080,
-      "contentHash": "0x1d324f1d68a32cdbf574afecc29800c1cfe12e99c98a71304ed69583120f2f8e",
+      "checkedAt": "2026-06-01T12:32:53.580Z",
+      "contentLength": 404913,
+      "contentHash": "0x056588e9d1e32d4ad3a35d6fefaf610d0fef837aef4cf1ab3bc1966d9234c32d",
       "matchedGroups": [
         "Argentina",
         "France",

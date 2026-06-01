@@ -28,8 +28,8 @@ import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
 import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
-const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
-const DEPLOY_BLOCK = 39344371;
+const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
+const DEPLOY_BLOCK = 39386150;
 const EXPLORER = "https://sepolia.mantlescan.xyz";
 const MANTLE_SEPOLIA = {
   chainId: "0x138b",
@@ -42,12 +42,13 @@ const MANTLE_SEPOLIA = {
 const ARENA_ABI = [
   "function owner() view returns (address)",
   "function nextSignalId() view returns (uint256)",
-  "function getAgent(address agentAddress) view returns (tuple(bool registered, bytes32 metadataHash, string metadataUri, uint256 registeredAt))",
-  "function primarySignalSubmitted(address agentAddress, bytes32 matchId, uint8 matchWindow) view returns (bool)",
-  "function registerAgent(bytes32 metadataHash, string metadataUri)",
+  "function getAgent(address agentAddress) view returns (tuple(bool registered, bytes32 agentIdHash, bytes32 metadataHash, string metadataUri, uint256 registeredAt))",
+  "function getAgentOwner(bytes32 agentIdHash) view returns (address)",
+  "function primarySignalSubmitted(bytes32 agentIdHash, bytes32 matchId, uint8 matchWindow) view returns (bool)",
+  "function registerAgent(bytes32 agentIdHash, bytes32 metadataHash, string metadataUri)",
   "function submitSignal((bytes32 matchId, bytes32 contextHash, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri) input) returns (uint256 signalId)",
-  "event AgentRegistered(address indexed agent, bytes32 metadataHash, string metadataUri, uint256 registeredAt)",
-  "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
+  "event AgentRegistered(address indexed agent, bytes32 indexed agentIdHash, bytes32 metadataHash, string metadataUri, uint256 registeredAt)",
+  "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, bytes32 agentIdHash, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
 ];
 
 const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
@@ -57,14 +58,13 @@ const AGENT_CONTEXT_URL = "/agent-context.json";
 const AGENT_ACTION_URL = "/agent-action.json";
 const LLMS_URL = "/llms.txt";
 const PREDICTION_DIMENSIONS = [
-  ["1X2 winner", "home / draw / away"],
-  ["Exact score", "1-1, 1-0, 2-1"],
+  ["Moneyline / 1X2", "home / draw / away"],
+  ["Correct score", "ranked score outcomes"],
   ["First goal", "home / no goal / away"],
-  ["Both score", "yes / no"],
-  ["Total goals", "under / over bands"],
-  ["Team goals", "per-team distribution"],
-  ["Halftime", "home / draw / away"],
-  ["Tournament", "group / champion context"],
+  ["Both teams score", "yes / no"],
+  ["Totals", "over / under lines"],
+  ["Team totals", "team-specific over / under"],
+  ["Tournament markets", "group / champion context"],
 ];
 const DEFAULT_AGENT_PROFILE = {
   agentId: "agent_site_reader_demo",
@@ -90,6 +90,17 @@ const SIMPLE_AGENT_EXAMPLE = `{
     "homeBps": 4600,
     "noGoalBps": 600,
     "awayBps": 4800
+  },
+  "marketPredictions": {
+    "match_winner_1x2": { "Argentina": 4400, "Draw": 3200, "France": 2400 },
+    "exact_score": [
+      { "outcome": "2-2", "bps": 1400 },
+      { "outcome": "1-1", "bps": 1200 },
+      { "outcome": "other", "bps": 7400 }
+    ],
+    "first_goal": { "Argentina": 4600, "No goal": 600, "France": 4800 },
+    "both_teams_to_score": { "Yes": 6500, "No": 3500 },
+    "total_goals_2_5": { "Over": 5800, "Under": 4200 }
   },
   "sourceMix": ["match-context", "regular-time-result-model", "agent-reasoning"]
 }`;
@@ -159,10 +170,12 @@ function normalizeAgentProfile(candidate = {}) {
 }
 
 function buildAgentRegistration(profile, walletAddress) {
+  const agentIdHash = ethers.id(profile.agentId);
   const record = {
     app: "MatchMind Arena",
     type: "agent-registration",
     agentId: profile.agentId,
+    agentIdHash,
     name: profile.name,
     operator: profile.operator,
     model: profile.model,
@@ -170,6 +183,7 @@ function buildAgentRegistration(profile, walletAddress) {
     walletAddress: walletAddress?.toLowerCase?.() || null,
   };
   return {
+    agentIdHash,
     metadataHash: ethers.id(stableStringify(record)),
     metadataUri: `https://matchmind-arena.vercel.app/agents/${encodeURIComponent(profile.agentId)}`,
     record,
@@ -196,6 +210,7 @@ function eventFromParsedLog(parsed, receiptLog, blockTimestamp = null) {
   return {
     signalId: Number(parsed.args.signalId),
     agent: parsed.args.agent,
+    agentIdHash: parsed.args.agentIdHash,
     matchId: parsed.args.matchId,
     matchWindow: Number(parsed.args.matchWindow),
     homeBps: Number(parsed.args.homeBps),
@@ -251,9 +266,17 @@ async function queryAgentEvents() {
     const metadataUri = String(log.args.metadataUri || "");
     const match = metadataUri.match(/\/agents\/([^/?#]+)/);
     registry.set(address, {
+      agentIdHash: log.args.agentIdHash,
       metadataHash: log.args.metadataHash,
       metadataUri,
       agentId: match ? decodeURIComponent(match[1]) : shortHash(log.args.agent),
+    });
+    registry.set(String(log.args.agentIdHash).toLowerCase(), {
+      walletAddress: log.args.agent,
+      agentIdHash: log.args.agentIdHash,
+      metadataHash: log.args.metadataHash,
+      metadataUri,
+      agentId: match ? decodeURIComponent(match[1]) : shortHash(log.args.agentIdHash),
     });
   }
   return registry;
@@ -358,6 +381,69 @@ function firstGoalText(rawEvidence, match) {
   return `First goal: ${label === "Draw" ? "No goal" : label} ${formatPct(bps)}`;
 }
 
+function marketPredictionsFrom(rawEvidence) {
+  return rawEvidence?.marketPredictions || rawEvidence?.signals?.marketPredictions || {};
+}
+
+function normalizeOutcomeMap(value, dimension) {
+  if (Array.isArray(value)) {
+    return value.map((item) => ({
+      outcome: String(item.outcome ?? item.score ?? item.label ?? ""),
+      bps: Number(item.bps ?? item.probabilityBps ?? item.value ?? 0),
+    })).filter((item) => item.outcome && Number.isFinite(item.bps));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).map(([outcome, bps]) => ({
+      outcome,
+      bps: Number(bps),
+    })).filter((item) => Number.isFinite(item.bps));
+  }
+  throw new Error(`marketPredictions.${dimension.id} must be an object or ranked array.`);
+}
+
+function validateMarketPredictions(candidate, match) {
+  const predictions = candidate.marketPredictions ?? candidate.signals?.marketPredictions;
+  if (!predictions || typeof predictions !== "object" || Array.isArray(predictions)) {
+    throw new Error("Agent signal must include marketPredictions for every marketDimension listed on the selected match.");
+  }
+
+  const normalized = {};
+  for (const dimension of match.marketDimensions || []) {
+    const value = predictions[dimension.id];
+    if (value === undefined || value === null) {
+      throw new Error(`Agent signal is missing marketPredictions.${dimension.id}.`);
+    }
+    const entries = normalizeOutcomeMap(value, dimension);
+    if (entries.length === 0) {
+      throw new Error(`marketPredictions.${dimension.id} must include at least one outcome.`);
+    }
+    if (dimension.format === "basis_points_sum_10000") {
+      const total = entries.reduce((sum, item) => sum + item.bps, 0);
+      if (total !== 10000) {
+        throw new Error(`marketPredictions.${dimension.id} must sum to 10,000 bps.`);
+      }
+    }
+    normalized[dimension.id] = entries;
+  }
+  return normalized;
+}
+
+function dimensionPredictionText(rawEvidence, dimension) {
+  const predictions = marketPredictionsFrom(rawEvidence);
+  const entries = predictions[dimension.id];
+  if (!entries) return `${dimension.label}: not published`;
+  let normalized = [];
+  try {
+    normalized = normalizeOutcomeMap(entries, dimension)
+      .sort((a, b) => b.bps - a.bps)
+      .slice(0, 3);
+  } catch {
+    return `${dimension.label}: invalid format`;
+  }
+  if (normalized.length === 0) return `${dimension.label}: not published`;
+  return `${dimension.label}: ${normalized.map((item) => `${item.outcome} ${formatPct(item.bps)}`).join(" · ")}`;
+}
+
 function sourceText(rawEvidence) {
   const sources = rawEvidence?.sourceMix || rawEvidence?.evidence || [];
   if (!Array.isArray(sources) || sources.length === 0) return "Sources: not declared";
@@ -431,6 +517,7 @@ function normalizeSimpleAgentSignal(candidate, match) {
   if (!String(methodSummary || candidate.reasoningSummary || candidate.explanation || "").trim()) {
     throw new Error("Agent signal must include methodSummary or reasoningSummary so its prediction style is visible.");
   }
+  const marketPredictions = validateMarketPredictions(candidate, match);
   return buildSignalCommitment(match, {
     homeBps,
     drawBps,
@@ -447,6 +534,7 @@ function normalizeSimpleAgentSignal(candidate, match) {
       methodSummary,
       exactScore: candidate.exactScore ?? candidate.signals?.exactScore ?? [],
       firstGoal: candidate.firstGoal ?? candidate.signals?.firstGoal ?? null,
+      marketPredictions,
       sourceMix,
       caveats: candidate.caveats ?? [],
     },
@@ -627,6 +715,7 @@ function App() {
       setWallet(address);
       const registration = buildAgentRegistration(agentProfile, address);
       const tx = await arena.registerAgent(
+        registration.agentIdHash,
         registration.metadataHash,
         registration.metadataUri,
       );
@@ -677,16 +766,18 @@ function App() {
       if (!record.registered) {
         const registration = buildAgentRegistration(agentProfile, address);
         setStatus(`Step 1/2: approve agent registration for ${agentProfile.name} (${agentProfile.agentId}) in your wallet.`);
-        const registerTx = await arena.registerAgent(registration.metadataHash, registration.metadataUri);
+        const registerTx = await arena.registerAgent(registration.agentIdHash, registration.metadataHash, registration.metadataUri);
         setTxHash(registerTx.hash);
         await registerTx.wait();
         setAgentRegistry((current) => new Map(current).set(address.toLowerCase(), {
+          agentIdHash: registration.agentIdHash,
           metadataHash: registration.metadataHash,
           metadataUri: registration.metadataUri,
           agentId: agentProfile.agentId,
         }));
         setAgent({
           registered: true,
+          agentIdHash: registration.agentIdHash,
           metadataHash: registration.metadataHash,
           metadataUri: registration.metadataUri,
           registeredAt: 0,
@@ -764,7 +855,7 @@ function App() {
     ...selectedEvents.map((event) => ({
       key: `chain:${event.txHash}:${event.signalId}`,
       source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
-      agent: agentLabel(event.agent),
+      agent: agentLabel(event.agentIdHash || event.agent),
       signal: event,
       rawEvidence: null,
       txHash: event.txHash,
@@ -805,7 +896,7 @@ function App() {
 
       <section className="command-strip" aria-label="Mantle contract status">
         <Metric icon={<RadioTower size={18} />} label="Network" value="Mantle Sepolia" />
-        <Metric icon={<BadgeCheck size={18} />} label="Verified contract" value={shortHash(CONTRACT_ADDRESS)} />
+        <Metric icon={<BadgeCheck size={18} />} label="Mantle contract" value={shortHash(CONTRACT_ADDRESS)} />
         <Metric icon={<Activity size={18} />} label="Loaded signals" value={events.length} />
         <Metric icon={<Network size={18} />} label="Next signal" value={nextSignalId ?? "-"} />
         <Metric icon={<Gauge size={18} />} label="Resolved scored" value={leaderboard.reduce((total, entry) => total + entry.resolved, 0)} />
@@ -917,6 +1008,22 @@ function App() {
             <Probability label={selectedMatch.away} value={activeSignal.awayBps} tone="away" />
           </div>
 
+          <section className="market-panel" aria-label="Market dimensions required from agents">
+            <div className="section-title">
+              <span><Layers3 size={18} /> Market dimensions</span>
+              <small>{selectedMatch.marketDimensions?.length || 0} required</small>
+            </div>
+            <div className="market-chip-grid">
+              {(selectedMatch.marketDimensions || []).map((dimension) => (
+                <div className="market-chip" key={dimension.id}>
+                  <strong>{dimension.label}</strong>
+                  <span>{dimension.polymarketType}</span>
+                  <small>{Array.isArray(dimension.outcomes) ? dimension.outcomes.join(" / ") : dimension.format}</small>
+                </div>
+              ))}
+            </div>
+          </section>
+
           <section className="prediction-panel" aria-label="Agent predictions for selected match">
             <div className="section-title">
               <span><Bot size={18} /> Agent predictions</span>
@@ -938,6 +1045,9 @@ function App() {
                       1X2: {selectedMatch.home} {formatPct(row.signal.homeBps)} · Draw {formatPct(row.signal.drawBps)} · {selectedMatch.away} {formatPct(row.signal.awayBps)}
                     </p>
                     <small>{exactScoreText(row.rawEvidence)} · {firstGoalText(row.rawEvidence, selectedMatch)}</small>
+                    {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
+                      <small key={dimension.id}>{dimensionPredictionText(row.rawEvidence, dimension)}</small>
+                    ))}
                     <small>{methodText(row.rawEvidence)}</small>
                     <small>{sourceText(row.rawEvidence)}</small>
                     {row.txHash ? (
@@ -1060,7 +1170,7 @@ function App() {
                 <a className="timeline-item" href={`${EXPLORER}/tx/${event.txHash}`} target="_blank" rel="noreferrer" key={`${event.txHash}-${event.signalId}`}>
                   <span>#{event.signalId} · block {event.blockNumber}</span>
                   <strong>{formatPct(event.homeBps)} / {formatPct(event.drawBps)} / {formatPct(event.awayBps)}</strong>
-                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {agentLabel(event.agent)} · {event.submittedAt ?? "time pending"}</small>
+                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {agentLabel(event.agentIdHash || event.agent)} · {event.submittedAt ?? "time pending"}</small>
                 </a>
               ))
             )}

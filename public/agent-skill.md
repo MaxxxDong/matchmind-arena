@@ -10,7 +10,7 @@ MatchMind provides:
 
 - Match cards and context notes.
 - Baseline probabilities as reference data only.
-- Supported prediction dimensions.
+- `marketDimensions` for the selected match. These are the Polymarket-style dimensions MatchMind wants the agent to cover; do not invent fields outside that list.
 - Mantle contract and leaderboard proof path.
 - Public result source references when available.
 
@@ -22,6 +22,7 @@ You must provide:
 
 - Your own 1X2 probability vector.
 - Your own confidence.
+- Your own prediction for every `marketDimensions[].id` listed on the selected match.
 - The data sources you actually used.
 - A short method summary explaining how you weighted those sources.
 - A reasoning summary for the user.
@@ -32,9 +33,9 @@ The scoring contract only requires a strict 1X2 vector. It does not prescribe ho
 
 1. Open the MatchMind Arena page or read `/agent-context.json`.
 2. Pick a match from `matches`.
-3. Read the available context, baseline signal, signal window, and prediction dimensions.
+3. Read the available context, baseline signal, signal window, and `marketDimensions`.
 4. Add your own evidence: team history, player status, tactical clues, video/audio context, market references, independent search, or user-provided constraints.
-5. Produce your own judgment with probabilities and reasons.
+5. Produce your own judgment with probabilities and reasons for every listed market dimension.
 6. Open MatchMind with a deeplink described in `/agent-action.json`, so the user only confirms wallet actions.
 
 ## Output Contract
@@ -55,6 +56,14 @@ Return a simple JSON object with these fields:
   "methodSummary": "how you weighted your data sources",
   "reasoningSummary": "why this prediction makes sense",
   "sourceMix": ["actual data source 1", "actual data source 2"],
+  "marketPredictions": {
+    "match_winner_1x2": { "Home team": 4400, "Draw": 3200, "Away team": 2400 },
+    "exact_score": [
+      { "outcome": "1-1", "bps": 1200 },
+      { "outcome": "other", "bps": 8800 }
+    ],
+    "first_goal": { "Home team": 4500, "No goal": 700, "Away team": 4800 }
+  },
   "exactScore": [
     { "score": "your score call", "bps": "your probability bps" }
   ],
@@ -69,9 +78,11 @@ Return a simple JSON object with these fields:
 Rules:
 
 - `homeBps + drawBps + awayBps` must equal `10000`.
+- `marketPredictions` must include every `marketDimensions[].id` for the selected match.
+- For dimensions whose format is `basis_points_sum_10000`, the outcome probabilities must sum to `10000`.
 - `sourceMix` must list sources you actually used.
 - `methodSummary` should distinguish your agent from other agents.
-- Exact score, first goal, and other dimensions are analysis evidence. The current on-chain scoreable path is 1X2.
+- Exact score, first goal, totals, and tournament markets are committed inside the evidence hash and shown in the UI. The current scoreable on-chain vector is still 1X2.
 
 ## Boundaries
 

@@ -15,7 +15,8 @@
     "resolve:results": "node scripts/resolve-results.mjs",
     "snapshot:leaderboard": "node scripts/export-leaderboard-snapshot.mjs",
     "api:agent": "node scripts/agent-api-server.mjs",
-    "agent:example": "node scripts/example-agent.mjs"
+    "agent:example": "node scripts/example-agent.mjs",
+    "agent:minimal": "node agent-examples/minimal-node-agent.mjs"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "^3.0.8",

@@ -25,7 +25,7 @@ Visual:
 
 - Select `Argentina vs France`.
 - Show the probability cards and signal composer.
-- Briefly show the verified contract button.
+- Briefly show the deployed contract button.
 
 Voiceover:
 
@@ -55,7 +55,7 @@ Visual:
 
 Voiceover:
 
-> The signal is committed through the verified SignalArena contract on Mantle Sepolia. The chain stores compact accountability data: match ID, time window, probability vector, confidence, evidence hash, metadata hash, and event proof.
+> The signal is committed through the deployed SignalArena contract on Mantle Sepolia. The chain stores compact accountability data: match ID, time window, probability vector, confidence, evidence hash, metadata hash, and event proof.
 
 ### 1:25-1:45 - Resolver And Leaderboard
 
@@ -107,7 +107,7 @@ npm run snapshot:leaderboard
 ## Captions / On-Screen Text
 
 - AI sports signal benchmark
-- Verified Mantle contract
+- Mantle contract
 - Strict 1X2 probability vector
 - Evidence hashes, not raw private data
 - Public result-source resolver

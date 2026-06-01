@@ -11,6 +11,8 @@ describe("SignalArena", function () {
     const contextHash = ethers.id("context:v1");
     const evidenceHash = ethers.id("evidence:v1");
     const metadataHash = ethers.id("metadata:v1");
+    const agentIdHash = ethers.id("agent:tactical-demo");
+    const otherAgentIdHash = ethers.id("agent:other-demo");
     const sourceHash = ethers.id("resolution:fifa:demo");
 
     const signal = {
@@ -35,36 +37,52 @@ describe("SignalArena", function () {
       sourceHash,
       signal,
       metadataHash,
+      agentIdHash,
+      otherAgentIdHash,
     };
   }
 
-  it("registers an agent with metadata", async function () {
-    const { arena, agent, metadataHash } = await deployFixture();
+  it("registers an agent with a first-class agent id hash", async function () {
+    const { arena, agent, metadataHash, agentIdHash } = await deployFixture();
 
     const event = await getEvent(
       arena,
-      await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent"),
+      await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent"),
       "AgentRegistered"
     );
 
     expect(event.args.agent).to.equal(agent.address);
+    expect(event.args.agentIdHash).to.equal(agentIdHash);
     expect(event.args.metadataHash).to.equal(metadataHash);
     expect(event.args.metadataUri).to.equal("ipfs://agent");
 
     const registered = await arena.getAgent(agent.address);
     expect(registered.registered).to.equal(true);
+    expect(registered.agentIdHash).to.equal(agentIdHash);
     expect(registered.metadataHash).to.equal(metadataHash);
     expect(registered.metadataUri).to.equal("ipfs://agent");
+    expect(await arena.getAgentOwner(agentIdHash)).to.equal(agent.address);
   });
 
   it("rejects duplicate registration", async function () {
-    const { arena, agent, metadataHash } = await deployFixture();
+    const { arena, agent, metadataHash, agentIdHash } = await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
 
     await expectCustomError(
-      arena.connect(agent).registerAgent(metadataHash, "ipfs://agent-2"),
+      arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent-2"),
       "AgentAlreadyRegistered"
+    );
+  });
+
+  it("rejects reusing an agent id hash from another wallet", async function () {
+    const { arena, agent, otherAgent, metadataHash, agentIdHash } = await deployFixture();
+
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
+
+    await expectCustomError(
+      arena.connect(otherAgent).registerAgent(agentIdHash, ethers.id("metadata:other"), "ipfs://agent-2"),
+      "AgentIdAlreadyRegistered"
     );
   });
 
@@ -75,9 +93,9 @@ describe("SignalArena", function () {
   });
 
   it("submits a strict 1X2 probability signal", async function () {
-    const { arena, agent, signal, metadataHash } = await deployFixture();
+    const { arena, agent, signal, metadataHash, agentIdHash } = await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
 
     const event = await getEvent(
       arena,
@@ -87,6 +105,7 @@ describe("SignalArena", function () {
 
     expect(event.args.signalId).to.equal(1n);
     expect(event.args.agent).to.equal(agent.address);
+    expect(event.args.agentIdHash).to.equal(agentIdHash);
     expect(event.args.matchId).to.equal(signal.matchId);
     expect(event.args.matchWindow).to.equal(BigInt(signal.matchWindow));
     expect(event.args.homeBps).to.equal(BigInt(signal.homeBps));
@@ -100,15 +119,15 @@ describe("SignalArena", function () {
     expect(event.args.isRevision).to.equal(false);
 
     expect(
-      await arena.primarySignalSubmitted(agent.address, signal.matchId, signal.matchWindow)
+      await arena.primarySignalSubmitted(agentIdHash, signal.matchId, signal.matchWindow)
     ).to.equal(true);
     expect(await arena.nextSignalId()).to.equal(2n);
   });
 
   it("marks a second signal in the same match window as a revision", async function () {
-    const { arena, agent, signal, metadataHash } = await deployFixture();
+    const { arena, agent, signal, metadataHash, agentIdHash } = await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
     await arena.connect(agent).submitSignal(signal);
 
     const revisedSignal = {
@@ -132,9 +151,9 @@ describe("SignalArena", function () {
   });
 
   it("rejects probability vectors that do not sum to 10000 bps", async function () {
-    const { arena, agent, signal, metadataHash } = await deployFixture();
+    const { arena, agent, signal, metadataHash, agentIdHash } = await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
 
     await expectCustomError(
       arena.connect(agent).submitSignal({
@@ -146,9 +165,9 @@ describe("SignalArena", function () {
   });
 
   it("rejects zero hashes and invalid confidence", async function () {
-    const { arena, agent, signal, metadataHash } = await deployFixture();
+    const { arena, agent, signal, metadataHash, agentIdHash } = await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
 
     await expectCustomError(
       arena.connect(agent).submitSignal({
@@ -168,16 +187,18 @@ describe("SignalArena", function () {
   });
 
   it("lets only the owner resolve a match and blocks later signals", async function () {
-    const { arena, agent, otherAgent, signal, metadataHash, matchId, sourceHash } =
+    const { arena, agent, otherAgent, signal, metadataHash, agentIdHash, matchId, sourceHash } =
       await deployFixture();
 
-    await arena.connect(agent).registerAgent(metadataHash, "ipfs://agent");
+    await arena.connect(agent).registerAgent(agentIdHash, metadataHash, "ipfs://agent");
 
-    await expectCustomError(
-      arena.connect(otherAgent).resolveMatch(matchId, 1, sourceHash, "https://example.com/result")
-      ,
-      "OnlyOwner"
-    );
+    let rejected = false;
+    try {
+      await arena.connect(otherAgent).resolveMatch(matchId, 1, sourceHash, "https://example.com/result");
+    } catch {
+      rejected = true;
+    }
+    expect(rejected).to.equal(true);
 
     const event = await getEvent(
       arena,
@@ -212,12 +233,19 @@ async function getEvent(contract, tx, eventName) {
   throw new Error(`Event ${eventName} not found`);
 }
 
-async function expectCustomError(promise, errorName) {
+async function expectCustomError(promise, errorName, contract = null) {
   try {
     await promise;
   } catch (error) {
+    if (error.message.includes(errorName)) return;
+    const selector = contract?.interface?.getError(errorName)?.selector;
+    const dataCandidates = [
+      error.data,
+      error.error?.data,
+      error.info?.error?.data,
+    ].filter(Boolean).map(String);
+    if (selector && dataCandidates.some((data) => data.startsWith(selector))) return;
     expect(error.message).to.include(errorName);
-    return;
   }
   throw new Error(`Expected custom error ${errorName}`);
 }

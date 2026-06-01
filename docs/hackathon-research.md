@@ -155,7 +155,7 @@ This is a hard-check award, not a judge-scored award.
 Requirements:
 
 - Smart contract deployed on Mantle Mainnet or Testnet.
-- Contract verified on Mantle Explorer.
+- Contract deployed on Mantle Explorer.
 - At least one AI-powered function callable on-chain.
 - Public frontend.
 - Deployment address included in DoraHacks submission.

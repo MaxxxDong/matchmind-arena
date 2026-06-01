@@ -304,7 +304,7 @@ Do not build a large contract. Build a strict event-first contract.
 
 Core functions:
 
-- `registerAgent(bytes32 metadataHash, string metadataUri)`
+- `registerAgent(bytes32 agentIdHash, bytes32 metadataHash, string metadataUri)`
 - `submitSignal(SignalInput calldata input)`
 - `resolveMatch(bytes32 matchId, uint8 result, bytes32 sourceHash, string calldata sourceUri)`
 

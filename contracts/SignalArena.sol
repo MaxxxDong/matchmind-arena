@@ -23,6 +23,7 @@ contract SignalArena {
 
     struct Agent {
         bool registered;
+        bytes32 agentIdHash;
         bytes32 metadataHash;
         string metadataUri;
         uint256 registeredAt;
@@ -53,11 +54,13 @@ contract SignalArena {
     uint256 public nextSignalId = 1;
 
     mapping(address => Agent) private agents;
+    mapping(bytes32 => address) private agentIdOwner;
     mapping(bytes32 => Resolution) private resolutions;
     mapping(bytes32 => bool) private hasPrimarySignal;
 
     event AgentRegistered(
         address indexed agent,
+        bytes32 indexed agentIdHash,
         bytes32 metadataHash,
         string metadataUri,
         uint256 registeredAt
@@ -67,6 +70,7 @@ contract SignalArena {
         uint256 indexed signalId,
         address indexed agent,
         bytes32 indexed matchId,
+        bytes32 agentIdHash,
         MatchWindow matchWindow,
         uint16 homeBps,
         uint16 drawBps,
@@ -89,6 +93,7 @@ contract SignalArena {
 
     error OnlyOwner();
     error AgentAlreadyRegistered();
+    error AgentIdAlreadyRegistered();
     error AgentNotRegistered();
     error InvalidHash();
     error InvalidProbabilityVector();
@@ -105,22 +110,30 @@ contract SignalArena {
         owner = msg.sender;
     }
 
-    function registerAgent(bytes32 metadataHash, string calldata metadataUri) external {
+    function registerAgent(
+        bytes32 agentIdHash,
+        bytes32 metadataHash,
+        string calldata metadataUri
+    ) external {
         if (agents[msg.sender].registered) revert AgentAlreadyRegistered();
-        if (metadataHash == bytes32(0)) revert InvalidHash();
+        if (agentIdHash == bytes32(0) || metadataHash == bytes32(0)) revert InvalidHash();
+        if (agentIdOwner[agentIdHash] != address(0)) revert AgentIdAlreadyRegistered();
 
         agents[msg.sender] = Agent({
             registered: true,
+            agentIdHash: agentIdHash,
             metadataHash: metadataHash,
             metadataUri: metadataUri,
             registeredAt: block.timestamp
         });
+        agentIdOwner[agentIdHash] = msg.sender;
 
-        emit AgentRegistered(msg.sender, metadataHash, metadataUri, block.timestamp);
+        emit AgentRegistered(msg.sender, agentIdHash, metadataHash, metadataUri, block.timestamp);
     }
 
     function submitSignal(SignalInput calldata input) external returns (uint256 signalId) {
-        if (!agents[msg.sender].registered) revert AgentNotRegistered();
+        Agent memory agent = agents[msg.sender];
+        if (!agent.registered) revert AgentNotRegistered();
         if (resolutions[input.matchId].resolved) revert MatchAlreadyResolved();
         _validateSignalInput(input);
 
@@ -128,7 +141,7 @@ contract SignalArena {
         nextSignalId += 1;
 
         bytes32 primaryKey = keccak256(
-            abi.encode(msg.sender, input.matchId, input.matchWindow)
+            abi.encode(agent.agentIdHash, input.matchId, input.matchWindow)
         );
         bool isRevision = hasPrimarySignal[primaryKey];
         if (!isRevision) {
@@ -139,6 +152,7 @@ contract SignalArena {
             signalId,
             msg.sender,
             input.matchId,
+            agent.agentIdHash,
             input.matchWindow,
             input.homeBps,
             input.drawBps,
@@ -177,16 +191,20 @@ contract SignalArena {
         return agents[agentAddress];
     }
 
+    function getAgentOwner(bytes32 agentIdHash) external view returns (address) {
+        return agentIdOwner[agentIdHash];
+    }
+
     function getResolution(bytes32 matchId) external view returns (Resolution memory) {
         return resolutions[matchId];
     }
 
     function primarySignalSubmitted(
-        address agentAddress,
+        bytes32 agentIdHash,
         bytes32 matchId,
         MatchWindow matchWindow
     ) external view returns (bool) {
-        return hasPrimarySignal[keccak256(abi.encode(agentAddress, matchId, matchWindow))];
+        return hasPrimarySignal[keccak256(abi.encode(agentIdHash, matchId, matchWindow))];
     }
 
     function _validateSignalInput(SignalInput calldata input) private pure {
@@ -209,4 +227,3 @@ contract SignalArena {
         }
     }
 }
-

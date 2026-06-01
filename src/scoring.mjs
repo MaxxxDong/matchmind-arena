@@ -74,6 +74,7 @@ export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_
     return {
       signalId: event.signalId,
       agent: event.agent,
+      agentIdHash: event.agentIdHash ?? null,
       matchId: event.matchId,
       matchKey: match?.id ?? null,
       submittedAt: event.submittedAt ?? null,
@@ -147,8 +148,11 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
     if (!audit.score) continue;
     const event = events.find((candidate) => candidate.signalId === audit.signalId && candidate.agent === audit.agent);
     const score = audit.score;
-    const current = byAgent.get(event.agent) ?? {
-      agent: event.agent,
+    const agentKey = event.agentIdHash || event.agent;
+    const current = byAgent.get(agentKey) ?? {
+      agent: agentKey,
+      wallet: event.agent,
+      agentIdHash: event.agentIdHash ?? null,
       signals: 0,
       resolved: 0,
       totalQuality: 0,
@@ -162,7 +166,7 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
     current.totalBrier += score.brier;
     current.totalLogLoss += score.logLoss;
     current.latestBlock = Math.max(current.latestBlock, event.blockNumber);
-    byAgent.set(event.agent, current);
+    byAgent.set(agentKey, current);
   }
   return [...byAgent.values()]
     .map((entry) => ({

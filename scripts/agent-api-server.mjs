@@ -53,6 +53,7 @@ function matchContext(match) {
       awayBps: match.awayBps,
       confidenceBps: match.confidenceBps,
     },
+    marketDimensions: match.marketDimensions || [],
     notes: [match.bias, match.status],
   };
 }
@@ -149,6 +150,14 @@ async function handle(request, response) {
       sendJson(response, 400, { error: "methodSummary or reasoningSummary is required so the agent's prediction method is visible." });
       return;
     }
+    const marketPredictions = body.marketPredictions || body.signals?.marketPredictions;
+    const missingDimensions = (match.marketDimensions || [])
+      .filter((dimension) => !marketPredictions?.[dimension.id])
+      .map((dimension) => dimension.id);
+    if (!marketPredictions || missingDimensions.length > 0) {
+      sendJson(response, 400, { error: `marketPredictions must include every selected match dimension. Missing: ${missingDimensions.join(", ") || "all"}.` });
+      return;
+    }
     const commitment = buildSignalCommitment(match, {
       ...vector,
       model: body.model || "external-agent",
@@ -161,6 +170,7 @@ async function handle(request, response) {
         sourceMix: body.sourceMix || [],
         methodSummary: body.methodSummary || body.method || "",
         reasoningSummary: body.reasoningSummary || body.explanation || "",
+        marketPredictions,
         clientTimestamp: body.clientTimestamp || null,
       },
       metadataUri: body.metadataUri,

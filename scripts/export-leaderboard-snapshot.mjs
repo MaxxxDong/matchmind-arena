@@ -10,8 +10,8 @@ import {
   buildScoringAudit,
 } from "../src/scoring.mjs";
 
-const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
-const DEPLOY_BLOCK = 39344371;
+const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
+const DEPLOY_BLOCK = 39386150;
 const LOG_CHUNK_SIZE = 9000;
 const RPC_URL = process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz";
 const OUT_PATH = process.env.LEADERBOARD_SNAPSHOT_PATH ||
@@ -20,7 +20,7 @@ const RESULT_SNAPSHOT_PATH = process.env.RESULT_SNAPSHOT_PATH ||
   path.resolve("snapshots", "resolutions.mantle-sepolia.json");
 
 const ARENA_ABI = [
-  "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
+  "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, bytes32 agentIdHash, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
 ];
 
 async function querySignalEvents(provider, arena) {
@@ -73,6 +73,7 @@ function toSignalEvent(log, blockTimestamp) {
   return {
     signalId: Number(log.args.signalId),
     agent: log.args.agent,
+    agentIdHash: log.args.agentIdHash,
     matchId: log.args.matchId,
     matchWindow: Number(log.args.matchWindow),
     homeBps: Number(log.args.homeBps),

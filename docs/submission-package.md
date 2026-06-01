@@ -8,8 +8,8 @@ Purpose: this is the canonical copy source for DoraHacks, demo narration, short 
 - Track: Consumer & Viral DApps
 - Secondary angle: AI Alpha & Data
 - Live demo: https://matchmind-arena.vercel.app
-- Verified contract: https://sepolia.mantlescan.xyz/address/0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4
-- Contract address: `0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4`
+- Mantle contract: https://sepolia.mantlescan.xyz/address/0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0
+- Contract address: `0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0`
 - Network: Mantle Sepolia
 - Repository URL: https://github.com/MaxxxDong/matchmind-arena
 - Demo video URL: TBD after recording/upload
@@ -24,7 +24,7 @@ An AI sports signal arena where football predictions are committed on Mantle, re
 
 ## Project Summary
 
-MatchMind Arena is an AI sports signal benchmark for live football. A user or external agent selects a match, generates a structured 1X2 probability signal, and commits that signal to Mantle through the verified `SignalArena` contract. The contract stores compact accountability data: match ID, time window, probability vector, confidence, evidence hash, metadata hash, and transaction proof.
+MatchMind Arena is an AI sports signal benchmark for live football. A user or external agent selects a match, generates a structured 1X2 probability signal plus match-specific market predictions, and commits that signal to Mantle through the `SignalArena` contract. The contract stores compact accountability data: agent ID hash, match ID, time window, probability vector, confidence, evidence hash, metadata hash, and transaction proof.
 
 After a match is resolved, the off-chain resolver pulls public result sources, writes an auditable resolution snapshot, and scores agent signals with Brier score, log loss, prediction hit rate, calibration bins, and a normalized quality score. The web app shows the match board, signal timeline, leaderboard, source evidence, and Mantle transaction links.
 
@@ -32,18 +32,18 @@ The product is not a betting product. It is a public evaluation arena for AI jud
 
 ## Demo Scene Description
 
-Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, prediction dimensions, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, or `/llms.txt`, then prepare a deeplinked signal with a stable `agentId` across 1X2, exact score, first goal, goals, or tournament dimensions. The user confirms once in the wallet; MatchMind registers the agent if needed and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
+Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, match-specific market dimensions, the Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, or `/llms.txt`, then prepare a deeplinked signal with a stable `agentId`, a 1X2 vector, and `marketPredictions` for every listed dimension. The user confirms once in the wallet; MatchMind registers the agent ID hash if needed and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
 
 ## Technical Highlights
 
-- Verified Solidity contract on Mantle Sepolia: `SignalArena`.
+- Solidity contract deployed on Mantle Sepolia: `SignalArena`.
 - On-chain signal function: `submitSignal`, accepting a strict 1X2 probability vector whose basis points must sum to 10,000.
-- Agent registration and revision detection are implemented on-chain.
+- Agent registration stores a first-class `agentIdHash` on-chain; revision detection is keyed by `agentIdHash + match + window`.
 - Each signal commits `contextHash`, `evidenceHash`, and `metadataHash`, keeping raw model prompts and private evidence off-chain.
 - Public frontend is deployed on Vercel and reads Mantle Sepolia directly from the browser.
 - Agent-readable resources are exposed at `/agent-skill.md`, `/agent-context.json`, and `/llms.txt`.
 - Agent action automation is exposed at `/agent-action.json`, including the deeplink format and fixed-agent identity rules.
-- Prediction dimensions include 1X2 winner, exact score, first goal, both teams to score, total goals, team goals, halftime result, and tournament context.
+- Match-specific market dimensions include Polymarket-style moneyline, correct score, first goal, both teams to score, totals, team totals, and tournament contexts when listed for the selected match.
 - The public frontend does not collect model API keys; agents run locally or in user-owned infrastructure.
 - Optional Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
 - Resolver job fetches public result sources, stores source checks and content hashes, and feeds reproducible leaderboard snapshots.
@@ -55,7 +55,7 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 2. Select a match card.
 3. Review the match context, baseline probabilities, agent resources, and prediction dimensions.
 4. Open `/agent-skill.md` and `/agent-context.json` to show how an agent can read the site directly.
-5. Ask or run an agent to produce a reasoned signal JSON across one or more dimensions.
+5. Ask or run an agent to produce a reasoned signal JSON across every listed market dimension.
 6. Preferred path: the agent opens a MatchMind deeplink with the signal and fixed `agentId` preloaded.
 7. The user confirms once; the page registers the agent if needed and commits a strict 1X2 signal.
 8. Open the MantleScan transaction link.
@@ -73,7 +73,7 @@ npm run snapshot:leaderboard
 ### 20 Project Deployment Award
 
 - Contract deployed on Mantle Sepolia.
-- Contract verified on MantleScan.
+- Source-code verification is pending a valid explorer API key or manual Standard JSON upload; the contract is deployed and callable on Mantle Sepolia.
 - Public frontend deployed on Vercel.
 - At least one AI-powered on-chain callable path exists through `submitSignal`.
 - README includes setup, architecture, contract address, proof transactions, and demo URL.

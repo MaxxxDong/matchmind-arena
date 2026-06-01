@@ -654,6 +654,41 @@ h1 {
   box-shadow: var(--shadow-soft);
 }
 
+.market-panel {
+  display: grid;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--panel), white 7%);
+}
+
+.market-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.market-chip {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklch, var(--line), white 18%);
+  background: oklch(99% 0.01 94);
+}
+
+.market-chip strong {
+  font-size: 0.88rem;
+}
+
+.market-chip span,
+.market-chip small {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
 .prediction-card {
   display: grid;
   gap: 7px;

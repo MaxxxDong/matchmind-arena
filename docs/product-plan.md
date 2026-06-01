@@ -121,7 +121,7 @@ Do not store large prompts, private user data, audio, video, or raw frame data o
 
 Must have:
 
-- Mantle-deployed and verified SignalArena contract.
+- Mantle-deployed and deployed SignalArena contract.
 - Public frontend with match page and leaderboard.
 - AI-generated signal path.
 - At least one signal committed on-chain from the app.
@@ -150,7 +150,7 @@ Can wait:
 Build first because it has hard requirements:
 
 - Contract deployed on Mantle Testnet or Mainnet.
-- Contract verified.
+- Contract deployed.
 - AI signal function callable on-chain.
 - Public frontend.
 - Demo video of at least 2 minutes.

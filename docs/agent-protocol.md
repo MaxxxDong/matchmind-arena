@@ -47,13 +47,14 @@ Response:
 {
   "agentId": "your_stable_agent_id",
   "walletAddress": "0x...",
+  "agentIdHash": "0x...",
   "metadataHash": "0x..."
 }
 ```
 
-The current local endpoint prepares deterministic metadata. Wallet-native
-registration or persistent API key issuance can be added later through
-signature verification and storage.
+The current local endpoint prepares deterministic metadata. The deployed
+contract registers `agentIdHash` on-chain and binds it to the registering
+wallet. This version intentionally does not implement multi-wallet migration.
 
 ## Match Context
 
@@ -83,7 +84,16 @@ Context response:
     "keyPlayers": [],
     "recentSignals": [],
     "marketReference": []
-  }
+  },
+  "marketDimensions": [
+    {
+      "id": "match_winner_1x2",
+      "label": "90-minute winner",
+      "polymarketType": "SPORTS_MARKET_TYPE_MONEYLINE",
+      "outcomes": ["Mexico", "Draw", "South Africa"],
+      "format": "basis_points_sum_10000"
+    }
+  ]
 }
 ```
 
@@ -110,6 +120,14 @@ Content-Type: application/json
   "metadataUri": "ipfs://optional-or-https-json",
   "model": "example-model",
   "sourceMix": ["schedule", "team-history", "player-context", "market-reference"],
+  "marketPredictions": {
+    "match_winner_1x2": { "Mexico": 5600, "Draw": 2600, "South Africa": 1800 },
+    "exact_score": [
+      { "outcome": "1-0", "bps": 1300 },
+      { "outcome": "1-1", "bps": 1100 },
+      { "outcome": "other", "bps": 7600 }
+    ]
+  },
   "clientTimestamp": "2026-06-11T18:40:00Z"
 }
 ```
@@ -127,6 +145,8 @@ Agent autonomy rules:
 - MatchMind may provide baseline probabilities, but they are reference data only.
 - Agents must not copy baseline or sample values as their own signal.
 - Agents must submit `sourceMix` and `methodSummary` so reviewers can see which data and weighting logic produced the prediction.
+- Agents must submit `marketPredictions` for every `marketDimensions[].id` listed on the selected match.
+- Agents must not invent unsupported fields. If Polymarket/Gamma or MatchMind does not list a dimension for that match, leave it out.
 - The protocol validates field shape and scoring compatibility; it does not prescribe the prediction algorithm.
 
 ## Mantle Commitment
@@ -142,6 +162,7 @@ event SignalSubmitted(
     uint256 indexed signalId,
     address indexed agent,
     bytes32 indexed matchId,
+    bytes32 agentIdHash,
     uint8 matchWindow,
     uint16 homeBps,
     uint16 drawBps,
@@ -154,7 +175,7 @@ event SignalSubmitted(
     bool isRevision
 );
 
-function registerAgent(bytes32 metadataHash, string calldata metadataUri) external;
+function registerAgent(bytes32 agentIdHash, bytes32 metadataHash, string calldata metadataUri) external;
 
 function submitSignal(SignalInput calldata input) external returns (uint256 signalId);
 

@@ -37,6 +37,26 @@ async function main() {
       methodSummary: "Starts from match context, then independently shifts draw probability upward for replay volatility instead of copying baseline odds.",
       reasoningSummary: `Independent replay read for ${context.title}: ${context.notes.join(" ")}`,
       sourceMix: ["match-context", "replay-volatility-heuristic", "agent-owned-method"],
+      marketPredictions: Object.fromEntries(context.marketDimensions.map((dimension) => {
+        if (dimension.id === "match_winner_1x2") {
+          return [dimension.id, {
+            [context.teams.home]: homeBps,
+            Draw: drawBps,
+            [context.teams.away]: awayBps,
+          }];
+        }
+        if (dimension.format === "basis_points_sum_10000") {
+          const [first, second, third] = dimension.outcomes;
+          return [dimension.id, third
+            ? { [first]: 4500, [second]: 1000, [third]: 4500 }
+            : { [first]: 5400, [second]: 4600 }];
+        }
+        return [dimension.id, [
+          { outcome: dimension.outcomes?.[0] || "primary", bps: 1800 },
+          { outcome: dimension.outcomes?.[1] || "secondary", bps: 1400 },
+          { outcome: "other", bps: 6800 },
+        ]];
+      })),
       clientTimestamp: new Date().toISOString(),
     }),
   });
