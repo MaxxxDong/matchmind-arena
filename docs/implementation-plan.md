@@ -9,9 +9,9 @@ This is the execution checklist for the new independent Mantle project.
 - [x] Create independent local Git repository.
 - [x] Capture hackathon rules, track requirements, and award criteria.
 - [x] Create README and planning docs.
-- [ ] Choose final public repository name before public upload.
-- [ ] Choose license before public upload.
-- [ ] Decide whether the public project name stays `MatchMind Arena` before public upload.
+- [x] Choose final public repository name before public upload.
+- [x] Choose license before public upload.
+- [x] Decide whether the public project name stays `MatchMind Arena` before public upload.
 
 ## Phase 1 - Deployment Award Foundation
 
@@ -171,6 +171,7 @@ Goal: make the hackathon submission easy to verify.
 - [x] Verified contract link.
 - [x] Short pitch for track and awards.
 - [x] Submission package draft.
+- [x] Publication hygiene check for ignored secrets and local Vercel metadata.
 
 ## Immediate Next Step
 

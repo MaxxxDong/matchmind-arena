@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI sports signal benchmark with Mantle on-chain accountability.",
+  "license": "Apache-2.0",
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",

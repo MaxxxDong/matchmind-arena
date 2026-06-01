@@ -4,7 +4,7 @@ Purpose: this is the single progress log for completed project phases and curren
 
 ## Status Summary
 
-- Phase 0: research and repo setup complete; public repo name and license are still publishing decisions.
+- Phase 0: research, repo setup, public repo name, project name, and license decisions complete.
 - Phase 1 local contract foundation: complete.
 - Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: minimal local demo complete.
@@ -18,6 +18,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 6F calibration summary: complete for leaderboard snapshots.
 - Phase 4A local Agent API skeleton: complete.
 - Phase 7A submission copy package: complete.
+- Phase 7B publication hygiene and license: complete locally.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -378,9 +379,33 @@ Reflection:
 - This prepares the human submission work without submitting anything externally or inventing missing video/repository URLs.
 - The package intentionally declares current limits, which should reduce reviewer confusion and keep the demo claims defensible.
 
+## Phase 7B - Publication Hygiene And License
+
+Completed locally.
+
+What was done:
+
+- Chose public repository target name: `matchmind-arena`.
+- Kept public project name: `MatchMind Arena`.
+- Added Apache License 2.0 in `LICENSE`.
+- Updated README license section.
+- Confirmed no Git remote is currently configured.
+- Confirmed `.env`, `.vercel`, `node_modules`, `dist`, `artifacts`, `cache`, and local temp folders are ignored.
+- Confirmed `.env` and `.vercel` are not tracked by Git.
+
+Verification:
+
+- `git ls-files .env .vercel node_modules dist tmp cache artifacts` returned no tracked files.
+- README now states Apache License 2.0.
+
+Reflection:
+
+- Apache-2.0 is a practical default for a public hackathon codebase because it is permissive and familiar to judges and ecosystem developers.
+- The repo is now closer to public-upload-ready, but public GitHub creation is still an external publication step.
+
 ## Next Phase
 
-After public Vercel deployment, resolver job, calibration summary, and submission copy:
+After public Vercel deployment, resolver job, calibration summary, submission copy, and publication hygiene:
 
 - Add persistent storage or a relay only if external agent participation needs server-side submission.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.

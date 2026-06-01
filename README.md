@@ -42,6 +42,8 @@ Why this direction fits:
 
 This repository is an independent Mantle project root. It is intentionally separated from earlier experiments and should be treated as a clean public project.
 
+Public repository name target: `matchmind-arena`.
+
 ## Quick Start
 
 ```bash
@@ -183,4 +185,4 @@ npx hardhat verify --network mantleSepolia 0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44C
 
 ## License
 
-License is not finalized yet. Choose before publishing the public repository.
+Apache License 2.0. See `LICENSE`.
