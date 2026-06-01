@@ -915,6 +915,9 @@ function App() {
     const profile = agentRegistry.get(String(address).toLowerCase());
     return profile?.agentId || shortHash(address);
   }, [agentRegistry]);
+  const matchByHash = useMemo(() => new Map(
+    MATCHES.map((match) => [ethers.id(match.id).toLowerCase(), match]),
+  ), []);
   const selectedMatchHash = ethers.id(selectedMatch.id).toLowerCase();
   const selectedEvents = events.filter((event) => String(event.matchId).toLowerCase() === selectedMatchHash);
   const latestSelectedEvent = selectedEvents[0] || null;
@@ -947,6 +950,38 @@ function App() {
       && (candidate.txHash || "") === (row.txHash || "")
     ))
   ));
+  const allPredictionRows = [
+    ...localSignals.map((record) => {
+      const match = MATCHES.find((candidate) => candidate.id === record.matchId);
+      return {
+        key: `local:${record.agentId}:${record.generatedAt}:${record.txHash || "draft"}`,
+        source: record.status === "submitted" ? "Submitted from this browser" : "Loaded in this browser",
+        agent: record.agentId,
+        signal: record.signal,
+        rawEvidence: record.rawEvidence,
+        txHash: record.txHash,
+        match,
+        matchId: record.matchId,
+        scored: Boolean(match && DEMO_RESOLUTIONS[match.id]),
+      };
+    }),
+    ...events.map((event) => {
+      const match = matchByHash.get(String(event.matchId).toLowerCase());
+      return {
+        key: `chain:${event.txHash}:${event.signalId}`,
+        source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
+        agent: agentLabel(event.agentIdHash || event.agent),
+        signal: event,
+        rawEvidence: null,
+        txHash: event.txHash,
+        match,
+        matchId: match?.id,
+        scored: Boolean(match && DEMO_RESOLUTIONS[match.id]),
+      };
+    }),
+  ].filter((row) => row.match).filter((row, index, list) => (
+    index === list.findIndex((candidate) => candidate.key === row.key)
+  ));
   const selectedPrediction = predictionRows.find((row) => row.key === selectedSignalKey) || null;
   const activeSignal = selectedPrediction?.signal || agentCommitment || latestSelectedEvent || selectedMatch;
   const activeSignalLabel = selectedPrediction
@@ -965,6 +1000,13 @@ function App() {
     setAgentSignalError("");
     setAgentSignalMode("selected signal");
   }, []);
+  const selectGlobalPredictionRow = useCallback((row) => {
+    if (row.matchId && row.matchId !== selectedId) setSelectedId(row.matchId);
+    setSelectedSignalKey(row.key);
+    setAgentCommitment(null);
+    setAgentSignalError("");
+    setAgentSignalMode("selected signal");
+  }, [selectedId]);
   const selectLeaderboardEntry = useCallback((entry) => {
     const event = findAgentSignalRow(entry, events);
     if (!event) return;
@@ -1296,6 +1338,34 @@ function App() {
             </div>
           ) : null}
 
+          <section className="mini-panel">
+            <div className="section-title">
+              <span><Bot size={18} /> Agent signal explorer</span>
+              <small>{allPredictionRows.length} visible</small>
+            </div>
+            <p className="resolution-note">
+              Select any visible agent signal to load that prediction onto the main match board. Scored rows are eligible for the success leaderboard; pending rows wait for a verified result.
+            </p>
+            {allPredictionRows.length === 0 ? (
+              <p className="empty">No agent signal is visible yet. Load a deeplink locally or submit one on-chain first.</p>
+            ) : (
+              allPredictionRows.slice(0, 8).map((row) => {
+                const [winner, winnerBps] = vectorWinner(row.signal, row.match);
+                return (
+                  <button
+                    className={`signal-row-button ${selectedSignalKey === row.key ? "active" : ""}`}
+                    key={row.key}
+                    onClick={() => selectGlobalPredictionRow(row)}
+                  >
+                    <span>{row.scored ? "Scored" : "Pending"} · {row.source}</span>
+                    <strong>{row.agent}</strong>
+                    <small>{row.match.title} · {winner} {formatPct(winnerBps)}</small>
+                  </button>
+                );
+              })
+            )}
+          </section>
+
           <section className="mini-panel timeline-panel">
             <div className="section-title">
               <span><Layers3 size={18} /> Signal timeline</span>
@@ -1316,7 +1386,7 @@ function App() {
 
           <section className="mini-panel">
             <div className="section-title">
-              <span><Gauge size={18} /> Agent leaderboard</span>
+              <span><Gauge size={18} /> Success leaderboard</span>
               <small>{leaderboard.length} scored</small>
             </div>
             {selectedResolution ? (
@@ -1327,7 +1397,11 @@ function App() {
                   FIFA source <ExternalLink size={12} />
                 </a>
               </p>
-            ) : null}
+            ) : (
+              <p className="resolution-note">
+                Rankings only include resolved matches with verified results. Group-stage predictions stay pending until the resolver adds the final result.
+              </p>
+            )}
             {leaderboard.length === 0 ? (
               <p className="empty">No resolved signal can be scored yet.</p>
             ) : (

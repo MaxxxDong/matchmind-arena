@@ -1235,6 +1235,49 @@ h1 {
   background: oklch(99% 0.01 94);
 }
 
+.signal-row-button {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 11px 12px;
+  text-align: left;
+  border: 1px solid color-mix(in oklch, var(--line), white 20%);
+  border-radius: var(--radius);
+  background: oklch(99% 0.01 94);
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.signal-row-button:hover,
+.signal-row-button:focus-visible {
+  border-color: color-mix(in oklch, var(--blue), var(--line) 20%);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.signal-row-button.active {
+  border-color: color-mix(in oklch, var(--mint), var(--blue) 25%);
+  background: color-mix(in oklch, var(--mint), white 88%);
+}
+
+.signal-row-button span {
+  color: oklch(38% 0.12 154);
+  font-size: 0.72rem;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.signal-row-button strong,
+.signal-row-button small {
+  overflow-wrap: anywhere;
+}
+
+.signal-row-button small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 .leader-card:last-child {
   margin-bottom: 0;
 }

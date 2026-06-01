@@ -718,3 +718,25 @@ Reflection:
 
 - This keeps the contract unchanged and avoids redeploy risk. Revisions remain technically possible at the contract layer, but the default product flow now prevents accidental duplicate uploads.
 - A future advanced mode could expose explicit revisions with a clear "replace/update signal" label, but that should be a separate UX decision.
+
+## Phase 8F - Agent Signal Explorer And Success Leaderboard Clarity
+
+Completed locally.
+
+What was found:
+
+- The selected-match `Agent predictions` panel existed, and leaderboard entries could drive the main board.
+- However, there was no obvious global entry for "pick an agent signal from anywhere and inspect it." This made the feature feel missing when the selected match had no visible signals.
+- The leaderboard title did not clearly explain that it is a success/scoring leaderboard and only includes resolved matches.
+
+What was done:
+
+- Added an `Agent signal explorer` panel that lists visible local/on-chain agent signals across all matches.
+- Selecting an explorer row switches the main board to that match and overlays that agent's prediction.
+- Renamed the scoring panel to `Success leaderboard`.
+- Added copy explaining that scored rows require a verified result; group-stage signals remain pending until resolution.
+
+Verification:
+
+- `npm test`: passing.
+- `npm run build`: passing.
