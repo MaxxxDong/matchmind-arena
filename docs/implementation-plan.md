@@ -57,7 +57,7 @@ Goal: build the public demo surface.
 - [x] Build signal timeline.
 - [x] Build leaderboard seed.
 - [x] Render transaction links.
-- [ ] Add public demo deployment.
+- [x] Add public demo deployment.
 
 UI targets:
 
@@ -167,7 +167,7 @@ Goal: make the hackathon submission easy to verify.
 - [ ] README with setup, architecture, contract address, and demo.
 - [ ] Demo video of at least 2 minutes.
 - [ ] DoraHacks BUIDL page filled.
-- [ ] Deployed public frontend link.
+- [x] Deployed public frontend link.
 - [ ] Verified contract link.
 - [ ] Short pitch for track and awards.
 
@@ -175,7 +175,7 @@ Goal: make the hackathon submission easy to verify.
 
 Current priority after Phase 6B:
 
-1. Deploy the frontend to a public URL.
-2. Replace static demo resolutions with a resolver job that pulls from public sources.
-3. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
-4. Then continue toward external Agent API and Chrome companion integration.
+1. Replace static demo resolutions with a resolver job that pulls from public sources.
+2. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
+3. Then continue toward external Agent API and Chrome companion integration.
+4. Prepare the public repository, demo video, DoraHacks page, and short pitch.

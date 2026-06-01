@@ -72,6 +72,12 @@ registers the connected wallet as an agent, generates a 1X2 signal through a
 user-provided OpenAI-compatible model endpoint, and commits the signal hash trail.
 Without a model key, the app still shows the deterministic demo baseline.
 
+Public demo:
+
+- Live URL: https://matchmind-arena.vercel.app
+- Vercel project: `maxxxdong/matchmind-arena`
+- Deployment target: static Vite build from `dist/`
+
 To reproduce the current leaderboard evidence from the deployed contract:
 
 ```bash

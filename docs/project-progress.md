@@ -8,6 +8,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 1 local contract foundation: complete.
 - Phase 1 Mantle testnet deployment: complete.
 - Phase 2 public frontend: minimal local demo complete.
+- Phase 2 public Vercel deployment: complete.
 - Phase 3 browser AI signal flow: minimal local demo complete.
 - Phase 6A local demo scoring: complete.
 - Phase 6B reproducible scoring snapshot: complete.
@@ -128,6 +129,28 @@ Reflection:
 - The current signal generator is deterministic demo logic. This is correct for the first public surface because it proves the user flow and chain path without blocking on model providers.
 - The next iteration should move AI generation behind a user-configured model endpoint and persist full signal metadata outside the contract, while keeping only hashes and event proofs on-chain.
 - The first UI pass felt too generic and card-heavy. It was redesigned into a denser sports signal desk with a match field visual, compact Mantle status strip, signal composer, and proof timeline.
+
+## Phase 2B - Public Vercel Deployment
+
+Completed.
+
+What was done:
+
+- Deployed the static Vite frontend to Vercel.
+- Vercel linked the project as `maxxxdong/matchmind-arena`.
+- Public demo URL: `https://matchmind-arena.vercel.app`.
+- Vercel added `.vercel` to `.gitignore`; the local project metadata remains untracked.
+
+Verification:
+
+- `npm run build`: passing before deployment.
+- `npx vercel --prod --yes`: deployment completed with `readyState: READY`.
+- `https://matchmind-arena.vercel.app`: returned HTTP 200 and served the Vite `index.html`.
+
+Reflection:
+
+- Static deployment is the right shape for the current product because wallet signing and Mantle reads happen in the browser.
+- The local Agent API remains intentionally local. It should not be exposed publicly until we decide whether to add persistent storage, rate limits, and an explicit relay boundary.
 
 ## Phase 3 - Browser AI Signal Flow
 
@@ -285,9 +308,8 @@ Reflection:
 
 ## Next Phase
 
-After reproducible scoring snapshot:
+After public Vercel deployment:
 
-- Deploy the frontend to a public URL.
 - Add a resolver job that pulls from public result sources and enforces live-match windows.
 - Add persistent storage or a relay only if external agent participation needs server-side submission.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
