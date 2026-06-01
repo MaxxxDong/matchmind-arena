@@ -3,7 +3,7 @@ import path from "node:path";
 import { ethers } from "ethers";
 import { MATCHES } from "../src/data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "../src/data/resolutions.mjs";
-import { buildLeaderboard } from "../src/scoring.mjs";
+import { buildLeaderboard, buildResolutionEvidence } from "../src/scoring.mjs";
 
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
@@ -62,12 +62,7 @@ async function main() {
     latestBlock: latest,
     eventCount: events.length,
     resolvedSignalCount,
-    matches: MATCHES.map((match) => ({
-      id: match.id,
-      title: match.title,
-      resolved: Boolean(DEMO_RESOLUTIONS[match.id]),
-      resolution: DEMO_RESOLUTIONS[match.id] || null,
-    })),
+    matches: buildResolutionEvidence(MATCHES, DEMO_RESOLUTIONS),
     leaderboard,
     events,
   };

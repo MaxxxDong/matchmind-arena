@@ -691,6 +691,14 @@ h1 {
   font-size: 0.9rem;
 }
 
+.resolution-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
 .leader-card {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

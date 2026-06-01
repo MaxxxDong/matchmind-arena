@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { MATCHES } from "./data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
+import { attachResultSource } from "./resultSources.mjs";
 
 export const RESULT_LABELS = {
   home: "Home",
@@ -62,4 +63,13 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
       logLoss: entry.totalLogLoss / entry.resolved,
     }))
     .sort((a, b) => b.quality - a.quality || a.brier - b.brier || b.latestBlock - a.latestBlock);
+}
+
+export function buildResolutionEvidence(matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+  return matches.map((match) => ({
+    id: match.id,
+    title: match.title,
+    resolved: Boolean(resolutions[match.id]),
+    resolution: resolutions[match.id] ? attachResultSource(resolutions[match.id]) : null,
+  }));
 }

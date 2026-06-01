@@ -24,6 +24,7 @@ import "./styles.css";
 import { MATCHES } from "./data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
+import { attachResultSource } from "./resultSources.mjs";
 
 const CONTRACT_ADDRESS = "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4";
 const DEPLOY_BLOCK = 39344371;
@@ -433,7 +434,7 @@ function App() {
 
   const selectedEvents = events.filter((event) => event.matchId === signal.matchId);
   const agentReady = Boolean(agent?.registered);
-  const selectedResolution = DEMO_RESOLUTIONS[selectedMatch.id];
+  const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
   const leaderboard = buildLeaderboard(events);
 
   return (
@@ -612,6 +613,10 @@ function App() {
             {selectedResolution ? (
               <p className="resolution-note">
                 Demo result: {RESULT_LABELS[selectedResolution.result]} · {selectedResolution.source}
+                {" "}
+                <a href={selectedResolution.sourceUri} target="_blank" rel="noreferrer">
+                  FIFA source <ExternalLink size={12} />
+                </a>
               </p>
             ) : null}
             {leaderboard.length === 0 ? (

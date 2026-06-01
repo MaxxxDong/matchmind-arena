@@ -11,6 +11,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 3 browser AI signal flow: minimal local demo complete.
 - Phase 6A local demo scoring: complete.
 - Phase 6B reproducible scoring snapshot: complete.
+- Phase 6C public result-source evidence: complete for the demo replay.
 
 ## Phase 0 - Research And Repo Setup
 
@@ -204,11 +205,33 @@ Reflection:
 - This closes the gap between "leaderboard visible in the browser" and "raw scoring data is inspectable." Judges or agents can now reproduce the current leaderboard without opening the UI.
 - The scoring source is still a local demo resolution. The next credible upgrade is not more UI polish; it is a public result-source adapter plus closed-window rules so future signals are scored from a stable external reference.
 
+## Phase 6C - Public Result-Source Evidence
+
+Completed locally for the demo replay.
+
+What was done:
+
+- Added `src/resultSources.mjs` as the first public result-source adapter.
+- Attached FIFA as the result source for the Argentina vs France 2022 demo replay.
+- Added source provider, title, URI, checked date, evidence summary, and deterministic source hash to resolved-match evidence.
+- Updated the web leaderboard note to link to the FIFA source.
+- Updated `npm run snapshot:leaderboard` output so `snapshots/leaderboard.mantle-sepolia.json` includes the public source URI and `sourceHash`.
+
+Verification:
+
+- `npm run snapshot:leaderboard`: passing.
+- Snapshot includes `sourceProvider: FIFA`, the FIFA source URI, and `sourceHash`.
+
+Reflection:
+
+- This improves judge reproducibility because the demo result is no longer just a local assertion.
+- It is still not a full resolver job. The next step should define closed-window rules and then make a script or service that maps future match IDs to public result sources without hand-editing fixtures.
+
 ## Next Phase
 
 After reproducible scoring snapshot:
 
 - Deploy the frontend to a public URL.
-- Add a resolver job and public result-source adapter for reproducible leaderboard scoring.
+- Add closed-window scoring rules and a resolver job that pulls from public result sources.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.

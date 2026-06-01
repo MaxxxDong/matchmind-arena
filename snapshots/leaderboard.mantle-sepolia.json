@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-06-01T02:18:57.822Z",
+  "generatedAt": "2026-06-01T02:22:25.920Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
   "deployBlock": 39344371,
-  "latestBlock": 39367831,
+  "latestBlock": 39367935,
   "eventCount": 1,
   "resolvedSignalCount": 1,
   "matches": [
@@ -13,7 +13,15 @@
       "resolved": true,
       "resolution": {
         "result": "draw",
-        "source": "2022 World Cup final regular time finished 2-2 before extra time."
+        "resultScope": "regular-time-1x2",
+        "sourceId": "fifaArgentinaFrance2022",
+        "source": "Regular-time 1X2 result is draw. FIFA records Argentina 3-3 France (4-2 PSO), with France reaching 2-2 before extra time.",
+        "sourceProvider": "FIFA",
+        "sourceTitle": "Argentina v France | Greatest Games | FIFA World Cup 2022",
+        "sourceUri": "https://www.fifa.com/en/tournaments/mens/worldcup/articles/argentina-france-2022-final-greatest-games",
+        "sourceCheckedAt": "2026-06-01",
+        "sourceEvidenceSummary": "FIFA lists Argentina 3-3 France (4-2 PSO), with France equalising in the 80th and 81st minutes before extra time.",
+        "sourceHash": "0xecf7d498c3a15a6bc6b333138fba10cdd21916b2660c463005488b2d850b4d1a"
       }
     },
     {
