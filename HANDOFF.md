@@ -31,6 +31,18 @@ Core idea:
 - Signals are scored after match resolution.
 - The product becomes a public arena for measuring sports AI judgment.
 
+Current public name:
+
+- `MatchMind Arena`
+
+Current public repository:
+
+- https://github.com/MaxxxDong/matchmind-arena
+
+Current live demo:
+
+- https://matchmind-arena.vercel.app
+
 ## Award Targets
 
 Primary:
@@ -47,26 +59,53 @@ Track:
 ## Files To Read First
 
 1. `README.md`
-2. `docs/hackathon-research.md`
-3. `docs/product-plan.md`
+2. `docs/implementation-plan.md`
+3. `docs/project-progress.md`
 4. `docs/agent-protocol.md`
-5. `docs/implementation-plan.md`
+5. `docs/submission-package.md`
+6. `docs/product-plan.md`
+7. `docs/hackathon-research.md`
 
-## Open Questions
+## Current Implementation State
 
-- Final project name.
-- License.
-- Mantle Testnet RPC and faucet path to use.
-- Whether to deploy first to testnet only or also mainnet.
-- Whether to include Byreal Agent Skills as a stretch demo.
-- How much of the existing Chrome companion should be copied versus rebuilt.
+- Contract: `contracts/SignalArena.sol`.
+- Network: Mantle Sepolia.
+- Contract address: `0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0`.
+- Explorer: https://sepolia.mantlescan.xyz/address/0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0
+- Verification: Sourcify `full_match`.
+- Frontend: Vite React app in `src/`, deployed on Vercel.
+- Agent-readable resources: `public/agent-skill.md`, `public/agent-context.json`, `public/agent-action.json`, `public/agent-signal.schema.json`, `public/llms.txt`.
+- Local Agent API: `scripts/agent-api-server.mjs`.
+- Minimal agent example: `agent-examples/minimal-node-agent.mjs`.
+- Resolver and leaderboard snapshots: `scripts/resolve-results.mjs`, `scripts/export-leaderboard-snapshot.mjs`, `snapshots/`.
+
+Implemented product behavior:
+
+- Stable agent IDs become on-chain `agentIdHash` values.
+- Agents can choose from demo replay cards and the 72 listed 2026 group-stage cards.
+- Agents must provide a strict 1X2 vector plus `marketPredictions` for every selected-match market dimension.
+- The page performs a no-wallet dry run and pre-submit preview before wallet confirmation.
+- The default UI blocks accidental duplicate primary submissions for the same `agentIdHash + match + window`.
+- The upper-right rail contains a scored `Leaderboard`; clicking a row selects that agent's latest scored signal and shows its detail card.
+- The central `Agent predictions` board shows market-dimension outcome distribution, vote counts, average probability, support score, probability buckets, and the agent rows behind each bucket.
+
+## Current Open Items
+
+- Add durable off-chain metadata retrieval/storage for rich `marketPredictions`; Mantle events currently preserve compact 1X2 accountability, while full dimension details are strongest for imported/local signals.
+- Add more real submitted agent signals so the leaderboard has meaningful density beyond the seed/demo state.
+- Finish or update final demo/submission URLs if the public submission package changes.
+- Keep Chrome companion integration as a later track. It is not part of the current Mantle web Arena review path.
+- Do not add Byreal-specific functionality unless the hackathon strategy changes; it remains optional research context only.
 
 ## Next Engineering Move
 
-Implement Phase 1 from `docs/implementation-plan.md`:
+Continue from the current `docs/implementation-plan.md` priorities:
 
-- Solidity `SignalArena` contract.
-- Tests.
-- Mantle deployment configuration.
-- Explorer verification flow.
-- Minimal frontend call path for AI-generated `submitSignal`.
+1. Improve rich signal metadata persistence/retrieval so all selected market dimensions can be reconstructed after wallet submission.
+2. Add more agent examples or seeded real submissions to exercise the leaderboard and prediction distribution views.
+3. Keep `docs/submission-package.md` as the only reviewer-facing copy source; update it only when public links or demo evidence change.
+4. Re-run the normal verification sequence after code changes:
+   - `npm test`
+   - `npm run build`
+   - `npm run resolve:results`
+   - `npm run snapshot:leaderboard`

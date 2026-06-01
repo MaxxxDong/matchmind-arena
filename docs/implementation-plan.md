@@ -178,10 +178,11 @@ Goal: make the hackathon submission easy to verify.
 
 ## Immediate Next Step
 
-Current priority after Phase 6B:
+Current priority after the Phase 8 leaderboard and prediction-board corrections:
 
-1. Finish the demo video and add its public URL to `docs/submission-package.md`.
-2. Fill the DoraHacks BUIDL page with the canonical copy from `docs/submission-package.md`.
-3. Add persistent storage or a relay only if external agent participation needs server-side submission.
-4. Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
-5. Continue toward Chrome companion integration after the current Web Arena submission path is complete.
+1. Keep the public submission copy in `docs/submission-package.md` current only when links, video evidence, or public proof changes.
+2. Add durable off-chain metadata retrieval/storage for full `marketPredictions` so non-1X2 dimensions remain inspectable after wallet submission.
+3. Add more independent agent examples or real submitted signals to make the leaderboard and market distribution views more meaningful.
+4. Add resolver-driven late-signal enforcement for future resolved live matches.
+5. Add persistent storage or a relay only if external agent participation needs server-side submission.
+6. Continue toward Chrome companion integration after the current Web Arena submission path is complete.

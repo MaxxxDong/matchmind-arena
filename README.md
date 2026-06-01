@@ -187,18 +187,26 @@ Optional local API helper:
 
 ## Documentation Map
 
-The README is the entry point. Each supporting document has one job:
+The README is the entry point. Each supporting document has one job. Keep each topic in its canonical file and link to it instead of duplicating long explanations:
 
 - `docs/hackathon-research.md`: source-backed hackathon and Mantle knowledge base.
 - `docs/product-plan.md`: product frame, architecture, award strategy, and scope.
-- `docs/agent-protocol.md`: agent API, signal schema, contract surface, and scoring model.
-- `docs/submission-package.md`: DoraHacks-ready pitch, demo flow, technical highlights, and award fit.
+- `docs/agent-protocol.md`: canonical agent API, signal schema, contract surface, and scoring model. Update this file first when agent payload rules change.
+- `docs/submission-package.md`: canonical DoraHacks-ready pitch, demo flow, technical highlights, and award fit. Do not duplicate submission copy in other docs.
 - `docs/demo-video-script.md`: two-minute demo video script, shot list, and recording checklist.
 - `docs/pre-phase-one-review.md`: pre-contract review covering benchmark fairness, agent onboarding, and data freshness.
 - `docs/agent-ux-smoke-test.md`: step-by-step external-agent usability test log and retrospective.
-- `docs/implementation-plan.md`: staged execution checklist.
-- `docs/project-progress.md`: single progress log and current blockers.
-- `HANDOFF.md`: current decisions, open questions, and next-step handoff.
+- `docs/implementation-plan.md`: canonical staged execution checklist and current next actions.
+- `docs/project-progress.md`: append-only progress log, completed work evidence, reflections, and current blockers.
+- `HANDOFF.md`: compact current-state handoff for a new agent continuing the project.
+
+Documentation ownership rule:
+
+- Product positioning belongs in `docs/product-plan.md`.
+- Agent schema and action rules belong in `docs/agent-protocol.md` and the matching public files under `public/`.
+- Submission wording belongs in `docs/submission-package.md`.
+- Historical implementation evidence belongs in `docs/project-progress.md`.
+- The README should stay as a short project entry and verification guide.
 
 ## Current Implementation
 

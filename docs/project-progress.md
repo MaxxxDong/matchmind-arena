@@ -844,3 +844,29 @@ Reflection:
 
 - This makes the hierarchy clearer: match-level market distribution stays in the central match area, while agent ranking and agent detail live in the right rail.
 - The leaderboard is still intentionally scored-only; pending group-stage agents should not appear as winners until resolved results exist.
+
+## Phase 8J - Documentation Consolidation
+
+Completed locally.
+
+What was found:
+
+- `HANDOFF.md` was still written as an early project handoff and incorrectly implied that the project name, license, Mantle testnet path, contract, and deployment were still open.
+- The README already had the right high-level story, but the documentation map did not clearly define which file owns each topic.
+- `docs/implementation-plan.md` still described the immediate next step as the older post-Phase-6B submission flow, while recent work has moved into leaderboard, agent ID, and prediction-distribution improvements.
+
+What was done:
+
+- Updated `HANDOFF.md` to the current public project name, repository, live demo, Mantle Sepolia contract, implemented behavior, actual open items, and current next engineering move.
+- Tightened the README documentation map with canonical ownership rules so agent schema, submission copy, product positioning, progress evidence, and handoff content do not drift into duplicated versions.
+- Updated `docs/implementation-plan.md` so the immediate next-step list reflects the current project state after the Phase 8 leaderboard and prediction-board corrections.
+
+Verification:
+
+- Checked stale handoff phrases and old early-phase TODOs with `rg`.
+- Ran Markdown whitespace validation with `git diff --check`.
+
+Reflection:
+
+- The docs are now clearer for a new agent: README gives the entry path, `HANDOFF.md` gives the current continuation state, `docs/agent-protocol.md` owns agent rules, and `docs/submission-package.md` owns reviewer-facing copy.
+- Future doc changes should avoid copying submission text or schema details into multiple files; link to the canonical document instead.
