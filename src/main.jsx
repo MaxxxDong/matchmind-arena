@@ -126,6 +126,10 @@ function formatPct(bps) {
   return `${(Number(bps) / 100).toFixed(1)}%`;
 }
 
+function formatSupportScore(bps) {
+  return `${(Number(bps) / 100).toFixed(1)} pts`;
+}
+
 function sanitizeAgentId(value) {
   return String(value || DEFAULT_AGENT_PROFILE.agentId)
     .toLowerCase()
@@ -597,6 +601,7 @@ function App() {
   const [agentProfile, setAgentProfile] = useState(DEFAULT_AGENT_PROFILE);
   const [selectedSignalKey, setSelectedSignalKey] = useState("");
   const [selectedPredictionDimensionId, setSelectedPredictionDimensionId] = useState("match_winner_1x2");
+  const [selectedConsensusOutcome, setSelectedConsensusOutcome] = useState("");
 
   const selectedMatch = useMemo(
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
@@ -988,7 +993,11 @@ function App() {
     || selectedMatch.marketDimensions?.[0]
     || { id: "match_winner_1x2", label: "90-minute winner" };
   const predictionConsensus = buildPredictionConsensus(predictionRows, selectedMatch, selectedPredictionDimension.id);
-  const focusedPrediction = selectedPrediction || predictionConsensus.groups[0]?.agents[0] || predictionRows[0] || null;
+  const selectedConsensusGroup = predictionConsensus.groups.find((group) => group.outcome === selectedConsensusOutcome)
+    || predictionConsensus.groups[0]
+    || null;
+  const maxConsensusScore = Math.max(...predictionConsensus.groups.map((group) => group.supportScore), 1);
+  const maxBucketCount = Math.max(...(selectedConsensusGroup?.probabilityBuckets || []).map((bucket) => bucket.agentCount), 1);
   const activeSignal = selectedPrediction?.signal || agentCommitment || latestSelectedEvent || selectedMatch;
   const activeSignalLabel = selectedPrediction
     ? `${selectedPrediction.agent} selected signal`
@@ -1181,18 +1190,21 @@ function App() {
           <section className="prediction-panel" aria-label="Agent predictions for selected match">
             <div className="section-title">
               <span><Bot size={18} /> Agent predictions</span>
-              <small>{predictionRows.length} visible</small>
+              <small>{predictionConsensus.totalAgents || predictionRows.length} agents total</small>
             </div>
             {predictionRows.length === 0 ? (
               <p className="empty">No agent prediction is loaded for this match yet. Ask an agent to open the action deeplink, then confirm the wallet transaction.</p>
             ) : (
               <div className="prediction-workbench">
-                <div className="prediction-left">
+                <div className="prediction-summary">
                   <label className="dimension-picker">
                     <span>Market view</span>
                     <select
                       value={selectedPredictionDimension.id}
-                      onChange={(event) => setSelectedPredictionDimensionId(event.target.value)}
+                      onChange={(event) => {
+                        setSelectedPredictionDimensionId(event.target.value);
+                        setSelectedConsensusOutcome("");
+                      }}
                     >
                       {(selectedMatch.marketDimensions || []).map((dimension) => (
                         <option key={dimension.id} value={dimension.id}>{dimension.label}</option>
@@ -1205,45 +1217,97 @@ function App() {
                     ) : (
                       predictionConsensus.groups.map((group) => (
                         <button
-                          className="consensus-row"
+                          className={`consensus-row ${selectedConsensusGroup?.outcome === group.outcome ? "active" : ""}`}
                           key={group.outcome}
-                          onClick={() => selectPredictionRow(group.agents[0])}
+                          onClick={() => setSelectedConsensusOutcome(group.outcome)}
                         >
-                          <span>{group.agentCount} agent{group.agentCount === 1 ? "" : "s"}</span>
-                          <strong>{group.outcome}</strong>
-                          <small>Average confidence {formatPct(group.averageBps)}</small>
+                          <div className="consensus-row-main">
+                            <strong>{group.outcome}</strong>
+                            <span>{group.topAgentCount}/{predictionConsensus.totalAgents} top votes</span>
+                          </div>
+                          <div className="consensus-metrics">
+                            <small>Avg {formatPct(group.averageBps)}</small>
+                            <small>Total score {formatSupportScore(group.supportScore)}</small>
+                            <small>{group.assignmentCount} probability entries</small>
+                          </div>
+                          <i style={{ width: `${Math.max(3, Math.round((group.supportScore / maxConsensusScore) * 100))}%` }} />
                         </button>
                       ))
                     )}
                   </div>
                 </div>
-                <div className="prediction-right">
-                  {focusedPrediction ? (() => {
-                    const [winner, winnerBps] = vectorWinner(focusedPrediction.signal, selectedMatch);
+                {selectedConsensusGroup ? (
+                  <div className="prediction-detail-panel">
+                    <div className="detail-heading">
+                      <div>
+                        <span>{selectedPredictionDimension.label}</span>
+                        <h3>{selectedConsensusGroup.outcome}</h3>
+                      </div>
+                      <dl>
+                        <div><dt>Top votes</dt><dd>{selectedConsensusGroup.topAgentCount}</dd></div>
+                        <div><dt>Average</dt><dd>{formatPct(selectedConsensusGroup.averageBps)}</dd></div>
+                        <div><dt>Total score</dt><dd>{formatSupportScore(selectedConsensusGroup.supportScore)}</dd></div>
+                      </dl>
+                    </div>
+                    <div className="bucket-chart" aria-label="Probability vote distribution">
+                      {selectedConsensusGroup.probabilityBuckets.length === 0 ? (
+                        <p className="empty">No probability entries for this outcome yet.</p>
+                      ) : (
+                        selectedConsensusGroup.probabilityBuckets.map((bucket) => (
+                          <div className="bucket-row" key={bucket.bps}>
+                            <strong>{formatPct(bucket.bps)}</strong>
+                            <div><i style={{ width: `${Math.max(5, Math.round((bucket.agentCount / maxBucketCount) * 100))}%` }} /></div>
+                            <span>{bucket.agentCount} agent{bucket.agentCount === 1 ? "" : "s"}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="agent-vote-list">
+                      {selectedConsensusGroup.probabilityBuckets.flatMap((bucket) => (
+                        bucket.agents.map((row) => (
+                          <button
+                            className={`agent-vote-row ${selectedSignalKey === row.key ? "active" : ""}`}
+                            key={`${bucket.bps}:${row.key}`}
+                            onClick={() => selectPredictionRow(row)}
+                          >
+                            <span>{formatPct(bucket.bps)}</span>
+                            <strong>{row.agent}</strong>
+                            <small>{row.source}</small>
+                          </button>
+                        ))
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                <div className="selected-agent-reader">
+                  {selectedPrediction ? (() => {
+                    const [winner, winnerBps] = vectorWinner(selectedPrediction.signal, selectedMatch);
                     return (
-                      <div className={`prediction-card ${selectedSignalKey === focusedPrediction.key ? "active" : ""}`}>
+                      <div className="prediction-card active">
                         <div>
-                          <strong>{focusedPrediction.agent}</strong>
-                          <span>{focusedPrediction.source}</span>
+                          <strong>{selectedPrediction.agent}</strong>
+                          <span>{selectedPrediction.source}</span>
                         </div>
                         <b>{winner} {formatPct(winnerBps)}</b>
                         <p>
-                          1X2: {selectedMatch.home} {formatPct(focusedPrediction.signal.homeBps)} · Draw {formatPct(focusedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(focusedPrediction.signal.awayBps)}
+                          1X2: {selectedMatch.home} {formatPct(selectedPrediction.signal.homeBps)} · Draw {formatPct(selectedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(selectedPrediction.signal.awayBps)}
                         </p>
-                        <small>{exactScoreText(focusedPrediction.rawEvidence)} · {firstGoalText(focusedPrediction.rawEvidence, selectedMatch)}</small>
+                        <small>{exactScoreText(selectedPrediction.rawEvidence)} · {firstGoalText(selectedPrediction.rawEvidence, selectedMatch)}</small>
                         {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
-                          <small key={dimension.id}>{dimensionPredictionText(focusedPrediction.rawEvidence, dimension)}</small>
+                          <small key={dimension.id}>{dimensionPredictionText(selectedPrediction.rawEvidence, dimension)}</small>
                         ))}
-                        <small>{methodText(focusedPrediction.rawEvidence)}</small>
-                        <small>{sourceText(focusedPrediction.rawEvidence)}</small>
-                        {focusedPrediction.txHash ? (
-                          <a href={`${EXPLORER}/tx/${focusedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
+                        <small>{methodText(selectedPrediction.rawEvidence)}</small>
+                        <small>{sourceText(selectedPrediction.rawEvidence)}</small>
+                        {selectedPrediction.txHash ? (
+                          <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
                             Open tx <ExternalLink size={12} />
                           </a>
                         ) : null}
                       </div>
                     );
-                  })() : null}
+                  })() : (
+                    <p className="empty">Select an agent row above to project that signal onto the main board.</p>
+                  )}
                 </div>
               </div>
             )}

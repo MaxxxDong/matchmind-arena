@@ -78,15 +78,16 @@ function marketPredictionsFrom(event) {
   return event?.rawEvidence?.marketPredictions || event?.rawEvidence?.signals?.marketPredictions || {};
 }
 
-function topPredictionForDimension(event, match, dimensionId) {
-  if (dimensionId === "match_winner_1x2") {
-    const [outcome, bps] = predictedOutcome(event.signal || event);
-    const label = outcome === "home" ? match.home : outcome === "away" ? match.away : "Draw";
-    return { outcome: label, bps: Number(bps || 0) };
+function entriesForDimension(row, match, dimension) {
+  if (dimension.id === "match_winner_1x2") {
+    const signal = row.signal || row;
+    return [
+      { outcome: match.home, bps: Number(signal.homeBps || 0) },
+      { outcome: "Draw", bps: Number(signal.drawBps || 0) },
+      { outcome: match.away, bps: Number(signal.awayBps || 0) },
+    ];
   }
-  const entries = normalizeOutcomeEntries(marketPredictionsFrom(event)[dimensionId])
-    .sort((a, b) => b.bps - a.bps);
-  return entries[0] || null;
+  return normalizeOutcomeEntries(marketPredictionsFrom(row)[dimension.id]);
 }
 
 function scoreExactScore(event, resolution) {
@@ -273,28 +274,67 @@ export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_R
 export function buildPredictionConsensus(rows = [], match = {}, dimensionId = "match_winner_1x2") {
   const dimension = (match.marketDimensions || []).find((item) => item.id === dimensionId)
     || { id: dimensionId, label: dimensionId };
-  const byOutcome = new Map();
+  const byOutcome = new Map((dimension.outcomes || []).map((outcome, index) => [outcome, {
+    outcome,
+    outcomeIndex: index,
+    topAgentCount: 0,
+    agentCount: 0,
+    assignmentCount: 0,
+    totalBps: 0,
+    topAgents: [],
+    agents: [],
+    assignments: [],
+  }]));
+  let totalAgents = 0;
   for (const row of rows) {
-    const prediction = topPredictionForDimension(row, match, dimensionId);
-    if (!prediction) continue;
-    const current = byOutcome.get(prediction.outcome) || {
-      outcome: prediction.outcome,
-      agentCount: 0,
-      totalBps: 0,
-      agents: [],
-    };
-    current.agentCount += 1;
-    current.totalBps += prediction.bps;
-    current.agents.push(row);
-    byOutcome.set(prediction.outcome, current);
+    const entries = entriesForDimension(row, match, dimension);
+    if (entries.length === 0) continue;
+    totalAgents += 1;
+    const sortedEntries = [...entries].sort((a, b) => b.bps - a.bps);
+    const top = sortedEntries[0];
+    for (const entry of entries) {
+      if (!byOutcome.has(entry.outcome)) {
+        byOutcome.set(entry.outcome, {
+          outcome: entry.outcome,
+          outcomeIndex: byOutcome.size,
+          topAgentCount: 0,
+          agentCount: 0,
+          assignmentCount: 0,
+          totalBps: 0,
+          topAgents: [],
+          agents: [],
+          assignments: [],
+        });
+      }
+      const current = byOutcome.get(entry.outcome);
+      current.assignmentCount += 1;
+      current.totalBps += entry.bps;
+      current.assignments.push({ row, bps: entry.bps });
+      if (entry.outcome === top.outcome) {
+        current.topAgentCount += 1;
+        current.agentCount += 1;
+        current.topAgents.push(row);
+        current.agents.push(row);
+      }
+    }
   }
   const groups = [...byOutcome.values()]
     .map((group) => ({
       ...group,
-      averageBps: Math.round(group.totalBps / group.agentCount),
+      averageBps: totalAgents ? Math.round(group.totalBps / totalAgents) : 0,
+      supportScore: group.totalBps,
+      probabilityBuckets: [...(group.topAgents.length ? group.assignments.filter((assignment) => (
+        group.topAgents.some((agent) => agent.key === assignment.row.key)
+      )) : group.assignments).reduce((buckets, assignment) => {
+        const current = buckets.get(assignment.bps) || { bps: assignment.bps, agentCount: 0, agents: [] };
+        current.agentCount += 1;
+        current.agents.push(assignment.row);
+        buckets.set(assignment.bps, current);
+        return buckets;
+      }, new Map()).values()].sort((a, b) => b.agentCount - a.agentCount || b.bps - a.bps),
     }))
-    .sort((a, b) => b.agentCount - a.agentCount || b.averageBps - a.averageBps || a.outcome.localeCompare(b.outcome));
-  return { dimension, groups };
+    .sort((a, b) => b.topAgentCount - a.topAgentCount || b.supportScore - a.supportScore || a.outcomeIndex - b.outcomeIndex);
+  return { dimension, totalAgents, groups };
 }
 
 export function buildResolutionEvidence(matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {

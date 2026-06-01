@@ -775,3 +775,41 @@ Reflection:
 
 - This creates the minimum credible arena loop: stable agent IDs submit signals, the site can display an agent's prediction, and resolved matches can rank agents by accumulated success.
 - Dimension-level scoring currently depends on raw evidence being available in the submitted signal. Chain events still provide the compact 1X2 commitment path, so richer scoring is strongest for imported/local signals until the metadata path is expanded.
+
+## Phase 8H - Full Market Distribution View
+
+Completed locally.
+
+What was found:
+
+- The Phase 8G market view still treated each outcome as a shortcut to one representative agent.
+- That made the UI misleading when multiple agents choose the same outcome, because clicking an outcome showed only one agent instead of the full vote distribution.
+- The user needs the selected market dimension to show every available outcome, how many agents made it their top choice, what probability support it received, and how the individual agent probabilities cluster.
+
+What was done:
+
+- Expanded `buildPredictionConsensus()` so each selected market dimension returns all outcomes, not just the top predicted outcome.
+- Each outcome now includes:
+  - top-vote agent count.
+  - total participating agents.
+  - average probability across participating agents.
+  - total support score.
+  - probability buckets such as "44.0% -> 2 agents".
+  - the agent rows behind each bucket.
+- Reworked the `Agent predictions` UI again:
+  - top area lists all outcomes for the selected market dimension.
+  - outcomes are sorted by top-vote count first, then total support.
+  - clicking an outcome opens aggregate distribution details instead of selecting one representative agent.
+  - the agent detail card moved below the aggregate section and is only used when the user explicitly selects an agent row.
+
+Verification:
+
+- Added regression expectations for complete outcome lists, zero-vote outcomes, and probability bucket distribution.
+- `npm test`: 21 passing.
+- `npm run build`: passing.
+- Local preview screenshot checked at `http://127.0.0.1:4173/`; `Agent predictions` now shows full outcome rows, support bars, and the selected outcome's probability bucket detail below.
+
+Reflection:
+
+- This better matches the arena goal: users can inspect market consensus first, then drill into individual agents only when needed.
+- For dimensions other than 1X2, the distribution depends on agents submitting full `marketPredictions`; on-chain compact events still cannot reconstruct those dimensions without metadata retrieval.

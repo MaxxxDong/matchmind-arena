@@ -94,7 +94,12 @@ describe("Scoring and prediction aggregation", function () {
     const winnerConsensus = buildPredictionConsensus(rows, match, "match_winner_1x2");
     const scoreConsensus = buildPredictionConsensus(rows, match, "exact_score");
 
-    expect(winnerConsensus.groups[0]).to.include({ outcome: "Argentina", agentCount: 2 });
-    expect(scoreConsensus.groups[0]).to.include({ outcome: "1-1", agentCount: 2 });
+    expect(winnerConsensus.totalAgents).to.equal(3);
+    expect(winnerConsensus.groups[0]).to.include({ outcome: "Argentina", topAgentCount: 2 });
+    expect(winnerConsensus.groups.map((group) => group.outcome)).to.deep.equal(["Argentina", "France", "Draw"]);
+    expect(winnerConsensus.groups.find((group) => group.outcome === "Draw")).to.include({ topAgentCount: 0 });
+    expect(scoreConsensus.groups[0]).to.include({ outcome: "1-1", topAgentCount: 2 });
+    expect(scoreConsensus.groups[0].probabilityBuckets[0]).to.include({ bps: 3000, agentCount: 1 });
+    expect(scoreConsensus.groups[0].probabilityBuckets[1]).to.include({ bps: 2800, agentCount: 1 });
   });
 });

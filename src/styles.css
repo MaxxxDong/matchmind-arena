@@ -661,13 +661,13 @@ h1 {
 
 .prediction-workbench {
   display: grid;
-  grid-template-columns: minmax(220px, 0.92fr) minmax(280px, 1.08fr);
   gap: 12px;
   align-items: start;
 }
 
-.prediction-left,
-.prediction-right {
+.prediction-summary,
+.prediction-detail-panel,
+.selected-agent-reader {
   min-width: 0;
 }
 
@@ -699,15 +699,15 @@ h1 {
 .consensus-list {
   display: grid;
   gap: 8px;
-  max-height: 360px;
+  max-height: 460px;
   overflow: auto;
 }
 
 .consensus-row {
   display: grid;
-  gap: 4px;
+  gap: 8px;
   width: 100%;
-  padding: 10px 11px;
+  padding: 11px;
   text-align: left;
   border: 1px solid color-mix(in oklch, var(--line), white 18%);
   border-radius: var(--radius);
@@ -723,11 +723,29 @@ h1 {
   transform: translateY(-1px);
 }
 
-.consensus-row span {
+.consensus-row.active {
+  border-color: color-mix(in oklch, var(--mint), var(--blue) 22%);
+  background: color-mix(in oklch, var(--mint), white 88%);
+}
+
+.consensus-row-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.consensus-row-main span {
   color: oklch(38% 0.12 154);
   font-size: 0.72rem;
   font-weight: 820;
   text-transform: uppercase;
+}
+
+.consensus-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .consensus-row strong,
@@ -738,6 +756,139 @@ h1 {
 .consensus-row small {
   color: var(--muted);
   line-height: 1.35;
+}
+
+.consensus-row > i {
+  display: block;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--blue), var(--mint) 36%);
+}
+
+.prediction-detail-panel {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid color-mix(in oklch, var(--line), white 15%);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--panel), white 5%);
+}
+
+.detail-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.detail-heading span {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 840;
+  text-transform: uppercase;
+}
+
+.detail-heading h3 {
+  margin: 2px 0 0;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  line-height: 0.95;
+}
+
+.detail-heading dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(72px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.detail-heading dl div {
+  padding: 8px;
+  border-radius: 12px;
+  background: oklch(99% 0.01 94);
+}
+
+.detail-heading dt {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.detail-heading dd {
+  margin: 2px 0 0;
+  font-weight: 900;
+}
+
+.bucket-chart {
+  display: grid;
+  gap: 7px;
+}
+
+.bucket-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 86px;
+  gap: 10px;
+  align-items: center;
+}
+
+.bucket-row strong,
+.bucket-row span {
+  font-size: 0.8rem;
+}
+
+.bucket-row span {
+  color: var(--muted);
+  text-align: right;
+}
+
+.bucket-row div {
+  height: 11px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--line), white 42%);
+}
+
+.bucket-row i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in oklch, var(--mint), white 10%), color-mix(in oklch, var(--blue), var(--mint) 15%));
+}
+
+.agent-vote-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+
+.agent-vote-row {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+  text-align: left;
+  border: 1px solid color-mix(in oklch, var(--line), white 20%);
+  border-radius: 12px;
+  background: oklch(99% 0.01 94);
+  cursor: pointer;
+}
+
+.agent-vote-row:hover,
+.agent-vote-row:focus-visible,
+.agent-vote-row.active {
+  border-color: color-mix(in oklch, var(--mint), var(--blue) 25%);
+  outline: none;
+}
+
+.agent-vote-row span {
+  color: oklch(38% 0.12 154);
+  font-size: 0.72rem;
+  font-weight: 840;
+  text-transform: uppercase;
+}
+
+.agent-vote-row small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .market-panel {
@@ -1456,8 +1607,7 @@ h1 {
   }
 
   .term-strip,
-  .dimension-grid,
-  .prediction-workbench {
+  .dimension-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1498,6 +1648,12 @@ h1 {
   .dimension-grid,
   .command-strip,
   .prediction-workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-heading,
+  .detail-heading dl,
+  .consensus-metrics {
     grid-template-columns: 1fr;
   }
 
