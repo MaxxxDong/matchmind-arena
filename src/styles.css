@@ -932,6 +932,84 @@ h1 {
   text-transform: uppercase;
 }
 
+.signal-checklist {
+  display: grid;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, white, var(--panel) 30%);
+}
+
+.signal-checklist > div {
+  display: grid;
+  gap: 3px;
+}
+
+.signal-checklist strong {
+  font-size: 0.9rem;
+}
+
+.signal-checklist > div span,
+.signal-checklist small,
+.fallback-copy {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.signal-checklist ul {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signal-checklist li {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 2px 8px;
+  align-items: start;
+  padding: 8px;
+  border-radius: calc(var(--radius) - 4px);
+  background: oklch(98% 0.008 94);
+}
+
+.signal-checklist li b {
+  grid-row: span 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.signal-checklist li.ok b {
+  color: oklch(31% 0.12 154);
+  background: color-mix(in oklch, var(--mint), white 76%);
+}
+
+.signal-checklist li.error b {
+  color: oklch(40% 0.15 28);
+  background: oklch(94% 0.05 32);
+}
+
+.signal-checklist li span {
+  font-size: 0.83rem;
+  font-weight: 820;
+}
+
+.signal-checklist li small {
+  overflow-wrap: anywhere;
+}
+
+.fallback-copy {
+  margin: 8px 0 0;
+  font-size: 0.84rem;
+}
+
 .model-action {
   width: 100%;
 }

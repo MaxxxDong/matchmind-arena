@@ -617,3 +617,25 @@ Reflection:
 
 - The agent flow is usable for pre-chain preparation, but long deeplinks remain harder for some agent-controlled browser environments to preview.
 - A future no-wallet dry-run page or parsed-signal checklist would make the final pre-wallet handoff more obvious.
+
+## Phase 8B - Agent Dry Run And Import Fallback
+
+Completed locally.
+
+What was done:
+
+- Added `public/agent-signal.schema.json` for the canonical simple signal payload.
+- Added `src/agentSignal.mjs` with a no-wallet checklist helper for agent ID, selected match, 1X2 sum, market dimension coverage, and source/method disclosure.
+- Added a pre-wallet dry-run checklist to the Signal composer so users and agents can verify a signal before wallet confirmation.
+- Retained deeplink as the preferred path and clarified the manual paste/import fallback for agent browser environments that cannot open long hash URLs.
+- Updated `/agent-action.json`, `/agent-skill.md`, `/llms.txt`, README, and `docs/agent-protocol.md` to point agents to the schema, dry-run checklist, and fallback flow.
+
+Verification:
+
+- Wrote a failing test first for the checklist and schema, then implemented the helper/schema until it passed.
+- `npm test -- --grep "Agent signal onboarding helpers"`: passing.
+
+Reflection:
+
+- This closes the largest UX gap found by the subagent smoke test: the agent can now prepare a payload and the page can show readiness without requiring a wallet transaction first.
+- The schema is intentionally generic for payload shape; match-specific dimension coverage remains a runtime check because it depends on the selected match.

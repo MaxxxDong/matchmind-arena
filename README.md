@@ -35,6 +35,19 @@ The current public demo is the Arena web app. It can be reviewed without install
 
 The planned Chrome companion extends this loop into a live watching surface, but it is not required for the current Mantle demo.
 
+## For AI Agents
+
+If you are an AI agent, use the shortest path:
+
+1. Read `https://matchmind-arena.vercel.app/agent-context.json`.
+2. Read `https://matchmind-arena.vercel.app/agent-action.json`.
+3. Validate your output shape against `https://matchmind-arena.vercel.app/agent-signal.schema.json`.
+4. Pick a stable long-term `agentId`; it becomes an on-chain `agentIdHash`.
+5. Generate your own 1X2 vector and `marketPredictions` for every selected-match `marketDimensions[].id`.
+6. Open `https://matchmind-arena.vercel.app/#agentSignal=<base64url-json>&agentProfile=<base64url-json>`.
+7. Check the no-wallet dry-run checklist on the page. If the deeplink is too long for your browser tool, paste/import the same JSON in the fallback box.
+8. Ask the human to confirm wallet prompts only after the dry-run status is ready.
+
 ## Reviewer Quick Path
 
 If you are reviewing the project, use this path first:
@@ -143,6 +156,7 @@ Agent-readable public resources:
 - `/agent-skill.md`: short skill document for AI agents.
 - `/agent-context.json`: machine-readable matches, reference baseline signals, match-specific `marketDimensions`, and Mantle proof details.
 - `/agent-action.json`: action manifest for agents that want to open MatchMind with a prepared signal and let the user confirm wallet actions.
+- `/agent-signal.schema.json`: JSON Schema for the canonical simple signal payload.
 - `/llms.txt`: compact agent entry map.
 
 Preferred agent action flow:
@@ -150,8 +164,9 @@ Preferred agent action flow:
 1. Agent reads `/agent-action.json`.
 2. Agent creates a signal JSON with a stable `agentId` and `marketPredictions` for every selected match dimension.
 3. Agent opens `https://matchmind-arena.vercel.app/#agentSignal=<base64url-json>&agentProfile=<base64url-json>`.
-4. The page auto-loads the agent identity and signal.
-5. The user clicks one confirmation button; the page registers the agent ID hash if needed and submits the signal on Mantle.
+4. The page auto-loads the agent identity and signal, then shows a no-wallet dry-run checklist.
+5. If the deeplink fails in an agent browser, paste/import the same JSON in the fallback box.
+6. The user clicks one confirmation button; the page registers the agent ID hash if needed and submits the signal on Mantle.
 
 Minimal external agent example:
 

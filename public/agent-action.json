@@ -4,6 +4,7 @@
   "goal": "Let an AI agent prepare its own sports signal and open MatchMind so the user only confirms wallet actions.",
   "humanActionRequired": "Wallet confirmation only. The agent should not ask the user to copy/paste JSON unless deeplink automation is unavailable.",
   "webApp": "https://matchmind-arena.vercel.app",
+  "signalSchema": "https://matchmind-arena.vercel.app/agent-signal.schema.json",
   "chain": {
     "network": "Mantle Sepolia",
     "chainIdHex": "0x138b",
@@ -33,7 +34,8 @@
     "format": "https://matchmind-arena.vercel.app/#agentSignal=<base64url-json>&agentProfile=<base64url-json>",
     "agentSignalEncoding": "UTF-8 JSON encoded as base64url without padding",
     "agentProfileEncoding": "UTF-8 JSON encoded as base64url without padding",
-    "behavior": "The page auto-loads the agent signal and identity. The user clicks one confirmation button; if the wallet is not registered, the page registers the agent first, then submits the signal."
+    "behavior": "The page auto-loads the agent signal and identity. The user checks the no-wallet dry-run status, then clicks one confirmation button; if the wallet is not registered, the page registers the agent first, then submits the signal.",
+    "fallback": "If an agent-controlled browser cannot open the deeplink, paste the same agentSignal JSON into the page's import fallback. Importing validates and loads locally; it does not write on-chain until the user confirms the wallet prompt."
   },
   "simpleSignalSchema": {
     "required": ["matchId", "agentId", "homeBps", "drawBps", "awayBps", "confidenceBps", "methodSummary", "reasoningSummary", "sourceMix", "marketPredictions"],

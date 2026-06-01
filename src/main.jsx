@@ -26,6 +26,7 @@ import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { RESULT_LABELS, buildLeaderboard } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
+import { buildAgentSignalChecklist } from "./agentSignal.mjs";
 import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
@@ -56,6 +57,7 @@ const LOG_LOOKBACK_BLOCKS = 8000;
 const AGENT_SKILL_URL = "/agent-skill.md";
 const AGENT_CONTEXT_URL = "/agent-context.json";
 const AGENT_ACTION_URL = "/agent-action.json";
+const AGENT_SCHEMA_URL = "/agent-signal.schema.json";
 const LLMS_URL = "/llms.txt";
 const PREDICTION_DIMENSIONS = [
   ["Moneyline / 1X2", "home / draw / away"],
@@ -598,6 +600,28 @@ function App() {
     () => MATCHES.find((match) => match.id === selectedId) || MATCHES[0],
     [selectedId],
   );
+  const agentSignalDraft = useMemo(() => {
+    try {
+      return JSON.parse(agentSignalText || "{}");
+    } catch (error) {
+      return { __parseError: error.message };
+    }
+  }, [agentSignalText]);
+  const agentChecklist = useMemo(() => {
+    if (agentSignalDraft.__parseError) {
+      return {
+        ok: false,
+        summary: "Fix JSON before wallet confirmation.",
+        items: [{
+          id: "json",
+          label: "Signal JSON",
+          status: "error",
+          detail: agentSignalDraft.__parseError,
+        }],
+      };
+    }
+    return buildAgentSignalChecklist(agentSignalDraft, selectedMatch);
+  }, [agentSignalDraft, selectedMatch]);
   const signal = useMemo(() => agentCommitment ?? buildSignal(selectedMatch), [selectedMatch, agentCommitment]);
 
   const selectMatch = useCallback((matchId) => {
@@ -945,6 +969,9 @@ function App() {
           <a href={AGENT_ACTION_URL} target="_blank" rel="noreferrer" className="link-button">
             <Zap size={17} /> Action JSON
           </a>
+          <a href={AGENT_SCHEMA_URL} target="_blank" rel="noreferrer" className="link-button">
+            <CheckCircle2 size={17} /> Signal schema
+          </a>
           <a href={LLMS_URL} target="_blank" rel="noreferrer" className="link-button">
             <BrainCircuit size={17} /> llms.txt
           </a>
@@ -1083,10 +1110,15 @@ function App() {
                 <span>Agent action</span>
                 <code>Read /agent-action.json</code>
                 <code>Open #agentSignal=&lt;base64url-json&gt;</code>
-                <span>Then use the green button below; approve wallet prompts to write on Mantle.</span>
+                <span>Check the dry-run status below, then use the green button; approve wallet prompts to write on Mantle.</span>
               </div>
+              <SignalChecklist checklist={agentChecklist} />
               <details className="debug-box">
-                <summary>Advanced fallback: inspect or manually load signal JSON</summary>
+                <summary>No deeplink? Paste/import signal JSON</summary>
+                <p className="fallback-copy">
+                  Use this fallback when an agent-controlled browser cannot open a long deeplink.
+                  Importing only validates and loads the signal locally; Mantle writes still require the green wallet button.
+                </p>
                 <label>
                   <span>Agent signal JSON</span>
                   <textarea
@@ -1098,7 +1130,7 @@ function App() {
                 </label>
                 <button onClick={loadAgentSignal} className="link-button model-action">
                   <Bot size={17} />
-                  Load signal for Mantle commit
+                  Validate/import signal JSON
                 </button>
               </details>
             </div>
@@ -1247,6 +1279,26 @@ function Probability({ label, value, tone }) {
       <span>{label}</span>
       <strong>{formatPct(value)}</strong>
       <div className="meter"><i style={{ width: `${Number(value) / 100}%` }} /></div>
+    </div>
+  );
+}
+
+function SignalChecklist({ checklist }) {
+  return (
+    <div className={`signal-checklist ${checklist.ok ? "ready" : "blocked"}`} aria-label="No-wallet agent signal dry run">
+      <div>
+        <strong>Pre-wallet dry run</strong>
+        <span>{checklist.summary}</span>
+      </div>
+      <ul>
+        {checklist.items.map((item) => (
+          <li className={item.status} key={item.id}>
+            <b>{item.status === "ok" ? "OK" : "Fix"}</b>
+            <span>{item.label}</span>
+            <small>{item.detail}</small>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
