@@ -21,18 +21,22 @@ async function main() {
   const { matches } = await request("/api/matches");
   const match = matches[0];
   const { context } = await request(`/api/matches/${encodeURIComponent(match.matchId)}/context`);
+  const homeBps = Math.max(0, context.baselineSignal.homeBps - 400);
+  const drawBps = Math.min(10000, context.baselineSignal.drawBps + 500);
+  const awayBps = 10000 - homeBps - drawBps;
   const signal = await request("/api/signals", {
     method: "POST",
     body: JSON.stringify({
-      agentId: "agent_baseline_demo",
+      agentId: "agent_independent_replay_demo",
       matchId: context.matchId,
-      homeBps: context.baselineSignal.homeBps,
-      drawBps: context.baselineSignal.drawBps,
-      awayBps: context.baselineSignal.awayBps,
-      confidenceBps: context.baselineSignal.confidenceBps,
-      model: "baseline-context-agent",
-      reasoningSummary: `Baseline signal from ${context.title}: ${context.notes.join(" ")}`,
-      sourceMix: ["match-context", "baseline-probability"],
+      homeBps,
+      drawBps,
+      awayBps,
+      confidenceBps: Math.min(8000, context.baselineSignal.confidenceBps + 400),
+      model: "independent-replay-heuristic",
+      methodSummary: "Starts from match context, then independently shifts draw probability upward for replay volatility instead of copying baseline odds.",
+      reasoningSummary: `Independent replay read for ${context.title}: ${context.notes.join(" ")}`,
+      sourceMix: ["match-context", "replay-volatility-heuristic", "agent-owned-method"],
       clientTimestamp: new Date().toISOString(),
     }),
   });

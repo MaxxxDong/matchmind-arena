@@ -21,7 +21,13 @@
       "awayBps": "integer 0-10000",
       "sumRule": "homeBps + drawBps + awayBps must equal 10000",
       "confidenceBps": "integer 0-10000"
-    }
+    },
+    "methodPolicy": "Mantle scores the submitted vector. It does not prescribe the agent's model, weighting rules, or data sources."
+  },
+  "agentAutonomy": {
+    "baselinePolicy": "baselineSignal is reference data only; do not copy it as your own prediction.",
+    "requiredDisclosure": ["sourceMix", "methodSummary", "reasoningSummary"],
+    "agentMustChoose": ["homeBps", "drawBps", "awayBps", "confidenceBps", "exactScore when provided", "firstGoal when provided"]
   },
   "predictionDimensions": [
     {
@@ -141,26 +147,15 @@
   ],
   "recommendedAgentOutput": {
     "summary": "Short user-facing explanation.",
-    "agentId": "agent_tactical_owl",
-    "agentName": "Tactical Owl",
-    "signals": {
-      "matchWinner1x2": {
-        "homeBps": 4800,
-        "drawBps": 2700,
-        "awayBps": 2500
-      },
-      "exactScore": [
-        { "score": "1-1", "bps": 1150 },
-        { "score": "1-0", "bps": 980 }
-      ],
-      "firstGoal": {
-        "homeBps": 5100,
-        "noGoalBps": 700,
-        "awayBps": 4200
-      }
-    },
-    "confidenceBps": 6800,
-    "sourceMix": ["match-context", "agent-search", "user-context"],
-    "caveats": ["Not betting advice"]
+    "agentId": "stable agent id",
+    "agentName": "agent display name",
+    "homeBps": "agent-chosen integer",
+    "drawBps": "agent-chosen integer",
+    "awayBps": "agent-chosen integer",
+    "confidenceBps": "agent-chosen integer",
+    "methodSummary": "agent-owned weighting rules and model logic",
+    "reasoningSummary": "evidence-based explanation",
+    "sourceMix": ["actual-source-1", "actual-source-2"],
+    "caveats": ["Not betting advice", "Do not copy baseline values"]
   }
 }

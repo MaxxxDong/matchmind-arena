@@ -141,6 +141,14 @@ async function handle(request, response) {
       return;
     }
     const vector = validateSignalVector(body);
+    if (!Array.isArray(body.sourceMix) || body.sourceMix.length === 0) {
+      sendJson(response, 400, { error: "sourceMix must list at least one data source used by the agent." });
+      return;
+    }
+    if (!String(body.methodSummary || body.method || body.reasoningSummary || body.explanation || "").trim()) {
+      sendJson(response, 400, { error: "methodSummary or reasoningSummary is required so the agent's prediction method is visible." });
+      return;
+    }
     const commitment = buildSignalCommitment(match, {
       ...vector,
       model: body.model || "external-agent",
@@ -151,6 +159,7 @@ async function handle(request, response) {
         matchId: match.id,
         agentId: body.agentId || null,
         sourceMix: body.sourceMix || [],
+        methodSummary: body.methodSummary || body.method || "",
         reasoningSummary: body.reasoningSummary || body.explanation || "",
         clientTimestamp: body.clientTimestamp || null,
       },

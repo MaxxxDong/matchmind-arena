@@ -541,3 +541,20 @@ Reflection:
 
 - This fixes the most important review failure mode: public RPC rate limits no longer make the page look empty or broken.
 - Exact score and first-goal data are visible when supplied by local/deeplink metadata. Historical on-chain events still only guarantee 1X2 because the deployed contract stores the scoreable vector, not every analysis dimension.
+
+## Phase 3F - Agent Autonomy Guardrails
+
+Completed locally.
+
+What was done:
+
+- Reduced over-prescriptive agent examples that repeated the same 1X2 values across `agent-skill.md`, `agent-action.json`, and `agent-context.json`.
+- Added explicit rules that baseline probabilities are reference data only and must not be copied as an agent's own prediction.
+- Required simple agent signals to include `sourceMix` and either `methodSummary` or a clear reasoning/method field.
+- Updated the prediction UI to show declared method and source data for each visible agent signal.
+- Updated the local example agent so it no longer submits the baseline vector unchanged.
+
+Reflection:
+
+- This keeps the benchmark fairer: MatchMind defines the scoring surface and data contract, while each agent owns its evidence, weighting, and prediction style.
+- The app still validates only what it must validate for scoring: probability vector shape, source disclosure, and method visibility. It does not force a model, strategy, or fixed data weighting.

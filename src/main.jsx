@@ -76,21 +76,22 @@ const SIMPLE_AGENT_EXAMPLE = `{
   "matchId": "demo-replay:argentina-france-2022",
   "agentId": "agent_site_reader_demo",
   "agentName": "Site Reading Agent",
-  "homeBps": 4800,
-  "drawBps": 2700,
-  "awayBps": 2500,
-  "confidenceBps": 6800,
-  "reasoningSummary": "Argentina have the stronger late-game chance quality, but France's transition threat keeps draw risk high.",
+  "homeBps": 4400,
+  "drawBps": 3200,
+  "awayBps": 2400,
+  "confidenceBps": 7200,
+  "methodSummary": "Weighted replay momentum, opponent transition risk, and regular-time draw probability; did not copy MatchMind baseline.",
+  "reasoningSummary": "My model prices the draw higher than the baseline because this replay context is tied to a regular-time final that stayed level.",
   "exactScore": [
-    { "score": "1-1", "bps": 1150 },
-    { "score": "2-1", "bps": 920 }
+    { "score": "2-2", "bps": 1400 },
+    { "score": "1-1", "bps": 1200 }
   ],
   "firstGoal": {
-    "homeBps": 5100,
-    "noGoalBps": 700,
-    "awayBps": 4200
+    "homeBps": 4600,
+    "noGoalBps": 600,
+    "awayBps": 4800
   },
-  "sourceMix": ["match-context", "agent-reasoning", "user-context"]
+  "sourceMix": ["match-context", "regular-time-result-model", "agent-reasoning"]
 }`;
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
@@ -357,6 +358,17 @@ function firstGoalText(rawEvidence, match) {
   return `First goal: ${label === "Draw" ? "No goal" : label} ${formatPct(bps)}`;
 }
 
+function sourceText(rawEvidence) {
+  const sources = rawEvidence?.sourceMix || rawEvidence?.evidence || [];
+  if (!Array.isArray(sources) || sources.length === 0) return "Sources: not declared";
+  return `Sources: ${sources.slice(0, 4).join(", ")}`;
+}
+
+function methodText(rawEvidence) {
+  const method = rawEvidence?.methodSummary || rawEvidence?.method || rawEvidence?.strategy;
+  return method ? `Method: ${method}` : "Method: not declared";
+}
+
 function normalizeCommitment(candidate) {
   const source = candidate?.commitment ?? candidate;
   const required = [
@@ -401,6 +413,8 @@ function normalizeCommitment(candidate) {
 
 function normalizeSimpleAgentSignal(candidate, match) {
   const source = candidate?.signals?.matchWinner1x2 ?? candidate?.matchWinner1x2 ?? candidate;
+  const sourceMix = candidate.sourceMix ?? candidate.evidence ?? [];
+  const methodSummary = candidate.methodSummary ?? candidate.method ?? candidate.strategy ?? "";
   const homeBps = Number(source.homeBps);
   const drawBps = Number(source.drawBps);
   const awayBps = Number(source.awayBps);
@@ -410,6 +424,12 @@ function normalizeSimpleAgentSignal(candidate, match) {
   }
   if (homeBps + drawBps + awayBps !== 10000) {
     throw new Error("Agent signal must sum to 10,000 bps.");
+  }
+  if (!Array.isArray(sourceMix) || sourceMix.length === 0) {
+    throw new Error("Agent signal must include sourceMix with at least one data source.");
+  }
+  if (!String(methodSummary || candidate.reasoningSummary || candidate.explanation || "").trim()) {
+    throw new Error("Agent signal must include methodSummary or reasoningSummary so its prediction style is visible.");
   }
   return buildSignalCommitment(match, {
     homeBps,
@@ -424,9 +444,10 @@ function normalizeSimpleAgentSignal(candidate, match) {
       matchId: match.id,
       summary: candidate.summary ?? null,
       reasoningSummary: candidate.reasoningSummary ?? candidate.explanation ?? "",
+      methodSummary,
       exactScore: candidate.exactScore ?? candidate.signals?.exactScore ?? [],
       firstGoal: candidate.firstGoal ?? candidate.signals?.firstGoal ?? null,
-      sourceMix: candidate.sourceMix ?? candidate.evidence ?? ["matchmind-site-context"],
+      sourceMix,
       caveats: candidate.caveats ?? [],
     },
     metadataUri: candidate.metadataUri,
@@ -917,6 +938,8 @@ function App() {
                       1X2: {selectedMatch.home} {formatPct(row.signal.homeBps)} · Draw {formatPct(row.signal.drawBps)} · {selectedMatch.away} {formatPct(row.signal.awayBps)}
                     </p>
                     <small>{exactScoreText(row.rawEvidence)} · {firstGoalText(row.rawEvidence, selectedMatch)}</small>
+                    <small>{methodText(row.rawEvidence)}</small>
+                    <small>{sourceText(row.rawEvidence)}</small>
                     {row.txHash ? (
                       <a href={`${EXPLORER}/tx/${row.txHash}`} target="_blank" rel="noreferrer">
                         Open tx <ExternalLink size={12} />

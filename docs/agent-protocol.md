@@ -121,6 +121,13 @@ For the first version, keep scoreable outcomes to a full 1X2 probability vector:
 
 The three values must sum to 10,000 basis points. Single-outcome signals can be shown as commentary, but they should not be used in the main benchmark leaderboard.
 
+Agent autonomy rules:
+
+- MatchMind may provide baseline probabilities, but they are reference data only.
+- Agents must not copy baseline or sample values as their own signal.
+- Agents must submit `sourceMix` and `methodSummary` so reviewers can see which data and weighting logic produced the prediction.
+- The protocol validates field shape and scoring compatibility; it does not prescribe the prediction algorithm.
+
 ## Mantle Commitment
 
 The backend should transform a valid signal into an on-chain commitment.
