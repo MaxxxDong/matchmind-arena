@@ -1,11 +1,16 @@
 {
-  "generatedAt": "2026-06-01T02:31:01.516Z",
+  "generatedAt": "2026-06-01T02:54:34.390Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x5929c4cC5DfEdaA8Cb8Df6e9d3aa27EF44CBceD4",
   "deployBlock": 39344371,
-  "latestBlock": 39368192,
+  "latestBlock": 39368899,
   "eventCount": 1,
   "resolvedSignalCount": 1,
+  "resolutionSource": {
+    "path": "snapshots/resolutions.mantle-sepolia.json",
+    "generatedAt": "2026-06-01T02:54:33.143Z",
+    "resolver": "matchmind-public-result-resolver"
+  },
   "matches": [
     {
       "id": "demo-replay:argentina-france-2022",
@@ -17,14 +22,16 @@
       "resolution": {
         "result": "draw",
         "resultScope": "regular-time-1x2",
-        "sourceId": "fifaArgentinaFrance2022",
-        "source": "Regular-time 1X2 result is draw. FIFA records Argentina 3-3 France (4-2 PSO), with France reaching 2-2 before extra time.",
-        "sourceProvider": "FIFA",
-        "sourceTitle": "Argentina v France | Greatest Games | FIFA World Cup 2022",
-        "sourceUri": "https://www.fifa.com/en/tournaments/mens/worldcup/articles/argentina-france-2022-final-greatest-games",
+        "sourceId": "espnArgentinaFrance2022",
+        "source": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
+        "resolvedAt": "2026-06-01T02:54:31.671Z",
+        "resolverStatus": "verified-from-public-source",
+        "sourceProvider": "ESPN",
+        "sourceTitle": "Argentina 3-3 France (Dec 18, 2022) Final Score",
+        "sourceUri": "https://global.espn.com/football/match/_/gameId/633850",
         "sourceCheckedAt": "2026-06-01",
-        "sourceEvidenceSummary": "FIFA lists Argentina 3-3 France (4-2 PSO), with France equalising in the 80th and 81st minutes before extra time.",
-        "sourceHash": "0xecf7d498c3a15a6bc6b333138fba10cdd21916b2660c463005488b2d850b4d1a"
+        "sourceEvidenceSummary": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
+        "sourceHash": "0xb34aba06471609eb91f0a437aac7ca5f1b69f4c82d46533bd50696b85a20a6e6"
       }
     },
     {

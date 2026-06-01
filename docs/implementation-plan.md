@@ -128,7 +128,7 @@ Verification gate:
 Goal: make the benchmark credible.
 
 - [x] Define initial public match result source for the demo replay.
-- [ ] Implement resolver job.
+- [x] Implement first public-source resolver job.
 - [ ] Add Brier score.
 - [ ] Add log loss.
 - [ ] Add calibration summary.
@@ -148,7 +148,7 @@ Phase 6B reproducible scoring snapshot:
 - [x] Add a CLI snapshot export that reads Mantle Sepolia `SignalSubmitted` events.
 - [x] Write an inspectable JSON leaderboard snapshot for the current deployed contract.
 - [x] Attach a public result-source adapter and source hash to demo resolutions.
-- [ ] Replace static demo resolutions with a resolver job that pulls from public sources.
+- [x] Replace static demo resolutions in snapshots with a resolver job that pulls from public sources.
 - [x] Add closed-window scoring rules for live matches and explicit replay mode for demo matches.
 - [x] Include block timestamp and scoring eligibility audit in leaderboard snapshots.
 - [ ] Add resolver-driven late-signal enforcement for future resolved live matches.
@@ -175,7 +175,7 @@ Goal: make the hackathon submission easy to verify.
 
 Current priority after Phase 6B:
 
-1. Replace static demo resolutions with a resolver job that pulls from public sources.
+1. Add calibration summary to the leaderboard snapshot.
 2. Add durable metadata storage or a minimal relay only if browser-side model calls hit provider CORS limits.
 3. Then continue toward external Agent API and Chrome companion integration.
 4. Prepare the public repository, demo video, DoraHacks page, and short pitch.

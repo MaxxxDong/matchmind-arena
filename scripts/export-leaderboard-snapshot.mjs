@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ethers } from "ethers";
 import { MATCHES } from "../src/data/matches.mjs";
@@ -11,6 +11,8 @@ const LOG_CHUNK_SIZE = 9000;
 const RPC_URL = process.env.MANTLE_SEPOLIA_RPC_URL || "https://rpc.sepolia.mantle.xyz";
 const OUT_PATH = process.env.LEADERBOARD_SNAPSHOT_PATH ||
   path.resolve("snapshots", "leaderboard.mantle-sepolia.json");
+const RESULT_SNAPSHOT_PATH = process.env.RESULT_SNAPSHOT_PATH ||
+  path.resolve("snapshots", "resolutions.mantle-sepolia.json");
 
 const ARENA_ABI = [
   "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
@@ -32,6 +34,33 @@ async function hydrateBlockTimestamps(provider, logs) {
   const blocks = await Promise.all(blockNumbers.map(async (blockNumber) => provider.getBlock(blockNumber)));
   const timestamps = new Map(blocks.filter(Boolean).map((block) => [block.number, Number(block.timestamp)]));
   return logs.map((log) => toSignalEvent(log, timestamps.get(log.blockNumber)));
+}
+
+async function loadResolutions() {
+  try {
+    const raw = await readFile(RESULT_SNAPSHOT_PATH, "utf8");
+    const snapshot = JSON.parse(raw);
+    if (snapshot?.resolutions && typeof snapshot.resolutions === "object") {
+      return {
+        resolutions: snapshot.resolutions,
+        source: {
+          path: path.relative(process.cwd(), RESULT_SNAPSHOT_PATH).replaceAll("\\", "/"),
+          generatedAt: snapshot.generatedAt,
+          resolver: snapshot.resolver,
+        },
+      };
+    }
+  } catch {
+    // Fall through to static demo fixtures when no resolver output exists.
+  }
+  return {
+    resolutions: DEMO_RESOLUTIONS,
+    source: {
+      path: null,
+      generatedAt: null,
+      resolver: "static-demo-fixtures",
+    },
+  };
 }
 
 function toSignalEvent(log, blockTimestamp) {
@@ -62,9 +91,10 @@ async function main() {
   const arena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, provider);
   const { latest, logs } = await querySignalEvents(provider, arena);
   const events = await hydrateBlockTimestamps(provider, logs);
-  const leaderboard = buildLeaderboard(events, MATCHES, DEMO_RESOLUTIONS);
+  const { resolutions, source: resolutionSource } = await loadResolutions();
+  const leaderboard = buildLeaderboard(events, MATCHES, resolutions);
   const resolvedSignalCount = leaderboard.reduce((total, entry) => total + entry.resolved, 0);
-  const scoringAudit = buildScoringAudit(events, MATCHES, DEMO_RESOLUTIONS);
+  const scoringAudit = buildScoringAudit(events, MATCHES, resolutions);
   const snapshot = {
     generatedAt: new Date().toISOString(),
     network: "mantle-sepolia",
@@ -73,7 +103,8 @@ async function main() {
     latestBlock: latest,
     eventCount: events.length,
     resolvedSignalCount,
-    matches: buildResolutionEvidence(MATCHES, DEMO_RESOLUTIONS),
+    resolutionSource,
+    matches: buildResolutionEvidence(MATCHES, resolutions),
     scoringAudit,
     leaderboard,
     events,

@@ -14,6 +14,7 @@ Purpose: this is the single progress log for completed project phases and curren
 - Phase 6B reproducible scoring snapshot: complete.
 - Phase 6C public result-source evidence: complete for the demo replay.
 - Phase 6D closed-window scoring audit: complete for local and snapshot scoring.
+- Phase 6E public-source resolver job: complete for the demo replay.
 - Phase 4A local Agent API skeleton: complete.
 
 ## Phase 0 - Research And Repo Setup
@@ -277,6 +278,31 @@ Reflection:
 - This is the right level for the current stage: it prevents silent scoring of late live signals while preserving explicitly labeled demo replay mode.
 - The next hardening step is to make the resolver job enforce these windows automatically when it writes future live resolutions.
 
+## Phase 6E - Public-Source Resolver Job
+
+Completed locally for the demo replay.
+
+What was done:
+
+- Added `src/resolver.mjs` with a public result-source resolver.
+- Added `scripts/resolve-results.mjs`.
+- Added `npm run resolve:results`.
+- Added ESPN as the first machine-readable result source for Argentina vs France 2022.
+- The resolver fetches the public source page, checks required text groups, writes source status, content hash, matched evidence groups, and resolved match output.
+- `npm run snapshot:leaderboard` now uses `snapshots/resolutions.mantle-sepolia.json` when present, then falls back to static demo fixtures if no resolver output exists.
+
+Verification:
+
+- `npm run resolve:results`: passing.
+- Resolver output: 1 match resolved, 0 source checks failed.
+- `npm run snapshot:leaderboard`: passing after resolver output was generated.
+- Leaderboard snapshot references `snapshots/resolutions.mantle-sepolia.json` and includes ESPN source evidence.
+
+Reflection:
+
+- FIFA remains a strong human-facing source, but its page HTML is not machine-readable through direct fetch in this environment. ESPN is currently more practical for a repeatable resolver job.
+- The resolver stores hashes and matched evidence strings, not raw fetched pages. That keeps the snapshot small and auditable without committing third-party page content.
+
 ## Phase 4A - Local Agent API Skeleton
 
 Completed locally.
@@ -308,9 +334,9 @@ Reflection:
 
 ## Next Phase
 
-After public Vercel deployment:
+After public Vercel deployment and resolver job:
 
-- Add a resolver job that pulls from public result sources and enforces live-match windows.
+- Add calibration summary to leaderboard snapshots.
 - Add persistent storage or a relay only if external agent participation needs server-side submission.
 - Replace browser-local metadata cache with durable off-chain storage when a backend or storage provider is chosen.
 - Then expand into the Chrome companion integration.

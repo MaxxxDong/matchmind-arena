@@ -11,6 +11,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "deploy:mantle-sepolia": "hardhat run scripts/deploy-signal-arena.js --network mantleSepolia",
     "submit-demo:mantle-sepolia": "hardhat run scripts/submit-demo-signal.js --network mantleSepolia",
+    "resolve:results": "node scripts/resolve-results.mjs",
     "snapshot:leaderboard": "node scripts/export-leaderboard-snapshot.mjs",
     "api:agent": "node scripts/agent-api-server.mjs",
     "agent:example": "node scripts/example-agent.mjs"

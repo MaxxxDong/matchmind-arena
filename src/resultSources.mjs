@@ -1,13 +1,24 @@
 import { ethers } from "ethers";
 
 export const PUBLIC_RESULT_SOURCES = {
-  fifaArgentinaFrance2022: {
-    provider: "FIFA",
-    title: "Argentina v France | Greatest Games | FIFA World Cup 2022",
-    uri: "https://www.fifa.com/en/tournaments/mens/worldcup/articles/argentina-france-2022-final-greatest-games",
+  espnArgentinaFrance2022: {
+    provider: "ESPN",
+    title: "Argentina 3-3 France (Dec 18, 2022) Final Score",
+    uri: "https://global.espn.com/football/match/_/gameId/633850",
     checkedAt: "2026-06-01",
     evidenceSummary:
-      "FIFA lists Argentina 3-3 France (4-2 PSO), with France equalising in the 80th and 81st minutes before extra time.",
+      "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
+    resolver: {
+      matchId: "demo-replay:argentina-france-2022",
+      result: "draw",
+      resultScope: "regular-time-1x2",
+      requiredTextGroups: [
+        ["Argentina"],
+        ["France"],
+        ["3(4), France 3(2)", "Argentina 3-3 France", "Argentina 3 - 3 France"],
+        ["Penalty Shootout", "penalties", "penalty"],
+      ],
+    },
   },
 };
 
