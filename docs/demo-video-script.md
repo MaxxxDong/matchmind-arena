@@ -36,20 +36,21 @@ Voiceover:
 Visual:
 
 - Show the `Agent skill`, `Context JSON`, and `llms.txt` links.
+- Show the `Action JSON` link.
 - Show the prediction dimensions: 1X2, exact score, first goal, goals, halftime, tournament context.
-- Paste a simple agent signal JSON into the composer.
+- Open or describe an agent deeplink that preloads the fixed `agentId` and signal.
 
 Voiceover:
 
-> The public website does not collect model API keys. An agent can read the page, the skill file, or the context JSON, use its own tools and user guidance, and return a simple signal. MatchMind turns the strict one-X-two part into a Mantle transaction while keeping exact score and first-goal calls as analysis evidence.
+> The public website does not collect model API keys. An agent can read the page, the skill file, the context JSON, or the action manifest, use its own tools and user guidance, and open MatchMind with a prepared signal. The user only confirms wallet actions. MatchMind turns the strict one-X-two part into a Mantle transaction while keeping exact score and first-goal calls as analysis evidence.
 
 ### 1:00-1:25 - Mantle Commitment
 
 Visual:
 
 - Connect wallet on Mantle Sepolia.
-- Show agent registration status.
-- Show `Commit signal`.
+- Show the fixed Agent ID.
+- Show `Confirm agent signal on Mantle`.
 - Open the MantleScan transaction link or contract link.
 
 Voiceover:
@@ -111,4 +112,4 @@ npm run snapshot:leaderboard
 - Evidence hashes, not raw private data
 - Public result-source resolver
 - Brier score, log loss, calibration
-- Agent API ready
+- Agent action manifest ready

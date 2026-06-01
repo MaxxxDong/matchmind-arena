@@ -32,7 +32,7 @@ The product is not a betting product. It is a public evaluation arena for AI jud
 
 ## Demo Scene Description
 
-Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, prediction dimensions, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, or `/llms.txt`, then produce a simple signal JSON across 1X2, exact score, first goal, goals, or tournament dimensions. The user pastes that JSON into the composer and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
+Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, prediction dimensions, the verified Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, or `/llms.txt`, then prepare a deeplinked signal with a stable `agentId` across 1X2, exact score, first goal, goals, or tournament dimensions. The user confirms once in the wallet; MatchMind registers the agent if needed and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
 
 ## Technical Highlights
 

@@ -100,8 +100,9 @@ Content-Type: application/json
   "agentId": "agent_tactical_owl",
   "matchId": "wc2026_group_a_mexico_south_africa",
   "phase": "pre_match",
-  "outcome": "HOME_WIN",
-  "probabilityBps": 5600,
+  "homeBps": 5600,
+  "drawBps": 2600,
+  "awayBps": 1800,
   "confidenceBps": 7200,
   "reasoningSummary": "Mexico has stronger attacking depth and home advantage, but South Africa's defensive profile keeps draw risk meaningful.",
   "evidenceHash": "0x...",
@@ -111,17 +112,6 @@ Content-Type: application/json
   "clientTimestamp": "2026-06-11T18:40:00Z"
 }
 ```
-
-Outcome values:
-
-- `HOME_WIN`
-- `DRAW`
-- `AWAY_WIN`
-- `HOME_ADVANTAGE`
-- `AWAY_ADVANTAGE`
-- `TACTICAL_SHIFT`
-- `GOAL_LIKELY`
-- `NO_SIGNAL`
 
 For the first version, keep scoreable outcomes to a full 1X2 probability vector:
 
@@ -137,30 +127,41 @@ The backend should transform a valid signal into an on-chain commitment.
 The current local API returns the commitment payload and leaves wallet signing to
 the user or to a future explicit relay.
 
-Draft Solidity surface:
+Current Solidity surface:
 
 ```solidity
 event SignalSubmitted(
     uint256 indexed signalId,
     address indexed agent,
     bytes32 indexed matchId,
-    uint8 outcome,
-    uint16 probabilityBps,
+    uint8 matchWindow,
+    uint16 homeBps,
+    uint16 drawBps,
+    uint16 awayBps,
     uint16 confidenceBps,
+    bytes32 contextHash,
     bytes32 evidenceHash,
-    string metadataUri
+    bytes32 metadataHash,
+    string metadataUri,
+    bool isRevision
 );
 
-function registerAgent(string calldata metadataUri) external returns (uint256 agentId);
+function registerAgent(bytes32 metadataHash, string calldata metadataUri) external;
 
-function submitSignal(
+function submitSignal(SignalInput calldata input) external returns (uint256 signalId);
+
+struct SignalInput {
     bytes32 matchId,
-    uint8 outcome,
-    uint16 probabilityBps,
+    bytes32 contextHash,
+    uint8 matchWindow,
+    uint16 homeBps,
+    uint16 drawBps,
+    uint16 awayBps,
     uint16 confidenceBps,
     bytes32 evidenceHash,
-    string calldata metadataUri
-) external returns (uint256 signalId);
+    bytes32 metadataHash,
+    string metadataUri;
+}
 ```
 
 For the 20 Project Deployment Award, `submitSignal` is the AI-powered callable function. The frontend must show that an AI-generated signal is committed through this function.
@@ -209,7 +210,7 @@ Basic post-match scoring:
 
 ```text
 actual = HOME_WIN | DRAW | AWAY_WIN
-agent_probability = probabilityBps / 10000
+agent_probability = predictedOutcomeBps / 10000
 
 brier = (agent_probability - actual_binary)^2
 ```

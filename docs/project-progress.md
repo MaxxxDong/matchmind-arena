@@ -435,7 +435,7 @@ What was done:
 
 - Added `docs/demo-video-script.md`.
 - Defined a 2-minute English voiceover.
-- Added shot list for public app, signal board, model configuration, Mantle commitment, resolver snapshot, leaderboard, and Agent API.
+- Added shot list for public app, signal board, agent action flow, Mantle commitment, resolver snapshot, leaderboard, and Agent API.
 - Added recording checklist and on-screen caption suggestions.
 - Linked the script from README.
 
