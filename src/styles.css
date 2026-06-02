@@ -1061,6 +1061,13 @@ h1 {
   line-height: 1.42;
 }
 
+.small-note {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .model-box label,
 .agent-box label {
   display: grid;

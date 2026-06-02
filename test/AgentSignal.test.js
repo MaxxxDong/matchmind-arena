@@ -218,6 +218,37 @@ describe("Agent signal onboarding helpers", function () {
     expect(duplicateSignalMessage(false)).to.equal("");
   });
 
+  it("deduplicates local loaded and submitted records for the same signal", async function () {
+    const { localSignalRecordKey, upsertLocalSignalRecords } = await import("../src/agentSignal.mjs");
+    const loaded = {
+      agentId: "agent_repeat_probe",
+      matchId: "wc-2026-001-mexico-south-africa",
+      metadataHash: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      generatedAt: "2026-06-02T01:00:00.000Z",
+      status: "loaded",
+      txHash: "",
+    };
+    const clickedAgainBeforeWallet = {
+      ...loaded,
+      generatedAt: "2026-06-02T01:00:05.000Z",
+    };
+    const submitted = {
+      ...loaded,
+      generatedAt: "2026-06-02T01:00:10.000Z",
+      status: "submitted",
+      txHash: "0xabc",
+    };
+
+    let records = upsertLocalSignalRecords([], loaded);
+    records = upsertLocalSignalRecords(records, clickedAgainBeforeWallet);
+    records = upsertLocalSignalRecords(records, submitted);
+
+    expect(localSignalRecordKey(loaded)).to.equal(localSignalRecordKey(submitted));
+    expect(records).to.have.length(1);
+    expect(records[0].status).to.equal("submitted");
+    expect(records[0].txHash).to.equal("0xabc");
+  });
+
   it("keeps seeded subagent signals complete and independently varied", async function () {
     const { SAMPLE_AGENT_SIGNALS } = await import("../src/data/sampleSignals.mjs");
     const { DEMO_MATCHES, MATCHES } = await import("../src/data/matches.mjs");

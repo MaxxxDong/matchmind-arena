@@ -35,6 +35,8 @@ import {
   findAgentSignalRow,
   friendlyAgentError,
   inferAgentSignalMatch,
+  localSignalRecordKey,
+  upsertLocalSignalRecords,
 } from "./agentSignal.mjs";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
@@ -324,8 +326,7 @@ function parseJsonOrEmpty(value) {
 
 function upsertLocalSignalRecord(record) {
   const existing = readLocalSignalMetadata();
-  const keyOf = (item) => `${item.metadataHash || ""}:${item.agentId}:${item.matchId}:${item.generatedAt || ""}:${item.txHash || ""}`;
-  const next = [record, ...existing.filter((item) => keyOf(item) !== keyOf(record))].slice(0, 30);
+  const next = upsertLocalSignalRecords(existing, record);
   globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify(next));
   return next;
 }
@@ -819,12 +820,6 @@ function App() {
       setAgentCommitment(activeCommitment);
       setAgentSignalMode(signalPayload.mode);
       setAgentProfile(activeProfile);
-      setLocalSignals(upsertLocalSignalRecord(localSignalRecord(
-        signalPayload,
-        activeMatch,
-        activeProfile,
-        { status: "loaded" },
-      )));
       setAgentSignalError("");
       setStatus("Preparing wallet flow. You may need to approve two prompts: agent registration first, then signal commit.");
       const { address, arena } = await getSignerContract();
@@ -973,6 +968,27 @@ function App() {
         ? `${agentLabel(latestSelectedEvent.agentIdHash || latestSelectedEvent.agent)} latest on-chain signal`
         : "Baseline market reference";
   const agentReady = Boolean(agent?.registered);
+  const agentSignalAlreadySubmitted = useMemo(() => {
+    if (!agentCommitment || !agentProfile.agentId) return false;
+    const match = matchByHash.get(String(agentCommitment.matchId || "").toLowerCase()) || selectedMatch;
+    const candidateKey = localSignalRecordKey({
+      agentId: agentProfile.agentId,
+      matchId: match.id,
+      metadataHash: agentCommitment.metadataHash,
+      commitment: agentCommitment,
+    });
+    const localSubmitted = localSignals.some((record) => (
+      record.status === "submitted"
+      && localSignalRecordKey(record) === candidateKey
+    ));
+    const agentIdHash = ethers.id(agentProfile.agentId).toLowerCase();
+    const chainSubmitted = events.some((event) => (
+      String(event.agentIdHash || "").toLowerCase() === agentIdHash
+      && String(event.matchId || "").toLowerCase() === String(agentCommitment.matchId || "").toLowerCase()
+      && Number(event.matchWindow || 0) === Number(agentCommitment.matchWindow || 0)
+    ));
+    return localSubmitted || chainSubmitted;
+  }, [agentCommitment, agentProfile.agentId, events, localSignals, matchByHash, selectedMatch]);
   const selectedResolution = null;
   const leaderboard = buildLeaderboard(events, MATCHES, {});
   const selectPredictionRow = useCallback((row) => {
@@ -1305,11 +1321,16 @@ function App() {
               </p>
             )}
             <div className="button-row">
-              <button onClick={confirmAgentSignal} disabled={busy === "confirm" || !agentChecklist.ok} className="primary">
+              <button onClick={confirmAgentSignal} disabled={busy === "confirm" || !agentChecklist.ok || agentSignalAlreadySubmitted} className="primary">
                 {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
-                Confirm in wallet and submit to Mantle
+                {agentSignalAlreadySubmitted ? "Signal already submitted" : "Confirm in wallet and submit to Mantle"}
               </button>
             </div>
+            {agentSignalAlreadySubmitted && (
+              <p className="small-note">
+                This exact agent signal is already recorded for the selected match window. Choose another match, revise the signal, or use another agent ID.
+              </p>
+            )}
             <details className="debug-box">
               <summary>Advanced wallet actions</summary>
               <div className="button-row">

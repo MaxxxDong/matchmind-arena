@@ -166,3 +166,18 @@ export function duplicateSignalMessage(isDuplicate) {
     ? "This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this Arena flow to prevent accidental duplicate uploads."
     : "";
 }
+
+export function localSignalRecordKey(record = {}) {
+  const metadataHash = String(record.metadataHash || record.commitment?.metadataHash || "").toLowerCase();
+  const agentId = String(record.agentId || record.agent?.agentId || "").toLowerCase();
+  const matchId = String(record.matchId || record.match?.id || "").toLowerCase();
+  if (metadataHash && agentId && matchId) {
+    return `${metadataHash}:${agentId}:${matchId}`;
+  }
+  return `${agentId}:${matchId}:${String(record.txHash || record.generatedAt || "").toLowerCase()}`;
+}
+
+export function upsertLocalSignalRecords(existing = [], record, limit = 30) {
+  const nextKey = localSignalRecordKey(record);
+  return [record, ...existing.filter((item) => localSignalRecordKey(item) !== nextKey)].slice(0, limit);
+}
