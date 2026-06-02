@@ -181,3 +181,16 @@ export function upsertLocalSignalRecords(existing = [], record, limit = 30) {
   const nextKey = localSignalRecordKey(record);
   return [record, ...existing.filter((item) => localSignalRecordKey(item) !== nextKey)].slice(0, limit);
 }
+
+export function dedupeLocalSignalRecords(records = [], limit = 30) {
+  const seen = new Set();
+  const next = [];
+  for (const record of records) {
+    const key = localSignalRecordKey(record);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    next.push(record);
+    if (next.length >= limit) break;
+  }
+  return next;
+}

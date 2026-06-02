@@ -31,6 +31,7 @@ import {
 import {
   buildAgentSignalChecklist,
   buildAgentSignalPreview,
+  dedupeLocalSignalRecords,
   duplicateSignalMessage,
   findAgentSignalRow,
   friendlyAgentError,
@@ -310,7 +311,7 @@ function buildSignal(match, aiSignal) {
 function readLocalSignalMetadata() {
   try {
     const parsed = JSON.parse(globalThis.localStorage?.getItem(SIGNAL_METADATA_KEY) || "[]");
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? dedupeLocalSignalRecords(parsed) : [];
   } catch {
     return [];
   }

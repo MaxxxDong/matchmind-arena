@@ -219,7 +219,7 @@ describe("Agent signal onboarding helpers", function () {
   });
 
   it("deduplicates local loaded and submitted records for the same signal", async function () {
-    const { localSignalRecordKey, upsertLocalSignalRecords } = await import("../src/agentSignal.mjs");
+    const { dedupeLocalSignalRecords, localSignalRecordKey, upsertLocalSignalRecords } = await import("../src/agentSignal.mjs");
     const loaded = {
       agentId: "agent_repeat_probe",
       matchId: "wc-2026-001-mexico-south-africa",
@@ -247,6 +247,7 @@ describe("Agent signal onboarding helpers", function () {
     expect(records).to.have.length(1);
     expect(records[0].status).to.equal("submitted");
     expect(records[0].txHash).to.equal("0xabc");
+    expect(dedupeLocalSignalRecords([submitted, clickedAgainBeforeWallet, loaded])).to.have.length(1);
   });
 
   it("keeps seeded subagent signals complete and independently varied", async function () {
