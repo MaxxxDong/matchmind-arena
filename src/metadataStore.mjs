@@ -57,7 +57,7 @@ export function attachMetadataToEvent(event, metadata) {
   const rawEvidence = rawEvidenceFromMetadata(metadata);
   return {
     ...event,
-    rawEvidence: rawEvidence || event.rawEvidence || null,
+    rawEvidence: event.rawEvidence || rawEvidence || null,
     metadataRecord: metadata,
     agentId: metadataAgentId(metadata) || event.agentId || null,
   };

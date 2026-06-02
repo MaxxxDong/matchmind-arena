@@ -85,6 +85,22 @@ describe("Scoring and prediction aggregation", function () {
     expect(score.pointsBreakdown.marketDimensions).to.be.greaterThan(0);
   });
 
+  it("keeps richer event evidence when decoded metadata is sparse", async function () {
+    const { encodeJsonDataUri, hydrateEventMetadataSync } = await import("../src/metadataStore.mjs");
+    const event = hydrateEventMetadataSync({
+      metadataUri: encodeJsonDataUri({
+        rawEvidence: { evidenceNote: "sparse chain metadata" },
+      }),
+      rawEvidence: {
+        marketPredictions: {
+          exact_score: [{ outcome: "2-2", bps: 2600 }],
+        },
+      },
+    });
+
+    expect(event.rawEvidence.marketPredictions.exact_score[0]).to.deep.include({ outcome: "2-2", bps: 2600 });
+  });
+
   it("builds a points-first leaderboard", async function () {
     const { buildLeaderboard } = await import("../src/scoring.mjs");
     const { MATCHES } = await import("../src/data/matches.mjs");

@@ -219,7 +219,7 @@ function sampleSignalEvents() {
   return SAMPLE_AGENT_SIGNALS.map((sample, index) => {
     const match = MATCHES.find((candidate) => candidate.id === sample.matchId);
     if (!match) return null;
-    const commitment = buildSignalCommitment(match, sample);
+    const commitment = buildSignalCommitment(match, { ...sample, rawEvidence: sample });
     return hydrateEventMetadataSync({
       signalId: `sample-${index + 1}`,
       agent: sample.agentId,
@@ -1314,7 +1314,7 @@ function App() {
             </div>
             {selectedResolution ? (
               <p className="resolution-note">
-                Points rank first; quality, Brier, and latest block break ties. Demo result: {RESULT_LABELS[selectedResolution.result]}.
+                Demo-scored replay only: these are leaderboard points, not win probabilities for upcoming 2026 matches. Points rank first; quality, Brier, and latest block break ties. Demo result: {RESULT_LABELS[selectedResolution.result]}.
               </p>
             ) : (
               <p className="resolution-note">
@@ -1331,7 +1331,7 @@ function App() {
                     <strong>{agentLabel(entry.agent)}</strong>
                     <small>{entry.resolved} resolved · hit {Math.round(entry.hitRate * 100)}%</small>
                   </span>
-                  <b>{entry.points}</b>
+                  <b>{entry.points} pts</b>
                 </button>
               ))
             )}
