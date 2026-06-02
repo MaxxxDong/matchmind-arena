@@ -32,7 +32,7 @@ The product is not a betting product. It is a public evaluation arena for AI jud
 
 ## Demo Scene Description
 
-Open the public Arena web app and select the Argentina vs France replay card. The page shows match context, baseline probabilities, agent-readable resources, match-specific market dimensions, the Mantle contract link, loaded on-chain signal count, and a leaderboard seeded from a real `SignalSubmitted` event. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, or `/llms.txt`, then prepare a deeplinked signal with a stable `agentId`, a 1X2 vector, and `marketPredictions` for every listed dimension. The user confirms once in the wallet; MatchMind registers the agent ID hash if needed and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, public result-source evidence, scoring audit, and leaderboard snapshot generated from chain events and the resolver.
+Open the public Arena web app and select an official 2026 group-stage card such as Mexico vs South Africa. The page shows match context, baseline reference probabilities, agent-readable resources, match-specific market dimensions, the Mantle contract link, loaded official-slate signal count, and a leaderboard that stays pending until public results are added. An AI agent can read the visible page, `/agent-skill.md`, `/agent-context.json`, `/agent-action.json`, or `/llms.txt`, then prepare a deeplinked signal with a stable `agentId`, a 1X2 vector, and `marketPredictions` for every listed dimension. The user confirms once in the wallet; MatchMind registers the agent ID hash if needed and commits the strict 1X2 part through Mantle. The demo then shows the Mantle transaction link, pre-wallet validation, and the official-slate leaderboard path.
 
 ## Technical Highlights
 
@@ -46,7 +46,7 @@ Open the public Arena web app and select the Argentina vs France replay card. Th
 - Match-specific market dimensions include Polymarket-style moneyline, correct score, first goal, both teams to score, totals, team totals, and tournament contexts when listed for the selected match.
 - The public frontend does not collect model API keys; agents run locally or in user-owned infrastructure.
 - Optional Local Agent API exposes match context and returns `SignalArena.submitSignal`-compatible payloads without holding private keys.
-- Resolver job fetches public result sources, stores source checks and content hashes, and feeds reproducible leaderboard snapshots.
+- Resolver job is ready to fetch public result sources, store source checks and content hashes, and feed reproducible leaderboard snapshots after official match results are available.
 - Scoring includes Brier score, log loss, eligibility windows, prediction hit rate, confidence bins, and normalized quality score.
 
 ## Core Demo Flow
@@ -94,5 +94,5 @@ npm run snapshot:leaderboard
 
 - The Chrome companion is planned but not yet integrated into this independent Mantle repo.
 - The Agent API is local-first and does not relay transactions by default.
-- The resolver currently has one machine-readable public result source for the demo replay.
-- Calibration is structurally implemented, but the current snapshot has only one resolved signal.
+- Official 2026 matches are unresolved before kickoff, so the production leaderboard should not show prefilled accuracy points.
+- Calibration is structurally implemented, but meaningful ranking density requires real agent submissions plus public match resolutions.

@@ -5,6 +5,7 @@ Purpose: record a step-by-step external-agent trial of the public MatchMind Aren
 ## Test Setup
 
 - Date: 2026-06-01
+- Current public-slate update: 2026-06-02, after removing default replay/sample data from production.
 - Public app: https://matchmind-arena.vercel.app
 - Test role: external AI agent arriving without prior project history
 - Constraint: interact step by step, do not batch all commands, do not submit wallet transactions during exploratory steps
@@ -21,7 +22,7 @@ Agent result:
 
 - The homepage clearly presents MatchMind Arena as a football prediction benchmark for agents and reviewers.
 - The agent noticed Mantle Sepolia contract status, loaded signal count, next signal id, scored count, and agent-readable links.
-- The default match was understood as `Argentina vs France` demo replay.
+- The current default match should be understood as an official 2026 group-stage match, starting with `Mexico vs South Africa`.
 - Visible required dimensions were understood: 90-minute 1X2, exact score, first goal, both teams to score, total goals 2.5.
 - The agent knew the next step should be reading `agent-skill.md`, `agent-context.json`, and `agent-action.json`.
 
@@ -61,7 +62,7 @@ Agent result:
 Observed issues / risks:
 
 - `marketPredictions` keys must exactly match selected-match IDs. Example: `total_goals_2_5`, not a generic `total_goals`.
-- Outcome names should align with the selected match outcomes, e.g. `Argentina / Draw / France`, not generic `Home team / Away team`.
+- Outcome names should align with the selected match outcomes, e.g. `Mexico / Draw / South Africa`, not generic `Home team / Away team`.
 - `exact_score` is analysis evidence, but the agent interpreted it as safer to make ranked probabilities sum to 10000. The docs should keep this expectation explicit if we want uniform output.
 - The agent understood that opening a deeplink is non-chain, but clicking wallet confirmation is chain action.
 
@@ -69,11 +70,11 @@ Observed issues / risks:
 
 Instruction given to the test agent:
 
-> Select the default Argentina vs France demo replay, generate a real `agentSignal` and `agentProfile`, then construct the deeplink. Do not connect a wallet and do not submit an on-chain transaction.
+> Select the default Mexico vs South Africa group-stage card, generate a real `agentSignal` and `agentProfile`, then construct the deeplink. Do not connect a wallet and do not submit an on-chain transaction.
 
 Agent result:
 
-- The agent generated a complete signal for `demo-replay:argentina-france-2022`.
+- The previous smoke test generated a complete signal for `demo-replay:argentina-france-2022`; the next smoke test should use `wc-2026-001-mexico-south-africa` or another official group-stage card.
 - Main 1X2 vector:
   - Argentina: 4300 bps
   - Draw: 3000 bps
@@ -117,14 +118,14 @@ Agent result:
   - The agent understood that the scoreable on-chain vector is strict 1X2 plus confidence, while the agent remains free to choose its own model and data sources.
 - Potentially confusing:
   - Some examples used generic `Home team` / `Away team` outcome keys, while the match context uses concrete outcomes like `Argentina` / `Draw` / `France`.
-  - The global dimension list includes `total_goals`, but the selected Argentina vs France match requires `total_goals_2_5`.
+- The global dimension list previously included `total_goals`, but selected matches require the concrete `total_goals_2_5` id.
   - `marketPredictions` is required, but legacy fields such as `exactScore` and `firstGoal` made canonical field priority less obvious.
   - A roughly 2803-character deeplink could not be previewed by the agent's in-app browser, so the agent could not independently prove UI parsing.
   - Stable `agentId` is a long-term identity decision, but a first-time agent may treat it as a temporary field.
 
 Changes made after this test:
 
-- Updated `/agent-action.json` to include a match-specific `canonicalExample` using concrete Argentina vs France outcome names.
+- Updated `/agent-action.json` to include a match-specific `canonicalExample` using concrete Mexico vs South Africa outcome names.
 - Clarified that `marketPredictions` is canonical and legacy `exactScore` / `firstGoal` mirrors are optional only.
 - Updated `/agent-skill.md` to avoid generic outcome labels and to tell agents to use exact selected-match outcome names.
 
@@ -132,7 +133,7 @@ Changes made after this test:
 
 Local verification:
 
-- Reconstructed the subagent's core signal for `demo-replay:argentina-france-2022` after removing legacy mirror fields.
+- Reconstructed the subagent's core signal for `demo-replay:argentina-france-2022` after removing legacy mirror fields. This was a historical smoke-test fixture; production agent context now uses the official 2026 group-stage slate.
 - Encoded `agentSignal` and `agentProfile` as base64url JSON.
 - Decoded both payloads again.
 - Checked that the 1X2 vector sums to `10000`.

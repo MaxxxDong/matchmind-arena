@@ -55,7 +55,7 @@ Goal: build the public demo surface.
 - [x] Build match list and match detail page.
 - [x] Build signal submission panel.
 - [x] Build signal timeline.
-- [x] Build leaderboard seed.
+- [x] Build leaderboard surface.
 - [x] Render transaction links.
 - [x] Add public demo deployment.
 
@@ -95,7 +95,7 @@ Goal: let external agents participate.
 - [x] Add local `POST /api/signals` validation and commitment-preparation endpoint.
 - [x] Add optional API-key auth through `AGENT_API_KEY`.
 - [x] Add example agent script.
-- [x] Add one sample baseline agent.
+- [x] Add local agent examples.
 - [ ] Add persistent agent registry storage.
 - [ ] Add wallet or relay path for committing API-submitted signals on Mantle.
 
@@ -128,7 +128,7 @@ Verification gate:
 
 Goal: make the benchmark credible.
 
-- [x] Define initial public match result source for the demo replay.
+- [x] Define initial public match result-source pipeline.
 - [x] Implement first public-source resolver job.
 - [x] Add Brier score.
 - [x] Add log loss.
@@ -136,11 +136,11 @@ Goal: make the benchmark credible.
 - [x] Add leaderboard update.
 - [x] Add first-pass late-signal handling for scored leaderboard entries.
 
-Phase 6A local demo scoring:
+Phase 6A local scoring:
 
-- [x] Add local resolved-result fixtures for demo matches.
+- [x] Add local resolved-result fixtures for resolver/scoring tests.
 - [x] Compute Brier score and log loss from loaded `SignalSubmitted` events.
-- [x] Show a real leaderboard seed in the Arena UI before the resolver backend exists.
+- [x] Remove prefilled replay/sample leaderboard points from the production Arena.
 
 Phase 6B reproducible scoring snapshot:
 
@@ -156,7 +156,7 @@ Phase 6B reproducible scoring snapshot:
 
 Verification gate:
 
-- Resolved sample match updates signal scores.
+- Resolved official match updates signal scores.
 - Leaderboard changes after resolution.
 - Raw scoring data is inspectable.
 
@@ -181,8 +181,8 @@ Goal: make the hackathon submission easy to verify.
 Current priority after the Phase 8 leaderboard and prediction-board corrections:
 
 1. Keep the public submission copy in `docs/submission-package.md` current only when links, video evidence, or public proof changes.
-2. Add more independent agent examples or real submitted signals to make the leaderboard and market distribution views more meaningful.
-   - [x] Seed several clearly labeled independent subagent sample signals.
+2. Add more real wallet-confirmed agent submissions to make the leaderboard and market distribution views meaningful before official results.
+   - [x] Remove seeded/sample signals from the production Arena.
    - [ ] Add more real wallet-confirmed public submissions when available.
 3. Add persistent storage or a relay only if external agent participation needs server-side submission.
 4. Continue toward Chrome companion integration after the current Web Arena submission path is complete.

@@ -22,10 +22,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { MATCHES } from "./data/matches.mjs";
-import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
-import { SAMPLE_AGENT_SIGNALS } from "./data/sampleSignals.mjs";
-import { RESULT_LABELS, buildLeaderboard, buildPredictionConsensus } from "./scoring.mjs";
-import { attachResultSource } from "./resultSources.mjs";
+import { buildLeaderboard, buildPredictionConsensus } from "./scoring.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
 import {
   hydrateEventMetadataSync,
@@ -39,7 +36,6 @@ import {
   friendlyAgentError,
   inferAgentSignalMatch,
 } from "./agentSignal.mjs";
-import LEADERBOARD_SNAPSHOT from "../snapshots/leaderboard.mantle-sepolia.json";
 
 const CONTRACT_ADDRESS = "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0";
 const DEPLOY_BLOCK = 39386150;
@@ -64,7 +60,7 @@ const ARENA_ABI = [
   "event SignalSubmitted(uint256 indexed signalId, address indexed agent, bytes32 indexed matchId, bytes32 agentIdHash, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 contextHash, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri, bool isRevision)",
 ];
 
-const SIGNAL_METADATA_KEY = "matchmind:signal-metadata";
+const SIGNAL_METADATA_KEY = "matchmind:signal-metadata:v2:official-slate";
 const LOG_LOOKBACK_BLOCKS = 8000;
 const AGENT_SKILL_URL = "/agent-skill.md";
 const AGENT_CONTEXT_URL = "/agent-context.json";
@@ -76,9 +72,7 @@ const PREDICTION_DIMENSIONS = [
   ["Correct score", "ranked score outcomes"],
   ["First goal", "home / no goal / away"],
   ["Both teams score", "yes / no"],
-  ["Totals", "over / under lines"],
-  ["Team totals", "team-specific over / under"],
-  ["Tournament markets", "group / champion context"],
+  ["Total goals 2.5", "over / under"],
 ];
 const DEFAULT_AGENT_PROFILE = {
   agentId: "agent_site_reader_demo",
@@ -87,36 +81,36 @@ const DEFAULT_AGENT_PROFILE = {
   model: "agent-provided",
 };
 const SIMPLE_AGENT_EXAMPLE = `{
-  "matchId": "demo-replay:argentina-france-2022",
+  "matchId": "wc-2026-001-mexico-south-africa",
   "agentId": "agent_site_reader_demo",
   "agentName": "Site Reading Agent",
-  "homeBps": 4400,
-  "drawBps": 3200,
-  "awayBps": 2400,
-  "confidenceBps": 7200,
-  "methodSummary": "Weighted replay momentum, opponent transition risk, and regular-time draw probability; did not copy MatchMind baseline.",
-  "reasoningSummary": "My model prices the draw higher than the baseline because this replay context is tied to a regular-time final that stayed level.",
+  "homeBps": 6900,
+  "drawBps": 2100,
+  "awayBps": 1000,
+  "confidenceBps": 6200,
+  "methodSummary": "Weighted host advantage, group-stage opener variance, and independent team-strength priors; did not copy MatchMind baseline.",
+  "reasoningSummary": "My model keeps Mexico as the clear 90-minute favorite, but leaves draw and South Africa upset paths because opening matches can be low-tempo.",
   "exactScore": [
-    { "score": "2-2", "bps": 1400 },
-    { "score": "1-1", "bps": 1200 }
+    { "score": "2-0", "bps": 1600 },
+    { "score": "1-0", "bps": 1400 }
   ],
   "firstGoal": {
-    "homeBps": 4600,
-    "noGoalBps": 600,
-    "awayBps": 4800
+    "homeBps": 6800,
+    "noGoalBps": 700,
+    "awayBps": 2500
   },
   "marketPredictions": {
-    "match_winner_1x2": { "Argentina": 4400, "Draw": 3200, "France": 2400 },
+    "match_winner_1x2": { "Mexico": 6900, "Draw": 2100, "South Africa": 1000 },
     "exact_score": [
-      { "outcome": "2-2", "bps": 1400 },
-      { "outcome": "1-1", "bps": 1200 },
-      { "outcome": "other", "bps": 7400 }
+      { "outcome": "2-0", "bps": 1600 },
+      { "outcome": "1-0", "bps": 1400 },
+      { "outcome": "other", "bps": 7000 }
     ],
-    "first_goal": { "Argentina": 4600, "No goal": 600, "France": 4800 },
-    "both_teams_to_score": { "Yes": 6500, "No": 3500 },
-    "total_goals_2_5": { "Over": 5800, "Under": 4200 }
+    "first_goal": { "Mexico": 6800, "No goal": 700, "South Africa": 2500 },
+    "both_teams_to_score": { "Yes": 4300, "No": 5700 },
+    "total_goals_2_5": { "Over": 4800, "Under": 5200 }
   },
-  "sourceMix": ["match-context", "regular-time-result-model", "agent-reasoning"]
+  "sourceMix": ["match-context", "team-strength-prior", "agent-reasoning"]
 }`;
 
 const publicProvider = new ethers.JsonRpcProvider(MANTLE_SEPOLIA.rpcUrls[0]);
@@ -208,47 +202,11 @@ function buildAgentRegistration(profile, walletAddress) {
   };
 }
 
-function snapshotSignalEvents() {
-  return (LEADERBOARD_SNAPSHOT.events || []).map((event) => ({
-    ...hydrateEventMetadataSync(event),
-    fromSnapshot: true,
-  }));
-}
-
-function sampleSignalEvents() {
-  return SAMPLE_AGENT_SIGNALS.map((sample, index) => {
-    const match = MATCHES.find((candidate) => candidate.id === sample.matchId);
-    if (!match) return null;
-    const commitment = buildSignalCommitment(match, { ...sample, rawEvidence: sample });
-    return hydrateEventMetadataSync({
-      signalId: `sample-${index + 1}`,
-      agent: sample.agentId,
-      agentId: sample.agentId,
-      agentName: sample.agentName || sample.agentId,
-      agentIdHash: ethers.id(sample.agentId),
-      matchId: commitment.matchId,
-      matchWindow: commitment.matchWindow,
-      homeBps: commitment.homeBps,
-      drawBps: commitment.drawBps,
-      awayBps: commitment.awayBps,
-      confidenceBps: commitment.confidenceBps,
-      contextHash: commitment.contextHash,
-      evidenceHash: commitment.evidenceHash,
-      metadataHash: commitment.metadataHash,
-      metadataUri: commitment.metadataUri,
-      isRevision: false,
-      txHash: "",
-      blockNumber: 0,
-      submittedAt: sample.clientTimestamp || "2026-06-01T00:00:00.000Z",
-      sample: true,
-      rawEvidence: sample.rawEvidence || sample,
-    });
-  }).filter(Boolean);
-}
-
 function mergeEvents(current, incoming) {
+  const activeMatchIds = new Set(MATCHES.map((match) => ethers.id(match.id).toLowerCase()));
   const byKey = new Map();
   for (const event of [...current, ...incoming]) {
+    if (!activeMatchIds.has(String(event.matchId || "").toLowerCase())) continue;
     const key = `${event.txHash || "no-tx"}:${event.signalId}`;
     byKey.set(key, event);
   }
@@ -338,11 +296,11 @@ function buildSignal(match, aiSignal) {
     drawBps: aiSignal?.drawBps ?? match.drawBps,
     awayBps: aiSignal?.awayBps ?? match.awayBps,
     confidenceBps: aiSignal?.confidenceBps ?? match.confidenceBps,
-    model: aiSignal?.model ?? "demo-sports-signal-agent",
+    model: aiSignal?.model ?? "sports-signal-agent",
     explanation: aiSignal?.explanation ??
-      "Demo signal generated from match context, replay evidence labels, and tactical momentum notes.",
-    generatedBy: aiSignal ? "user-configured-model" : "deterministic-demo",
-    generatedAt: aiSignal?.generatedAt ?? "demo",
+      "Signal generated from visible match context and the agent's own prediction method.",
+    generatedBy: aiSignal ? "user-configured-model" : "deterministic-baseline",
+    generatedAt: aiSignal?.generatedAt ?? "unknown",
     rawEvidence: aiSignal?.rawEvidence,
   });
 }
@@ -627,7 +585,7 @@ function App() {
   const [wallet, setWallet] = useState("");
   const [agent, setAgent] = useState(null);
   const [nextSignalId, setNextSignalId] = useState(null);
-  const [events, setEvents] = useState(() => mergeEvents(snapshotSignalEvents(), sampleSignalEvents()));
+  const [events, setEvents] = useState(() => []);
   const [agentRegistry, setAgentRegistry] = useState(new Map());
   const [localSignals, setLocalSignals] = useState(() => readLocalSignalMetadata());
   const [readWarning, setReadWarning] = useState("");
@@ -980,7 +938,7 @@ function App() {
     })),
     ...selectedEvents.map((event) => ({
       key: event.sample ? `sample:${event.signalId}` : `chain:${event.txHash}:${event.signalId}`,
-      source: event.sample ? "Seeded agent sample" : event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
+      source: event.sample ? "Local fixture" : event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
       agent: event.agentId || agentLabel(event.agentIdHash || event.agent),
       signal: event,
       rawEvidence: event.rawEvidence || null,
@@ -1015,8 +973,8 @@ function App() {
         ? `${agentLabel(latestSelectedEvent.agentIdHash || latestSelectedEvent.agent)} latest on-chain signal`
         : "Baseline market reference";
   const agentReady = Boolean(agent?.registered);
-  const selectedResolution = attachResultSource(DEMO_RESOLUTIONS[selectedMatch.id]);
-  const leaderboard = buildLeaderboard(events);
+  const selectedResolution = null;
+  const leaderboard = buildLeaderboard(events, MATCHES, {});
   const selectPredictionRow = useCallback((row) => {
     setSelectedSignalKey(row.key);
     setAgentCommitment(null);
@@ -1082,7 +1040,7 @@ function App() {
           <div><dt>1X2</dt><dd>home / draw / away</dd></div>
           <div><dt>bps</dt><dd>basis points, 10,000 = 100%</dd></div>
           <div><dt>quality</dt><dd>normalized score after resolution</dd></div>
-          <div><dt>demo replay</dt><dd>historical match used for a verifiable demo</dd></div>
+          <div><dt>official slate</dt><dd>2026 group-stage match cards only</dd></div>
         </dl>
       </section>
 
@@ -1314,7 +1272,7 @@ function App() {
             </div>
             {selectedResolution ? (
               <p className="resolution-note">
-                Demo-scored replay only: these are leaderboard points, not win probabilities for upcoming 2026 matches. Points rank first; quality, Brier, and latest block break ties. Demo result: {RESULT_LABELS[selectedResolution.result]}.
+                Resolved official match: leaderboard points rank first; quality, Brier, and latest block break ties.
               </p>
             ) : (
               <p className="resolution-note">
@@ -1483,7 +1441,7 @@ function App() {
                 >
                   <span>#{event.signalId} · block {event.blockNumber}</span>
                   <strong>{formatPct(event.homeBps)} / {formatPct(event.drawBps)} / {formatPct(event.awayBps)}</strong>
-                  <small>{event.sample ? "Seeded sample" : event.isRevision ? "Revision signal" : "Primary signal"} · {event.agentId || agentLabel(event.agentIdHash || event.agent)} · {event.submittedAt ?? "time pending"}</small>
+                  <small>{event.sample ? "Local fixture" : event.isRevision ? "Revision signal" : "Primary signal"} · {event.agentId || agentLabel(event.agentIdHash || event.agent)} · {event.submittedAt ?? "time pending"}</small>
                 </a>
               ))
             )}

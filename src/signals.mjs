@@ -43,24 +43,24 @@ export function buildSignalCommitment(match, signal = {}) {
     source: signal.contextSource ?? "MatchMind browser context pack",
     notes: [match.bias, match.status, match.venue],
   };
-  const rawEvidence = signal.rawEvidence ?? `evidence:${match.id}:browser-demo`;
+  const rawEvidence = signal.rawEvidence ?? `evidence:${match.id}:browser-signal`;
   const metadata = {
     app: "MatchMind Arena",
     type: "signal-metadata",
     schemaVersion: 1,
     matchId: match.id,
     title: match.title,
-    model: signal.model ?? "demo-sports-signal-agent",
+    model: signal.model ?? "sports-signal-agent",
     explanation: signal.explanation ??
-      "Demo signal generated from match context, replay evidence labels, and tactical momentum notes.",
+      "Signal generated from match context, public evidence, and the agent's own prediction method.",
     probabilities: {
       home: vector.homeBps,
       draw: vector.drawBps,
       away: vector.awayBps,
     },
     confidenceBps: vector.confidenceBps,
-    generatedBy: signal.generatedBy ?? "deterministic-demo",
-    generatedAt: signal.generatedAt ?? "demo",
+    generatedBy: signal.generatedBy ?? "agent-or-browser",
+    generatedAt: signal.generatedAt ?? "unknown",
     rawEvidence: rawEvidence && typeof rawEvidence === "object" ? rawEvidence : { evidenceNote: rawEvidence },
   };
   const metadataHash = ethers.id(stableJson(metadata));

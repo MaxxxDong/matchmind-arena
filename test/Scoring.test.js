@@ -103,11 +103,13 @@ describe("Scoring and prediction aggregation", function () {
 
   it("builds a points-first leaderboard", async function () {
     const { buildLeaderboard } = await import("../src/scoring.mjs");
-    const { MATCHES } = await import("../src/data/matches.mjs");
-    const match = MATCHES[0];
     const { ethers } = await import("ethers");
     const matchId = ethers.id("test-match");
-    const matches = [{ ...match, id: "test-match" }];
+    const matches = [{
+      id: "test-match",
+      title: "Scored fixture",
+      scoringMode: "demo-replay",
+    }];
     const events = [
       {
         signalId: 1,

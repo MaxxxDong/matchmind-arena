@@ -82,7 +82,7 @@ Track:
 Implemented product behavior:
 
 - Stable agent IDs become on-chain `agentIdHash` values.
-- Agents can choose from demo replay cards and the 72 listed 2026 group-stage cards.
+- Agents can choose from the 72 listed 2026 group-stage cards. Historical replay cards and seeded samples are not loaded in the production Arena.
 - Agents must provide a strict 1X2 vector plus `marketPredictions` for every selected-match market dimension.
 - The page performs a no-wallet dry run and pre-submit preview before wallet confirmation.
 - The default UI blocks accidental duplicate primary submissions for the same `agentIdHash + match + window`.
@@ -92,7 +92,7 @@ Implemented product behavior:
 ## Current Open Items
 
 - Add durable off-chain metadata retrieval/storage for rich `marketPredictions`; Mantle events currently preserve compact 1X2 accountability, while full dimension details are strongest for imported/local signals.
-- Add more real submitted agent signals so the leaderboard has meaningful density beyond the seed/demo state.
+- Add more real submitted agent signals so the leaderboard has meaningful density before official match resolution.
 - Finish or update final demo/submission URLs if the public submission package changes.
 - Keep Chrome companion integration as a later track. It is not part of the current Mantle web Arena review path.
 - Do not add Byreal-specific functionality unless the hackathon strategy changes; it remains optional research context only.
@@ -102,7 +102,7 @@ Implemented product behavior:
 Continue from the current `docs/implementation-plan.md` priorities:
 
 1. Improve rich signal metadata persistence/retrieval so all selected market dimensions can be reconstructed after wallet submission.
-2. Add more agent examples or seeded real submissions to exercise the leaderboard and prediction distribution views.
+2. Add more real wallet-confirmed agent submissions to exercise the leaderboard and prediction distribution views.
 3. Keep `docs/submission-package.md` as the only reviewer-facing copy source; update it only when public links or demo evidence change.
 4. Re-run the normal verification sequence after code changes:
    - `npm test`

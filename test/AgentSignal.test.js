@@ -214,14 +214,15 @@ describe("Agent signal onboarding helpers", function () {
   it("blocks accidental duplicate primary submissions for the same agent match window", async function () {
     const { duplicateSignalMessage } = await import("../src/agentSignal.mjs");
 
-    expect(duplicateSignalMessage(true)).to.equal("This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this demo to prevent accidental duplicate uploads.");
+    expect(duplicateSignalMessage(true)).to.equal("This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this Arena flow to prevent accidental duplicate uploads.");
     expect(duplicateSignalMessage(false)).to.equal("");
   });
 
   it("keeps seeded subagent signals complete and independently varied", async function () {
     const { SAMPLE_AGENT_SIGNALS } = await import("../src/data/sampleSignals.mjs");
-    const { MATCHES } = await import("../src/data/matches.mjs");
+    const { DEMO_MATCHES, MATCHES } = await import("../src/data/matches.mjs");
     const { buildAgentSignalChecklist } = await import("../src/agentSignal.mjs");
+    const allSignalTestMatches = [...DEMO_MATCHES, ...MATCHES];
 
     expect(SAMPLE_AGENT_SIGNALS).to.have.length.at.least(4);
     expect(new Set(SAMPLE_AGENT_SIGNALS.map((signal) => signal.agentId)).size)
@@ -230,7 +231,7 @@ describe("Agent signal onboarding helpers", function () {
       .to.be.greaterThan(1);
 
     for (const signal of SAMPLE_AGENT_SIGNALS) {
-      const match = MATCHES.find((candidate) => candidate.id === signal.matchId);
+      const match = allSignalTestMatches.find((candidate) => candidate.id === signal.matchId);
       expect(match, signal.matchId).to.exist;
       expect(signal.homeBps + signal.drawBps + signal.awayBps, signal.agentId).to.equal(10000);
       const checklist = buildAgentSignalChecklist(signal, match);

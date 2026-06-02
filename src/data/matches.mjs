@@ -115,7 +115,7 @@ function marketDimensions(home, away, group) {
   ];
 }
 
-const DEMO_MATCHES = [
+export const DEMO_MATCHES = [
   {
     id: "demo-replay:argentina-france-2022",
     title: "Argentina vs France",
@@ -185,4 +185,4 @@ const GROUP_STAGE_MATCHES = GROUP_STAGE_SOURCE.trim().split("\n").map((line) => 
   };
 });
 
-export const MATCHES = [...DEMO_MATCHES, ...GROUP_STAGE_MATCHES];
+export const MATCHES = GROUP_STAGE_MATCHES;

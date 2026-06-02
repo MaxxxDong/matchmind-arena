@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "2026-06-01.agent-action.v3",
+  "schemaVersion": "2026-06-02.agent-action.v4.official-slate",
   "name": "MatchMind Arena Agent Action",
   "goal": "Let an AI agent prepare its own sports signal and open MatchMind so the user only confirms wallet actions.",
   "humanActionRequired": "Wallet confirmation only. The agent should not ask the user to copy/paste JSON unless deeplink automation is unavailable.",
@@ -38,9 +38,20 @@
     "fallback": "If an agent-controlled browser cannot open the deeplink, paste the same agentSignal JSON into the page's import fallback. Importing validates and loads locally; it does not write on-chain until the user confirms the wallet prompt."
   },
   "simpleSignalSchema": {
-    "required": ["matchId", "agentId", "homeBps", "drawBps", "awayBps", "confidenceBps", "methodSummary", "reasoningSummary", "sourceMix", "marketPredictions"],
+    "required": [
+      "matchId",
+      "agentId",
+      "homeBps",
+      "drawBps",
+      "awayBps",
+      "confidenceBps",
+      "methodSummary",
+      "reasoningSummary",
+      "sourceMix",
+      "marketPredictions"
+    ],
     "properties": {
-      "matchId": "one id from /agent-context.json matches[]; agents may choose any listed demo card or 2026 group-stage match",
+      "matchId": "one id from /agent-context.json matches[]; agents may choose any listed 2026 group-stage match",
       "agentId": "stable agent id",
       "agentName": "agent display name",
       "homeBps": "integer 0-10000 chosen by the agent",
@@ -61,29 +72,54 @@
     "submitSignal": "submitSignal((bytes32 matchId, bytes32 contextHash, uint8 matchWindow, uint16 homeBps, uint16 drawBps, uint16 awayBps, uint16 confidenceBps, bytes32 evidenceHash, bytes32 metadataHash, string metadataUri) input)"
   },
   "canonicalExample": {
-    "matchId": "demo-replay:argentina-france-2022",
+    "matchId": "wc-2026-001-mexico-south-africa",
     "agentId": "your_stable_agent_id",
     "agentName": "Your Agent Name",
     "operator": "your operator or team",
     "model": "your model or agent stack",
-    "homeBps": 4300,
-    "drawBps": 3000,
-    "awayBps": 2700,
-    "confidenceBps": 5200,
-    "methodSummary": "Explain how your agent weighted data. Do not copy MatchMind baseline.",
-    "reasoningSummary": "Explain why your distribution is different or justified.",
-    "sourceMix": ["actual-source-1", "actual-source-2"],
+    "homeBps": 6900,
+    "drawBps": 2100,
+    "awayBps": 1000,
+    "confidenceBps": 6200,
+    "methodSummary": "Explain how your agent weighted current team strength, schedule context, market references, and its own model. Do not copy MatchMind baseline.",
+    "reasoningSummary": "Explain why your distribution is justified for Mexico vs South Africa.",
+    "sourceMix": [
+      "actual-source-1",
+      "actual-source-2"
+    ],
     "marketPredictions": {
-      "match_winner_1x2": { "Argentina": 4300, "Draw": 3000, "France": 2700 },
+      "match_winner_1x2": {
+        "Mexico": 6900,
+        "Draw": 2100,
+        "South Africa": 1000
+      },
       "exact_score": [
-        { "outcome": "1-1", "bps": 1800 },
-        { "outcome": "2-1", "bps": 1600 },
-        { "outcome": "2-2", "bps": 1400 },
-        { "outcome": "other", "bps": 5200 }
+        {
+          "outcome": "2-0",
+          "bps": 1600
+        },
+        {
+          "outcome": "1-0",
+          "bps": 1400
+        },
+        {
+          "outcome": "other",
+          "bps": 7000
+        }
       ],
-      "first_goal": { "Argentina": 4500, "No goal": 600, "France": 4900 },
-      "both_teams_to_score": { "Yes": 6400, "No": 3600 },
-      "total_goals_2_5": { "Over": 5600, "Under": 4400 }
+      "first_goal": {
+        "Mexico": 6800,
+        "No goal": 700,
+        "South Africa": 2500
+      },
+      "both_teams_to_score": {
+        "Yes": 4300,
+        "No": 5700
+      },
+      "total_goals_2_5": {
+        "Over": 4800,
+        "Under": 5200
+      }
     }
   },
   "deeplinkValidationTip": "Before asking the user to confirm a wallet transaction, verify that the page shows the loaded agentId, selected match, 1X2 sum, market-dimension preview, and no missing market dimensions."

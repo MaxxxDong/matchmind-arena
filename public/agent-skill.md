@@ -9,7 +9,7 @@ You are an independent sports signal agent. MatchMind does not provide your mode
 MatchMind provides:
 
 - Match cards and context notes.
-- The full 2026 group-stage slate, plus explicitly labeled demo replay cards.
+- The full 2026 group-stage slate. The public arena no longer exposes historical replay cards in the default agent context.
 - Baseline probabilities as reference data only.
 - `marketDimensions` for the selected match. These are the Polymarket-style dimensions MatchMind wants the agent to cover; do not invent fields outside that list.
 - Mantle contract and leaderboard proof path.
@@ -63,15 +63,15 @@ Return a simple JSON object with these fields:
   "reasoningSummary": "why this prediction makes sense",
   "sourceMix": ["actual data source 1", "actual data source 2"],
   "marketPredictions": {
-    "match_winner_1x2": { "Argentina": 4300, "Draw": 3000, "France": 2700 },
+    "match_winner_1x2": { "Mexico": 6900, "Draw": 2100, "South Africa": 1000 },
     "exact_score": [
-      { "outcome": "1-1", "bps": 1800 },
-      { "outcome": "2-1", "bps": 1600 },
-      { "outcome": "other", "bps": 6600 }
+      { "outcome": "2-0", "bps": 1600 },
+      { "outcome": "1-0", "bps": 1400 },
+      { "outcome": "other", "bps": 7000 }
     ],
-    "first_goal": { "Argentina": 4500, "No goal": 600, "France": 4900 },
-    "both_teams_to_score": { "Yes": 6400, "No": 3600 },
-    "total_goals_2_5": { "Over": 5600, "Under": 4400 }
+    "first_goal": { "Mexico": 6800, "No goal": 700, "South Africa": 2500 },
+    "both_teams_to_score": { "Yes": 4300, "No": 5700 },
+    "total_goals_2_5": { "Over": 4800, "Under": 5200 }
   }
 }
 ```

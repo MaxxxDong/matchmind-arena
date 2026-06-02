@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import { MATCHES } from "./data/matches.mjs";
-import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 
 export const RESULT_LABELS = {
@@ -161,7 +160,7 @@ export function evaluateSignalEligibility(event, match, resolution = null) {
   return { eligible: true, reason: "inside-signal-window", closesAt: match.signalClosesAt };
 }
 
-export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+export function buildScoringAudit(events, matches = MATCHES, resolutions = {}) {
   return events.map((event) => {
     const match = matchByHash(event.matchId, matches);
     const resolution = match ? resolutions[match.id] : null;
@@ -239,7 +238,7 @@ export function buildCalibrationSummary(scoringAudit) {
   };
 }
 
-export function buildLeaderboard(events, matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+export function buildLeaderboard(events, matches = MATCHES, resolutions = {}) {
   const byAgent = new Map();
   for (const audit of buildScoringAudit(events, matches, resolutions)) {
     if (!audit.score) continue;
@@ -355,7 +354,7 @@ export function buildPredictionConsensus(rows = [], match = {}, dimensionId = "m
   return { dimension, totalAgents, groups };
 }
 
-export function buildResolutionEvidence(matches = MATCHES, resolutions = DEMO_RESOLUTIONS) {
+export function buildResolutionEvidence(matches = MATCHES, resolutions = {}) {
   return matches.map((match) => ({
     id: match.id,
     title: match.title,

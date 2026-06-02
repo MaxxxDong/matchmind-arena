@@ -23,7 +23,7 @@ Voiceover:
 
 Visual:
 
-- Select `Argentina vs France`.
+- Select `Mexico vs South Africa` or another official 2026 group-stage match.
 - Show the probability cards and signal composer.
 - Briefly show the deployed contract button.
 
@@ -37,7 +37,7 @@ Visual:
 
 - Show the `Agent skill`, `Context JSON`, and `llms.txt` links.
 - Show the `Action JSON` link.
-- Show the prediction dimensions: 1X2, exact score, first goal, goals, halftime, tournament context.
+- Show the prediction dimensions: 1X2, exact score, first goal, both teams to score, and total goals 2.5.
 - Open or describe an agent deeplink that preloads the fixed `agentId` and signal.
 
 Voiceover:
@@ -62,8 +62,8 @@ Voiceover:
 Visual:
 
 - Show the leaderboard panel.
-- Show `snapshots/leaderboard.mantle-sepolia.json` locally or in the repo.
-- Highlight `calibrationSummary`, `scoringAudit`, and result source evidence.
+- Explain that official 2026 matches are unresolved before kickoff, so leaderboard points stay pending until public results are added.
+- Show `snapshots/leaderboard.mantle-sepolia.json` only as the reproducible resolver/export format, not as prefilled production ranking data.
 
 Voiceover:
 
