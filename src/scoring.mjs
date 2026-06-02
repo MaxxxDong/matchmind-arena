@@ -119,26 +119,44 @@ function scoreMarketDimensions(event, resolution) {
   return { hits, points };
 }
 
-export function evaluateSignalEligibility(event, match) {
+export function evaluateSignalEligibility(event, match, resolution = null) {
   if (!match) {
     return { eligible: false, reason: "unknown-match" };
   }
   if (match.scoringMode === "demo-replay") {
     return { eligible: true, reason: "demo-replay-window" };
   }
-  if (!match.signalClosesAt) {
-    return { eligible: true, reason: "no-close-window-configured" };
-  }
   if (!event.submittedAt) {
     return { eligible: false, reason: "missing-submission-timestamp" };
   }
   const submittedAt = Date.parse(event.submittedAt);
-  const closesAt = Date.parse(match.signalClosesAt);
-  if (!Number.isFinite(submittedAt) || !Number.isFinite(closesAt)) {
+  if (!Number.isFinite(submittedAt)) {
     return { eligible: false, reason: "invalid-window-timestamp" };
   }
-  if (submittedAt > closesAt) {
-    return { eligible: false, reason: "late-signal", closesAt: match.signalClosesAt };
+  if (match.signalClosesAt) {
+    const closesAt = Date.parse(match.signalClosesAt);
+    if (!Number.isFinite(closesAt)) {
+      return { eligible: false, reason: "invalid-window-timestamp" };
+    }
+    if (submittedAt > closesAt) {
+      return { eligible: false, reason: "late-signal", closesAt: match.signalClosesAt };
+    }
+  }
+  if (resolution?.resolvedAt) {
+    const resolvedAt = Date.parse(resolution.resolvedAt);
+    if (!Number.isFinite(resolvedAt)) {
+      return { eligible: false, reason: "invalid-resolution-timestamp" };
+    }
+    if (submittedAt > resolvedAt) {
+      return {
+        eligible: false,
+        reason: "late-after-resolution",
+        resolvedAt: resolution.resolvedAt,
+      };
+    }
+  }
+  if (!match.signalClosesAt && !resolution?.resolvedAt) {
+    return { eligible: true, reason: "no-close-window-configured" };
   }
   return { eligible: true, reason: "inside-signal-window", closesAt: match.signalClosesAt };
 }
@@ -147,7 +165,7 @@ export function buildScoringAudit(events, matches = MATCHES, resolutions = DEMO_
   return events.map((event) => {
     const match = matchByHash(event.matchId, matches);
     const resolution = match ? resolutions[match.id] : null;
-    const eligibility = evaluateSignalEligibility(event, match);
+    const eligibility = evaluateSignalEligibility(event, match, resolution);
     const score = eligibility.eligible ? scoreSignal(event, resolution) : null;
     const [predictedResult, predictedBps] = predictedOutcome(event);
     return {

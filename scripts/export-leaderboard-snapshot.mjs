@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { ethers } from "ethers";
+import { hydrateEventsWithMetadata } from "../src/metadataStore.mjs";
 import { MATCHES } from "../src/data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "../src/data/resolutions.mjs";
 import {
@@ -96,7 +97,7 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
   const arena = new ethers.Contract(CONTRACT_ADDRESS, ARENA_ABI, provider);
   const { latest, logs } = await querySignalEvents(provider, arena);
-  const events = await hydrateBlockTimestamps(provider, logs);
+  const events = await hydrateEventsWithMetadata(await hydrateBlockTimestamps(provider, logs), { fetchImpl: fetch });
   const { resolutions, source: resolutionSource } = await loadResolutions();
   const leaderboard = buildLeaderboard(events, MATCHES, resolutions);
   const resolvedSignalCount = leaderboard.reduce((total, entry) => total + entry.resolved, 0);

@@ -27,6 +27,10 @@ import { RESULT_LABELS, buildLeaderboard, buildPredictionConsensus } from "./sco
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
 import {
+  hydrateEventMetadataSync,
+  hydrateEventsWithMetadata,
+} from "./metadataStore.mjs";
+import {
   buildAgentSignalChecklist,
   buildAgentSignalPreview,
   duplicateSignalMessage,
@@ -205,7 +209,7 @@ function buildAgentRegistration(profile, walletAddress) {
 
 function snapshotSignalEvents() {
   return (LEADERBOARD_SNAPSHOT.events || []).map((event) => ({
-    ...event,
+    ...hydrateEventMetadataSync(event),
     fromSnapshot: true,
   }));
 }
@@ -220,7 +224,7 @@ function mergeEvents(current, incoming) {
 }
 
 function eventFromParsedLog(parsed, receiptLog, blockTimestamp = null) {
-  return {
+  return hydrateEventMetadataSync({
     signalId: Number(parsed.args.signalId),
     agent: parsed.args.agent,
     agentIdHash: parsed.args.agentIdHash,
@@ -239,7 +243,7 @@ function eventFromParsedLog(parsed, receiptLog, blockTimestamp = null) {
     blockNumber: receiptLog.blockNumber,
     blockTimestamp,
     submittedAt: blockTimestamp ? new Date(blockTimestamp * 1000).toISOString() : new Date().toISOString(),
-  };
+  });
 }
 
 function signalEventsFromReceipt(receipt) {
@@ -261,11 +265,12 @@ async function querySignalEvents() {
   const blockNumbers = [...new Set(logs.map((log) => log.blockNumber))];
   const blocks = await Promise.all(blockNumbers.map(async (blockNumber) => publicProvider.getBlock(blockNumber)));
   const timestamps = new Map(blocks.filter(Boolean).map((block) => [block.number, Number(block.timestamp)]));
-  return logs.map((log) => eventFromParsedLog(
+  const events = logs.map((log) => eventFromParsedLog(
     readArena.interface.parseLog(log),
     log,
     timestamps.get(log.blockNumber) ?? null,
   ));
+  return hydrateEventsWithMetadata(events, { records: readLocalSignalMetadata(), fetchImpl: fetch });
 }
 
 async function queryAgentEvents() {
@@ -329,7 +334,7 @@ function parseJsonOrEmpty(value) {
 
 function upsertLocalSignalRecord(record) {
   const existing = readLocalSignalMetadata();
-  const keyOf = (item) => `${item.agentId}:${item.matchId}:${item.generatedAt || ""}:${item.txHash || ""}`;
+  const keyOf = (item) => `${item.metadataHash || ""}:${item.agentId}:${item.matchId}:${item.generatedAt || ""}:${item.txHash || ""}`;
   const next = [record, ...existing.filter((item) => keyOf(item) !== keyOf(record))].slice(0, 30);
   globalThis.localStorage?.setItem(SIGNAL_METADATA_KEY, JSON.stringify(next));
   return next;
@@ -346,6 +351,9 @@ function localSignalRecord(signalPayload, match, profile, extra = {}) {
     agentName: profile.name,
     status: extra.status || "loaded",
     txHash: extra.txHash || "",
+    metadataHash: signalPayload.commitment.metadataHash,
+    metadataUri: signalPayload.commitment.metadataUri,
+    commitment: signalPayload.commitment,
     signal: {
       homeBps: signalPayload.commitment.homeBps,
       drawBps: signalPayload.commitment.drawBps,
@@ -941,9 +949,9 @@ function App() {
     ...selectedEvents.map((event) => ({
       key: `chain:${event.txHash}:${event.signalId}`,
       source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
-      agent: agentLabel(event.agentIdHash || event.agent),
+      agent: event.agentId || agentLabel(event.agentIdHash || event.agent),
       signal: event,
-      rawEvidence: null,
+      rawEvidence: event.rawEvidence || null,
       txHash: event.txHash,
       matchId: selectedMatch.id,
     })),

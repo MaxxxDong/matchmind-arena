@@ -870,3 +870,31 @@ Reflection:
 
 - The docs are now clearer for a new agent: README gives the entry path, `HANDOFF.md` gives the current continuation state, `docs/agent-protocol.md` owns agent rules, and `docs/submission-package.md` owns reviewer-facing copy.
 - Future doc changes should avoid copying submission text or schema details into multiple files; link to the canonical document instead.
+
+## Phase 8K - Rich Metadata Hydration And Late-Signal Enforcement
+
+Completed locally.
+
+What was found:
+
+- Chain events already preserve the strict 1X2 signal, but non-1X2 dimensions such as exact score and both-teams-to-score could only be reconstructed when a local deeplink record was still present in the browser.
+- The snapshot exporter did not try to recover rich metadata from `metadataUri`, so leaderboard scoring for market dimensions could not survive beyond local-only records.
+- Eligibility already used `signalClosesAt`, but future resolved live matches also need a resolver-side cutoff so post-result submissions cannot be scored if a close window is missing.
+
+What was done:
+
+- Added `src/metadataStore.mjs` for JSON data-URI encoding, local cache matching, HTTP(S) metadata loading, and `rawEvidence` hydration.
+- Updated `buildSignalCommitment()` so local/simple agent signals embed compact rich metadata in a `data:application/json;base64,...` `metadataUri` when the agent does not provide its own external URI.
+- Updated the browser chain-event path and `npm run snapshot:leaderboard` path to hydrate events with recovered metadata before prediction distribution and scoring.
+- Updated non-demo eligibility so signals submitted after the resolver's `resolvedAt` timestamp are marked `late-after-resolution` and remain unscored.
+
+Verification:
+
+- Added regression coverage for metadata URI hydration feeding exact-score and market-dimension scoring.
+- Added regression coverage for post-resolution non-demo signals being excluded from scoring.
+- `npm test -- --grep "Scoring and prediction aggregation"`: passing.
+
+Reflection:
+
+- This keeps the deployed contract unchanged and preserves the compact Mantle proof path.
+- Data-URI metadata is appropriate for lightweight demo signals and makes the current static frontend self-contained. For production-scale submissions, the same resolver already supports HTTP(S) JSON metadata, so the next upgrade can move heavy metadata into durable storage without changing the contract.

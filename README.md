@@ -230,6 +230,7 @@ The current web app is in `src/` and is intentionally small:
 - `src/resultSources.mjs`: public result-source evidence and deterministic source hashes.
 - `src/scoring.mjs`: shared Brier score, log loss, eligibility audit, calibration summary, and leaderboard logic.
 - `src/signals.mjs`: shared stable JSON hashing, signal vector validation, and commitment construction.
+- `src/metadataStore.mjs`: signal metadata URI encoding, local/http/data-URI hydration, and rich `marketPredictions` recovery for UI and snapshots.
 - Locally loaded signal metadata is stored in `localStorage`; the public frontend does not collect model API keys.
 - `src/styles.css`: responsive live-sports dashboard styling.
 - `index.html`: Vite entry.

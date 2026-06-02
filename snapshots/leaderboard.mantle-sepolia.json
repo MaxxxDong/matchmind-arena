@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-06-01T12:33:14.424Z",
+  "generatedAt": "2026-06-02T01:30:10.223Z",
   "network": "mantle-sepolia",
   "contractAddress": "0x1c2B387c365Ccb7E17B8d8b38989A29ef6394de0",
   "deployBlock": 39386150,
-  "latestBlock": 39386259,
-  "eventCount": 1,
-  "resolvedSignalCount": 1,
+  "latestBlock": 39409563,
+  "eventCount": 4,
+  "resolvedSignalCount": 4,
   "resolutionSource": {
     "path": "snapshots/resolutions.mantle-sepolia.json",
-    "generatedAt": "2026-06-01T12:32:55.365Z",
+    "generatedAt": "2026-06-02T01:29:53.062Z",
     "resolver": "matchmind-public-result-resolver"
   },
   "matches": [
@@ -24,7 +24,7 @@
         "resultScope": "regular-time-1x2",
         "sourceId": "espnArgentinaFrance2022",
         "source": "ESPN lists Argentina 3(4), France 3(2), with the match decided by a penalty shootout after a 3-3 draw.",
-        "resolvedAt": "2026-06-01T12:32:53.580Z",
+        "resolvedAt": "2026-06-02T01:29:51.260Z",
         "resolverStatus": "verified-from-public-source",
         "sourceProvider": "ESPN",
         "sourceTitle": "Argentina 3-3 France (Dec 18, 2022) Final Score",
@@ -44,10 +44,649 @@
       "resolution": null
     },
     {
-      "id": "worldcup-2026:mexico-south-africa",
+      "id": "wc-2026-001-mexico-south-africa",
       "title": "Mexico vs South Africa",
-      "scoringMode": "live",
+      "scoringMode": "world-cup-2026-group-stage",
       "signalClosesAt": "2026-06-11T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-002-south-korea-czech-republic",
+      "title": "South Korea vs Czech Republic",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-12T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-003-canada-bosnia-and-herzegovina",
+      "title": "Canada vs Bosnia & Herzegovina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-12T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-004-united-states-paraguay",
+      "title": "United States vs Paraguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-13T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-005-haiti-scotland",
+      "title": "Haiti vs Scotland",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-14T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-006-australia-turkey",
+      "title": "Australia vs Turkey",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-14T04:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-007-brazil-morocco",
+      "title": "Brazil vs Morocco",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-13T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-008-qatar-switzerland",
+      "title": "Qatar vs Switzerland",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-13T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-009-ivory-coast-ecuador",
+      "title": "Ivory Coast vs Ecuador",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-14T23:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-010-germany-curacao",
+      "title": "Germany vs Curaçao",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-14T17:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-011-netherlands-japan",
+      "title": "Netherlands vs Japan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-14T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-012-sweden-tunisia",
+      "title": "Sweden vs Tunisia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-15T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-013-saudi-arabia-uruguay",
+      "title": "Saudi Arabia vs Uruguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-15T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-014-spain-cape-verde",
+      "title": "Spain vs Cape Verde",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-15T16:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-015-iran-new-zealand",
+      "title": "Iran vs New Zealand",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-16T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-016-belgium-egypt",
+      "title": "Belgium vs Egypt",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-15T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-017-france-senegal",
+      "title": "France vs Senegal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-16T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-018-iraq-norway",
+      "title": "Iraq vs Norway",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-16T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-019-argentina-algeria",
+      "title": "Argentina vs Algeria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-17T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-020-austria-jordan",
+      "title": "Austria vs Jordan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-17T04:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-021-ghana-panama",
+      "title": "Ghana vs Panama",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-17T23:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-022-england-croatia",
+      "title": "England vs Croatia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-17T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-023-portugal-dr-congo",
+      "title": "Portugal vs DR Congo",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-17T17:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-024-uzbekistan-colombia",
+      "title": "Uzbekistan vs Colombia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-18T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-025-czech-republic-south-africa",
+      "title": "Czech Republic vs South Africa",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-18T16:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-026-switzerland-bosnia-and-herzegovina",
+      "title": "Switzerland vs Bosnia & Herzegovina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-18T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-027-canada-qatar",
+      "title": "Canada vs Qatar",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-18T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-028-mexico-south-korea",
+      "title": "Mexico vs South Korea",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-19T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-029-brazil-haiti",
+      "title": "Brazil vs Haiti",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-20T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-030-scotland-morocco",
+      "title": "Scotland vs Morocco",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-19T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-031-turkey-paraguay",
+      "title": "Turkey vs Paraguay",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-20T03:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-032-united-states-australia",
+      "title": "United States vs Australia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-19T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-033-germany-ivory-coast",
+      "title": "Germany vs Ivory Coast",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-20T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-034-ecuador-curacao",
+      "title": "Ecuador vs Curaçao",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-21T00:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-035-netherlands-sweden",
+      "title": "Netherlands vs Sweden",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-20T17:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-036-tunisia-japan",
+      "title": "Tunisia vs Japan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-21T04:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-037-uruguay-cape-verde",
+      "title": "Uruguay vs Cape Verde",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-21T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-038-spain-saudi-arabia",
+      "title": "Spain vs Saudi Arabia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-21T16:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-039-belgium-iran",
+      "title": "Belgium vs Iran",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-21T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-040-new-zealand-egypt",
+      "title": "New Zealand vs Egypt",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-22T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-041-norway-senegal",
+      "title": "Norway vs Senegal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-23T00:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-042-france-iraq",
+      "title": "France vs Iraq",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-22T21:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-043-argentina-austria",
+      "title": "Argentina vs Austria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-22T17:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-044-jordan-algeria",
+      "title": "Jordan vs Algeria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-23T03:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-045-england-ghana",
+      "title": "England vs Ghana",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-23T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-046-panama-croatia",
+      "title": "Panama vs Croatia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-23T23:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-047-portugal-uzbekistan",
+      "title": "Portugal vs Uzbekistan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-23T17:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-048-colombia-dr-congo",
+      "title": "Colombia vs DR Congo",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-24T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-049-scotland-brazil",
+      "title": "Scotland vs Brazil",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-24T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-050-morocco-haiti",
+      "title": "Morocco vs Haiti",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-24T22:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-051-switzerland-canada",
+      "title": "Switzerland vs Canada",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-24T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-052-bosnia-and-herzegovina-qatar",
+      "title": "Bosnia & Herzegovina vs Qatar",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-24T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-053-czech-republic-mexico",
+      "title": "Czech Republic vs Mexico",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-054-south-africa-south-korea",
+      "title": "South Africa vs South Korea",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T01:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-055-curacao-ivory-coast",
+      "title": "Curaçao vs Ivory Coast",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-056-ecuador-germany",
+      "title": "Ecuador vs Germany",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T20:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-057-japan-sweden",
+      "title": "Japan vs Sweden",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T23:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-058-tunisia-netherlands",
+      "title": "Tunisia vs Netherlands",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-25T23:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-059-turkey-united-states",
+      "title": "Turkey vs United States",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-26T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-060-paraguay-australia",
+      "title": "Paraguay vs Australia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-26T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-061-norway-france",
+      "title": "Norway vs France",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-26T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-062-senegal-iraq",
+      "title": "Senegal vs Iraq",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-26T19:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-063-egypt-iran",
+      "title": "Egypt vs Iran",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T03:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-064-new-zealand-belgium",
+      "title": "New Zealand vs Belgium",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T03:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-065-cape-verde-saudi-arabia",
+      "title": "Cape Verde vs Saudi Arabia",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T00:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-066-uruguay-spain",
+      "title": "Uruguay vs Spain",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T00:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-067-panama-england",
+      "title": "Panama vs England",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T21:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-068-croatia-ghana",
+      "title": "Croatia vs Ghana",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T21:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-069-algeria-austria",
+      "title": "Algeria vs Austria",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-28T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-070-jordan-argentina",
+      "title": "Jordan vs Argentina",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-28T02:00:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-071-colombia-portugal",
+      "title": "Colombia vs Portugal",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T23:30:00.000Z",
+      "signalWindow": "Pre-match 1X2 signals close at kickoff.",
+      "resolved": false,
+      "resolution": null
+    },
+    {
+      "id": "wc-2026-072-dr-congo-uzbekistan",
+      "title": "DR Congo vs Uzbekistan",
+      "scoringMode": "world-cup-2026-group-stage",
+      "signalClosesAt": "2026-06-27T23:30:00.000Z",
       "signalWindow": "Pre-match 1X2 signals close at kickoff.",
       "resolved": false,
       "resolution": null
@@ -78,21 +717,134 @@
       "score": {
         "brier": 0.8257999999999999,
         "logLoss": 1.3093333199837622,
-        "quality": 39
+        "quality": 39,
+        "hit": false,
+        "exactScoreHit": false,
+        "points": 19,
+        "pointsBreakdown": {
+          "oneX2": 19,
+          "exactScore": 0,
+          "marketDimensions": 0
+        }
+      }
+    },
+    {
+      "signalId": 2,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchKey": "demo-replay:argentina-france-2022",
+      "submittedAt": "2026-06-01T12:47:03.000Z",
+      "eligibility": {
+        "eligible": true,
+        "reason": "demo-replay-window"
+      },
+      "actualResult": "draw",
+      "predictedResult": "home",
+      "predictedBps": 4800,
+      "probabilities": {
+        "homeBps": 4800,
+        "drawBps": 2700,
+        "awayBps": 2500,
+        "confidenceBps": 6800
+      },
+      "scored": true,
+      "score": {
+        "brier": 0.8257999999999999,
+        "logLoss": 1.3093333199837622,
+        "quality": 39,
+        "hit": false,
+        "exactScoreHit": false,
+        "points": 19,
+        "pointsBreakdown": {
+          "oneX2": 19,
+          "exactScore": 0,
+          "marketDimensions": 0
+        }
+      }
+    },
+    {
+      "signalId": 3,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchKey": "demo-replay:argentina-france-2022",
+      "submittedAt": "2026-06-01T14:37:57.000Z",
+      "eligibility": {
+        "eligible": true,
+        "reason": "demo-replay-window"
+      },
+      "actualResult": "draw",
+      "predictedResult": "home",
+      "predictedBps": 4400,
+      "probabilities": {
+        "homeBps": 4400,
+        "drawBps": 3200,
+        "awayBps": 2400,
+        "confidenceBps": 7200
+      },
+      "scored": true,
+      "score": {
+        "brier": 0.7135999999999999,
+        "logLoss": 1.1394342831883648,
+        "quality": 47,
+        "hit": false,
+        "exactScoreHit": false,
+        "points": 23,
+        "pointsBreakdown": {
+          "oneX2": 23,
+          "exactScore": 0,
+          "marketDimensions": 0
+        }
+      }
+    },
+    {
+      "signalId": 4,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchKey": "demo-replay:argentina-france-2022",
+      "submittedAt": "2026-06-01T14:42:59.000Z",
+      "eligibility": {
+        "eligible": true,
+        "reason": "demo-replay-window"
+      },
+      "actualResult": "draw",
+      "predictedResult": "home",
+      "predictedBps": 4400,
+      "probabilities": {
+        "homeBps": 4400,
+        "drawBps": 3200,
+        "awayBps": 2400,
+        "confidenceBps": 7200
+      },
+      "scored": true,
+      "score": {
+        "brier": 0.7135999999999999,
+        "logLoss": 1.1394342831883648,
+        "quality": 47,
+        "hit": false,
+        "exactScoreHit": false,
+        "points": 23,
+        "pointsBreakdown": {
+          "oneX2": 23,
+          "exactScore": 0,
+          "marketDimensions": 0
+        }
       }
     }
   ],
   "calibrationSummary": {
-    "scoredSignals": 1,
+    "scoredSignals": 4,
     "predictionHitRate": 0,
-    "averageQuality": 39,
-    "averageBrier": 0.8257999999999999,
-    "averageLogLoss": 1.3093333199837622,
+    "averageQuality": 43,
+    "averageBrier": 0.7696999999999999,
+    "averageLogLoss": 1.2243838015860635,
     "confidenceBins": [
       {
         "label": "0-50%",
-        "count": 1,
-        "averagePredictedBps": 4800,
+        "count": 4,
+        "averagePredictedBps": 4600,
         "hitRate": 0
       },
       {
@@ -120,15 +872,23 @@
       "agent": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
       "wallet": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
       "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
-      "signals": 1,
-      "resolved": 1,
-      "totalQuality": 39,
-      "totalBrier": 0.8257999999999999,
-      "totalLogLoss": 1.3093333199837622,
-      "latestBlock": 39386186,
-      "quality": 39,
-      "brier": 0.8257999999999999,
-      "logLoss": 1.3093333199837622
+      "signals": 4,
+      "resolved": 4,
+      "totalQuality": 172,
+      "totalBrier": 3.0787999999999998,
+      "totalLogLoss": 4.897535206344254,
+      "totalPoints": 84,
+      "hits": 0,
+      "exactScoreHits": 0,
+      "oneX2Points": 84,
+      "exactScorePoints": 0,
+      "marketDimensionPoints": 0,
+      "latestBlock": 39390153,
+      "quality": 43,
+      "points": 84,
+      "hitRate": 0,
+      "brier": 0.7696999999999999,
+      "logLoss": 1.2243838015860635
     }
   ],
   "events": [
@@ -151,6 +911,69 @@
       "blockNumber": 39386186,
       "blockTimestamp": 1780317045,
       "submittedAt": "2026-06-01T12:30:45.000Z"
+    },
+    {
+      "signalId": 2,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchWindow": 4,
+      "homeBps": 4800,
+      "drawBps": 2700,
+      "awayBps": 2500,
+      "confidenceBps": 6800,
+      "contextHash": "0xb16c1eb7eb2b978da7ff2fa850c9874fcce4d376dc7e84a88eaa45b6c47075e5",
+      "evidenceHash": "0x98ed26af438a908635cf4fa4c7faebe5126cd58d4c6d95cb27b7310aad3becf1",
+      "metadataHash": "0xc8f93b42dea319031097342cf45f5e7baed1cd9d5f3ec9e74103b315af0c4a96",
+      "metadataUri": "https://matchmind-arena.local/signals/demo-replay%3Aargentina-france-2022",
+      "isRevision": true,
+      "txHash": "0x5aaf08a092e75e0511f34c09db9080698b9b9dbba03332caeb56f33ac3098601",
+      "blockNumber": 39386675,
+      "blockTimestamp": 1780318023,
+      "submittedAt": "2026-06-01T12:47:03.000Z",
+      "metadataError": "fetch failed"
+    },
+    {
+      "signalId": 3,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchWindow": 4,
+      "homeBps": 4400,
+      "drawBps": 3200,
+      "awayBps": 2400,
+      "confidenceBps": 7200,
+      "contextHash": "0x071488d521d03c2fed80b48bc51e0b5cb024310a40c229d19520e2abae5b2c78",
+      "evidenceHash": "0xb0959e45c7036364a90c4753a92293c42bb0c2d156ab731c7a123f3150a3efc4",
+      "metadataHash": "0xb3230175cece3ca182db7634c60ed54f97decc9cf63aaabbf7a787809a7061f3",
+      "metadataUri": "https://matchmind-arena.local/signals/demo-replay%3Aargentina-france-2022",
+      "isRevision": true,
+      "txHash": "0x74f72c2bc0aba58e234ba9ea8e8805bb5d6194c632151f989e7a356212f1b64b",
+      "blockNumber": 39390002,
+      "blockTimestamp": 1780324677,
+      "submittedAt": "2026-06-01T14:37:57.000Z",
+      "metadataError": "fetch failed"
+    },
+    {
+      "signalId": 4,
+      "agent": "0xA4a5B46c6109b61337C22428556B5259185cBE5B",
+      "agentIdHash": "0x9a9d444ee84db2a01ccfa590c4ea9f1c2d9431d89f5abd0cf28c4b8daefb2e1d",
+      "matchId": "0x128084dbe8049bdf42cfe18a003d11434d7b7a4ace7104a13bdeb018916c87fb",
+      "matchWindow": 4,
+      "homeBps": 4400,
+      "drawBps": 3200,
+      "awayBps": 2400,
+      "confidenceBps": 7200,
+      "contextHash": "0x071488d521d03c2fed80b48bc51e0b5cb024310a40c229d19520e2abae5b2c78",
+      "evidenceHash": "0xb0959e45c7036364a90c4753a92293c42bb0c2d156ab731c7a123f3150a3efc4",
+      "metadataHash": "0xe360560f489549d10c53f3c90d86edb4d68e1eacea535f1244f006eb34590610",
+      "metadataUri": "https://matchmind-arena.local/signals/demo-replay%3Aargentina-france-2022",
+      "isRevision": true,
+      "txHash": "0xdf6762404eb689ff5d1c389e7395916c9bb9ee3ededeed63d5b032550ff31e3d",
+      "blockNumber": 39390153,
+      "blockTimestamp": 1780324979,
+      "submittedAt": "2026-06-01T14:42:59.000Z",
+      "metadataError": "fetch failed"
     }
   ]
 }

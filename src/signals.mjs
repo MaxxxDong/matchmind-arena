@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { encodeJsonDataUri } from "./metadataStore.mjs";
 
 export function stableJson(value) {
   if (Array.isArray(value)) {
@@ -42,8 +43,13 @@ export function buildSignalCommitment(match, signal = {}) {
     source: signal.contextSource ?? "MatchMind browser context pack",
     notes: [match.bias, match.status, match.venue],
   };
+  const rawEvidence = signal.rawEvidence ?? `evidence:${match.id}:browser-demo`;
   const metadata = {
     app: "MatchMind Arena",
+    type: "signal-metadata",
+    schemaVersion: 1,
+    matchId: match.id,
+    title: match.title,
     model: signal.model ?? "demo-sports-signal-agent",
     explanation: signal.explanation ??
       "Demo signal generated from match context, replay evidence labels, and tactical momentum notes.",
@@ -55,8 +61,9 @@ export function buildSignalCommitment(match, signal = {}) {
     confidenceBps: vector.confidenceBps,
     generatedBy: signal.generatedBy ?? "deterministic-demo",
     generatedAt: signal.generatedAt ?? "demo",
+    rawEvidence: rawEvidence && typeof rawEvidence === "object" ? rawEvidence : { evidenceNote: rawEvidence },
   };
-  const rawEvidence = signal.rawEvidence ?? `evidence:${match.id}:browser-demo`;
+  const metadataHash = ethers.id(stableJson(metadata));
   return {
     matchId: ethers.id(match.id),
     contextHash: ethers.id(stableJson(context)),
@@ -66,7 +73,7 @@ export function buildSignalCommitment(match, signal = {}) {
     awayBps: vector.awayBps,
     confidenceBps: vector.confidenceBps,
     evidenceHash: ethers.id(typeof rawEvidence === "string" ? rawEvidence : stableJson(rawEvidence)),
-    metadataHash: ethers.id(stableJson(metadata)),
-    metadataUri: signal.metadataUri ?? `https://matchmind-arena.local/signals/${encodeURIComponent(match.id)}`,
+    metadataHash,
+    metadataUri: signal.metadataUri ?? encodeJsonDataUri({ ...metadata, metadataHash }),
   };
 }

@@ -152,7 +152,7 @@ Phase 6B reproducible scoring snapshot:
 - [x] Replace static demo resolutions in snapshots with a resolver job that pulls from public sources.
 - [x] Add closed-window scoring rules for live matches and explicit replay mode for demo matches.
 - [x] Include block timestamp and scoring eligibility audit in leaderboard snapshots.
-- [ ] Add resolver-driven late-signal enforcement for future resolved live matches.
+- [x] Add resolver-driven late-signal enforcement for future resolved live matches.
 
 Verification gate:
 
@@ -181,8 +181,6 @@ Goal: make the hackathon submission easy to verify.
 Current priority after the Phase 8 leaderboard and prediction-board corrections:
 
 1. Keep the public submission copy in `docs/submission-package.md` current only when links, video evidence, or public proof changes.
-2. Add durable off-chain metadata retrieval/storage for full `marketPredictions` so non-1X2 dimensions remain inspectable after wallet submission.
-3. Add more independent agent examples or real submitted signals to make the leaderboard and market distribution views more meaningful.
-4. Add resolver-driven late-signal enforcement for future resolved live matches.
-5. Add persistent storage or a relay only if external agent participation needs server-side submission.
-6. Continue toward Chrome companion integration after the current Web Arena submission path is complete.
+2. Add more independent agent examples or real submitted signals to make the leaderboard and market distribution views more meaningful.
+3. Add persistent storage or a relay only if external agent participation needs server-side submission.
+4. Continue toward Chrome companion integration after the current Web Arena submission path is complete.
