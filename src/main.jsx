@@ -862,7 +862,8 @@ function App() {
       const duplicateMessage = duplicateSignalMessage(alreadySubmitted);
       if (duplicateMessage) {
         setAgentSignalError("");
-        setStatus(duplicateMessage);
+        setAgentSignalError(duplicateMessage);
+        setStatus("");
         return;
       }
       const signalTx = await arena.submitSignal(activeCommitment);
@@ -879,8 +880,8 @@ function App() {
       setStatus(`${activeProfile.name} signal committed on Mantle.`);
     } catch (error) {
       const message = friendlyError(error);
-      setAgentSignalError(message === "Wallet request cancelled. No transaction was submitted." ? "" : message);
-      setStatus(message);
+      setAgentSignalError(message);
+      setStatus("");
     } finally {
       setBusy("");
     }
@@ -992,6 +993,13 @@ function App() {
   }, [agentCommitment, agentProfile.agentId, events, localSignals, matchByHash, selectedMatch]);
   const selectedResolution = null;
   const leaderboard = buildLeaderboard(events, MATCHES, {});
+  const agentComposerMessage = agentSignalError
+    || (agentSignalAlreadySubmitted
+      ? duplicateSignalMessage(true)
+      : agentCommitment
+        ? "Agent signal loaded. MatchMind will commit the strict 1X2 vector on Mantle; exact score, first goal, and other dimensions stay as analysis evidence for the agent's reasoning."
+        : "The website exposes match context and supported dimensions. Agents should use their own method, sources, and probability weighting instead of copying baseline values.");
+  const agentComposerTone = agentSignalError || agentSignalAlreadySubmitted ? "warning" : "";
   const selectPredictionRow = useCallback((row) => {
     setSelectedSignalKey(row.key);
     setAgentCommitment(null);
@@ -1304,34 +1312,18 @@ function App() {
                 </button>
               </details>
             </div>
-            {agentSignalError ? <p className="error-text">{agentSignalError}</p> : null}
             <dl className="hash-list">
               <div><dt>Context</dt><dd>{shortHash(signal.contextHash)}</dd></div>
               <div><dt>Evidence</dt><dd>{shortHash(signal.evidenceHash)}</dd></div>
               <div><dt>Confidence</dt><dd>{formatPct(signal.confidenceBps)}</dd></div>
             </dl>
-            {agentCommitment ? (
-              <p className="ai-explanation">
-                Agent signal loaded. MatchMind will commit the strict 1X2 vector on Mantle; exact score,
-                first goal, and other dimensions stay as analysis evidence for the agent's reasoning.
-              </p>
-            ) : (
-              <p className="ai-explanation">
-                The website exposes match context and supported dimensions. Agents should use their own
-                method, sources, and probability weighting instead of copying baseline values.
-              </p>
-            )}
+            <p className={`ai-explanation ${agentComposerTone}`}>{agentComposerMessage}</p>
             <div className="button-row">
               <button onClick={confirmAgentSignal} disabled={busy === "confirm" || !agentChecklist.ok || agentSignalAlreadySubmitted} className="primary">
                 {busy === "confirm" ? <Loader2 className="spin" size={18} /> : <CheckCircle2 size={18} />}
                 {agentSignalAlreadySubmitted ? "Signal already submitted" : "Confirm in wallet and submit to Mantle"}
               </button>
             </div>
-            {agentSignalAlreadySubmitted && (
-              <p className="small-note">
-                This exact agent signal is already recorded for the selected match window. Choose another match, revise the signal, or use another agent ID.
-              </p>
-            )}
             <details className="debug-box">
               <summary>Advanced wallet actions</summary>
               <div className="button-row">

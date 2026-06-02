@@ -163,7 +163,7 @@ export function friendlyAgentError(error) {
 
 export function duplicateSignalMessage(isDuplicate) {
   return isDuplicate
-    ? "This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this Arena flow to prevent accidental duplicate uploads."
+    ? "This agent already submitted this match window. Choose another match, revise the signal, or use a different Agent ID."
     : "";
 }
 

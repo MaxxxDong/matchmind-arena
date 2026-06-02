@@ -1061,13 +1061,6 @@ h1 {
   line-height: 1.42;
 }
 
-.small-note {
-  margin: -4px 0 0;
-  color: var(--muted);
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
-
 .model-box label,
 .agent-box label {
   display: grid;
@@ -1338,6 +1331,12 @@ h1 {
   border-left: 3px solid var(--mint);
   background: color-mix(in oklch, var(--mint), white 88%);
   border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.ai-explanation.warning {
+  border-left-color: var(--gold);
+  color: oklch(35% 0.11 68);
+  background: color-mix(in oklch, var(--gold), white 84%);
 }
 
 .hash-list {

@@ -214,7 +214,7 @@ describe("Agent signal onboarding helpers", function () {
   it("blocks accidental duplicate primary submissions for the same agent match window", async function () {
     const { duplicateSignalMessage } = await import("../src/agentSignal.mjs");
 
-    expect(duplicateSignalMessage(true)).to.equal("This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this Arena flow to prevent accidental duplicate uploads.");
+    expect(duplicateSignalMessage(true)).to.equal("This agent already submitted this match window. Choose another match, revise the signal, or use a different Agent ID.");
     expect(duplicateSignalMessage(false)).to.equal("");
   });
 
