@@ -217,4 +217,24 @@ describe("Agent signal onboarding helpers", function () {
     expect(duplicateSignalMessage(true)).to.equal("This agent already submitted a primary signal for this match window. Select another match or use a different agent ID; revisions are disabled in this demo to prevent accidental duplicate uploads.");
     expect(duplicateSignalMessage(false)).to.equal("");
   });
+
+  it("keeps seeded subagent signals complete and independently varied", async function () {
+    const { SAMPLE_AGENT_SIGNALS } = await import("../src/data/sampleSignals.mjs");
+    const { MATCHES } = await import("../src/data/matches.mjs");
+    const { buildAgentSignalChecklist } = await import("../src/agentSignal.mjs");
+
+    expect(SAMPLE_AGENT_SIGNALS).to.have.length.at.least(4);
+    expect(new Set(SAMPLE_AGENT_SIGNALS.map((signal) => signal.agentId)).size)
+      .to.equal(SAMPLE_AGENT_SIGNALS.length);
+    expect(new Set(SAMPLE_AGENT_SIGNALS.map((signal) => `${signal.homeBps}-${signal.drawBps}-${signal.awayBps}`)).size)
+      .to.be.greaterThan(1);
+
+    for (const signal of SAMPLE_AGENT_SIGNALS) {
+      const match = MATCHES.find((candidate) => candidate.id === signal.matchId);
+      expect(match, signal.matchId).to.exist;
+      expect(signal.homeBps + signal.drawBps + signal.awayBps, signal.agentId).to.equal(10000);
+      const checklist = buildAgentSignalChecklist(signal, match);
+      expect(checklist.ok, signal.agentId).to.equal(true);
+    }
+  });
 });

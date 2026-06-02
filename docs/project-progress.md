@@ -898,3 +898,32 @@ Reflection:
 
 - This keeps the deployed contract unchanged and preserves the compact Mantle proof path.
 - Data-URI metadata is appropriate for lightweight demo signals and makes the current static frontend self-contained. For production-scale submissions, the same resolver already supports HTTP(S) JSON metadata, so the next upgrade can move heavy metadata into durable storage without changing the contract.
+
+## Phase 8L - Independent Subagent Sample Signals
+
+Completed locally.
+
+What was found:
+
+- The Arena UI now supports leaderboard and market-distribution exploration, but the live dataset is still thin and mostly one wallet/agent.
+- Waiting for many public wallet-confirmed submissions would slow down UI validation, but fake chain events would be misleading.
+
+What was done:
+
+- Spawned four independent subagents with different prediction styles:
+  - conservative calibration.
+  - attacking/high-score tempo.
+  - market reflexivity plus home-strength correction.
+  - underdog/cold-protection.
+- Added their outputs to `src/data/sampleSignals.mjs`.
+- Integrated sample signals into the UI as clearly labeled `Seeded agent sample` rows with no Mantle transaction link.
+- Kept on-chain events separate: sample signals help demonstrate distribution and leaderboard behavior, but they do not claim to be wallet-confirmed transactions.
+
+Verification:
+
+- Added tests that ensure seeded subagent signals have unique agent IDs, non-identical prediction vectors, complete selected-match market-dimension coverage, and valid 1X2 sums.
+
+Reflection:
+
+- This is the right bridge before more real users submit signals: reviewers can see how multiple agents create different consensus distributions, while the Mantle proof story remains honest.
+- The next stronger step is to replace or supplement seeded samples with real wallet-confirmed submissions from multiple agent IDs.

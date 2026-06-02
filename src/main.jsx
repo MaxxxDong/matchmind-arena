@@ -23,6 +23,7 @@ import {
 import "./styles.css";
 import { MATCHES } from "./data/matches.mjs";
 import { DEMO_RESOLUTIONS } from "./data/resolutions.mjs";
+import { SAMPLE_AGENT_SIGNALS } from "./data/sampleSignals.mjs";
 import { RESULT_LABELS, buildLeaderboard, buildPredictionConsensus } from "./scoring.mjs";
 import { attachResultSource } from "./resultSources.mjs";
 import { buildSignalCommitment } from "./signals.mjs";
@@ -212,6 +213,37 @@ function snapshotSignalEvents() {
     ...hydrateEventMetadataSync(event),
     fromSnapshot: true,
   }));
+}
+
+function sampleSignalEvents() {
+  return SAMPLE_AGENT_SIGNALS.map((sample, index) => {
+    const match = MATCHES.find((candidate) => candidate.id === sample.matchId);
+    if (!match) return null;
+    const commitment = buildSignalCommitment(match, sample);
+    return hydrateEventMetadataSync({
+      signalId: `sample-${index + 1}`,
+      agent: sample.agentId,
+      agentId: sample.agentId,
+      agentName: sample.agentName || sample.agentId,
+      agentIdHash: ethers.id(sample.agentId),
+      matchId: commitment.matchId,
+      matchWindow: commitment.matchWindow,
+      homeBps: commitment.homeBps,
+      drawBps: commitment.drawBps,
+      awayBps: commitment.awayBps,
+      confidenceBps: commitment.confidenceBps,
+      contextHash: commitment.contextHash,
+      evidenceHash: commitment.evidenceHash,
+      metadataHash: commitment.metadataHash,
+      metadataUri: commitment.metadataUri,
+      isRevision: false,
+      txHash: "",
+      blockNumber: 0,
+      submittedAt: sample.clientTimestamp || "2026-06-01T00:00:00.000Z",
+      sample: true,
+      rawEvidence: sample.rawEvidence || sample,
+    });
+  }).filter(Boolean);
 }
 
 function mergeEvents(current, incoming) {
@@ -595,7 +627,7 @@ function App() {
   const [wallet, setWallet] = useState("");
   const [agent, setAgent] = useState(null);
   const [nextSignalId, setNextSignalId] = useState(null);
-  const [events, setEvents] = useState(() => snapshotSignalEvents());
+  const [events, setEvents] = useState(() => mergeEvents(snapshotSignalEvents(), sampleSignalEvents()));
   const [agentRegistry, setAgentRegistry] = useState(new Map());
   const [localSignals, setLocalSignals] = useState(() => readLocalSignalMetadata());
   const [readWarning, setReadWarning] = useState("");
@@ -947,8 +979,8 @@ function App() {
       matchId: record.matchId,
     })),
     ...selectedEvents.map((event) => ({
-      key: `chain:${event.txHash}:${event.signalId}`,
-      source: event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
+      key: event.sample ? `sample:${event.signalId}` : `chain:${event.txHash}:${event.signalId}`,
+      source: event.sample ? "Seeded agent sample" : event.fromSnapshot ? "On-chain snapshot" : "On-chain event",
       agent: event.agentId || agentLabel(event.agentIdHash || event.agent),
       signal: event,
       rawEvidence: event.rawEvidence || null,
@@ -961,7 +993,7 @@ function App() {
       && Number(candidate.signal.homeBps) === Number(row.signal.homeBps)
       && Number(candidate.signal.drawBps) === Number(row.signal.drawBps)
       && Number(candidate.signal.awayBps) === Number(row.signal.awayBps)
-      && (candidate.txHash || "") === (row.txHash || "")
+    && (candidate.txHash || candidate.key || "") === (row.txHash || row.key || "")
     ))
   ));
   const selectedPrediction = predictionRows.find((row) => row.key === selectedSignalKey) || null;
@@ -996,7 +1028,7 @@ function App() {
     if (!event) return;
     const match = MATCHES.find((candidate) => ethers.id(candidate.id).toLowerCase() === String(event.matchId).toLowerCase());
     if (match && match.id !== selectedId) setSelectedId(match.id);
-    setSelectedSignalKey(`chain:${event.txHash}:${event.signalId}`);
+    setSelectedSignalKey(event.sample ? `sample:${event.signalId}` : `chain:${event.txHash}:${event.signalId}`);
     setAgentCommitment(null);
     setAgentSignalError("");
     setAgentSignalMode("leaderboard signal");
@@ -1328,7 +1360,7 @@ function App() {
                     <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
                       Open tx <ExternalLink size={12} />
                     </a>
-                  ) : null}
+                  ) : <small>Sample signal: no Mantle transaction</small>}
                 </div>
               );
             })() : null}
@@ -1442,10 +1474,16 @@ function App() {
               <p className="empty">No on-chain signal for this selected card yet.</p>
             ) : (
               selectedEvents.map((event) => (
-                <a className="timeline-item" href={`${EXPLORER}/tx/${event.txHash}`} target="_blank" rel="noreferrer" key={`${event.txHash}-${event.signalId}`}>
+                <a
+                  className="timeline-item"
+                  href={event.txHash ? `${EXPLORER}/tx/${event.txHash}` : undefined}
+                  target={event.txHash ? "_blank" : undefined}
+                  rel={event.txHash ? "noreferrer" : undefined}
+                  key={`${event.txHash || "sample"}-${event.signalId}`}
+                >
                   <span>#{event.signalId} · block {event.blockNumber}</span>
                   <strong>{formatPct(event.homeBps)} / {formatPct(event.drawBps)} / {formatPct(event.awayBps)}</strong>
-                  <small>{event.isRevision ? "Revision signal" : "Primary signal"} · {agentLabel(event.agentIdHash || event.agent)} · {event.submittedAt ?? "time pending"}</small>
+                  <small>{event.sample ? "Seeded sample" : event.isRevision ? "Revision signal" : "Primary signal"} · {event.agentId || agentLabel(event.agentIdHash || event.agent)} · {event.submittedAt ?? "time pending"}</small>
                 </a>
               ))
             )}
