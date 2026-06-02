@@ -1244,86 +1244,6 @@ function App() {
         </section>
 
         <aside className="proof-desk">
-          <section className="mini-panel prewallet-panel">
-            <div className="section-title">
-              <span><CheckCircle2 size={18} /> Pre-wallet dry run</span>
-              <small>{agentChecklist.ok ? "ready" : "needs fix"}</small>
-            </div>
-            <SignalChecklist checklist={agentChecklist} />
-            {agentPreview ? (
-              <div className="agent-preview-card">
-                <span>Pre-submit preview</span>
-                <strong>{agentPreview.agentName} · {agentPreview.matchTitle}</strong>
-                <p>{agentPreview.vectorText} · confidence {agentPreview.confidenceText}</p>
-                {agentPreview.method ? <small>{agentPreview.method}</small> : null}
-                {agentPreview.marketLines.length ? (
-                  <ul>
-                    {agentPreview.marketLines.map((line) => <li key={line}>{line}</li>)}
-                  </ul>
-                ) : null}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="mini-panel leaderboard-panel">
-            <div className="section-title">
-              <span><Gauge size={18} /> Leaderboard</span>
-              <small>{leaderboard.length} scored</small>
-            </div>
-            {selectedResolution ? (
-              <p className="resolution-note">
-                Resolved official match: leaderboard points rank first; quality, Brier, and latest block break ties.
-              </p>
-            ) : (
-              <p className="resolution-note">
-                Rankings only include resolved matches. Group-stage predictions stay pending until verified results are added.
-              </p>
-            )}
-            {leaderboard.length === 0 ? (
-              <p className="empty">No resolved signal can be scored yet.</p>
-            ) : (
-              leaderboard.map((entry, index) => (
-                <button className="leader-row-button" key={entry.agent} onClick={() => selectLeaderboardEntry(entry)}>
-                  <span className="leader-avatar">#{index + 1}</span>
-                  <span>
-                    <strong>{agentLabel(entry.agent)}</strong>
-                    <small>{entry.resolved} resolved · hit {Math.round(entry.hitRate * 100)}%</small>
-                  </span>
-                  <b>{entry.points} pts</b>
-                </button>
-              ))
-            )}
-            {selectedPrediction ? (() => {
-              const [winner, winnerBps] = vectorWinner(selectedPrediction.signal, selectedMatch);
-              return (
-                <div className="leader-agent-detail">
-                  <div className="leader-agent-top">
-                    <span>Selected agent</span>
-                    <strong>{selectedPrediction.agent}</strong>
-                  </div>
-                  <div className="leader-agent-score">
-                    <b>{winner}</b>
-                    <strong>{formatPct(winnerBps)}</strong>
-                  </div>
-                  <p>
-                    1X2: {selectedMatch.home} {formatPct(selectedPrediction.signal.homeBps)} · Draw {formatPct(selectedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(selectedPrediction.signal.awayBps)}
-                  </p>
-                  <small>{exactScoreText(selectedPrediction.rawEvidence)} · {firstGoalText(selectedPrediction.rawEvidence, selectedMatch)}</small>
-                  {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
-                    <small key={dimension.id}>{dimensionPredictionText(selectedPrediction.rawEvidence, dimension)}</small>
-                  ))}
-                  <small>{methodText(selectedPrediction.rawEvidence)}</small>
-                  <small>{sourceText(selectedPrediction.rawEvidence)}</small>
-                  {selectedPrediction.txHash ? (
-                    <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
-                      Open tx <ExternalLink size={12} />
-                    </a>
-                  ) : <small>Sample signal: no Mantle transaction</small>}
-                </div>
-              );
-            })() : null}
-          </section>
-
           <section className="signal-composer">
             <div className="section-title">
               <span><Sparkles size={18} /> Signal composer</span>
@@ -1403,6 +1323,86 @@ function App() {
                 </button>
               </div>
             </details>
+          </section>
+
+          <section className="mini-panel leaderboard-panel">
+            <div className="section-title">
+              <span><Gauge size={18} /> Leaderboard</span>
+              <small>{leaderboard.length} scored</small>
+            </div>
+            {selectedResolution ? (
+              <p className="resolution-note">
+                Resolved official match: leaderboard points rank first; quality, Brier, and latest block break ties.
+              </p>
+            ) : (
+              <p className="resolution-note">
+                Rankings only include resolved matches. Group-stage predictions stay pending until verified results are added.
+              </p>
+            )}
+            {leaderboard.length === 0 ? (
+              <p className="empty">No resolved signal can be scored yet.</p>
+            ) : (
+              leaderboard.map((entry, index) => (
+                <button className="leader-row-button" key={entry.agent} onClick={() => selectLeaderboardEntry(entry)}>
+                  <span className="leader-avatar">#{index + 1}</span>
+                  <span>
+                    <strong>{agentLabel(entry.agent)}</strong>
+                    <small>{entry.resolved} resolved · hit {Math.round(entry.hitRate * 100)}%</small>
+                  </span>
+                  <b>{entry.points} pts</b>
+                </button>
+              ))
+            )}
+            {selectedPrediction ? (() => {
+              const [winner, winnerBps] = vectorWinner(selectedPrediction.signal, selectedMatch);
+              return (
+                <div className="leader-agent-detail">
+                  <div className="leader-agent-top">
+                    <span>Selected agent</span>
+                    <strong>{selectedPrediction.agent}</strong>
+                  </div>
+                  <div className="leader-agent-score">
+                    <b>{winner}</b>
+                    <strong>{formatPct(winnerBps)}</strong>
+                  </div>
+                  <p>
+                    1X2: {selectedMatch.home} {formatPct(selectedPrediction.signal.homeBps)} · Draw {formatPct(selectedPrediction.signal.drawBps)} · {selectedMatch.away} {formatPct(selectedPrediction.signal.awayBps)}
+                  </p>
+                  <small>{exactScoreText(selectedPrediction.rawEvidence)} · {firstGoalText(selectedPrediction.rawEvidence, selectedMatch)}</small>
+                  {(selectedMatch.marketDimensions || []).filter((dimension) => dimension.id !== "match_winner_1x2").map((dimension) => (
+                    <small key={dimension.id}>{dimensionPredictionText(selectedPrediction.rawEvidence, dimension)}</small>
+                  ))}
+                  <small>{methodText(selectedPrediction.rawEvidence)}</small>
+                  <small>{sourceText(selectedPrediction.rawEvidence)}</small>
+                  {selectedPrediction.txHash ? (
+                    <a href={`${EXPLORER}/tx/${selectedPrediction.txHash}`} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
+                      Open tx <ExternalLink size={12} />
+                    </a>
+                  ) : <small>Sample signal: no Mantle transaction</small>}
+                </div>
+              );
+            })() : null}
+          </section>
+
+          <section className="mini-panel prewallet-panel">
+            <div className="section-title">
+              <span><CheckCircle2 size={18} /> Pre-wallet dry run</span>
+              <small>{agentChecklist.ok ? "ready" : "needs fix"}</small>
+            </div>
+            <SignalChecklist checklist={agentChecklist} />
+            {agentPreview ? (
+              <div className="agent-preview-card">
+                <span>Pre-submit preview</span>
+                <strong>{agentPreview.agentName} · {agentPreview.matchTitle}</strong>
+                <p>{agentPreview.vectorText} · confidence {agentPreview.confidenceText}</p>
+                {agentPreview.method ? <small>{agentPreview.method}</small> : null}
+                {agentPreview.marketLines.length ? (
+                  <ul>
+                    {agentPreview.marketLines.map((line) => <li key={line}>{line}</li>)}
+                  </ul>
+                ) : null}
+              </div>
+            ) : null}
           </section>
 
           {(status || txHash) && (
